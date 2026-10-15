@@ -1,0 +1,90 @@
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Connexion | Incipit{% endblock %}
+
+{% block body %}
+
+<a href="{{ path('app_accueil') }}" class="login-back-home">
+    ← Retour à l'accueil
+</a>
+
+<main class="login-page">
+    <div class="login-container">
+        <img src="{{ asset('images/livre2.png') }}" alt="" class="login-logo">
+
+        <h1>Ma Bibliothèque</h1>
+        <p class="login-subtitle">
+            Connectez-vous pour accéder à votre bibliothèque.
+        </p>
+
+        <form method="post" action="{{ path('app_login') }}" class="login-card">
+            <div class="login-field">
+                <label for="username">Adresse e-mail</label>
+                <div class="login-input-wrapper">
+                    <img src="{{ asset('images/mail.png') }}" alt="">
+                    <input
+                        type="email"
+                        id="username"
+                        name="_username"
+                        value="{{ last_username }}"
+                        placeholder="Votre adresse e-mail"
+                        autocomplete="email"
+                        required
+                    >
+                </div>
+            </div>
+
+            <div class="login-field">
+                <label for="password">Mot de passe</label>
+                <div class="login-input-wrapper">
+                    <img src="{{ asset('images/cadenas2.png') }}" alt="">
+                    <input
+                        type="password"
+                        id="password"
+                        name="_password"
+                        placeholder="Votre mot de passe"
+                        autocomplete="current-password"
+                        required
+                    >
+                   
+                    <button
+                        type="button"
+                        id="toggle-password"
+                        class="login-password-toggle"
+                        aria-label="Afficher le mot de passe"
+                        aria-pressed="false"
+                    >
+                        <img
+                            id="password-icon"
+                            src="{{ asset('images/afficher2.png') }}"
+                            data-image-afficher="{{ asset('images/afficher2.png') }}"
+                            data-image-masquer="{{ asset('images/masquer2.png') }}"
+                            alt=""
+                        >
+                    </button>
+
+                </div>
+            </div>
+
+            <input
+                type="hidden"
+                name="_csrf_token"
+                value="{{ csrf_token('authenticate') }}"
+            >
+
+            <button type="submit" class="btn-primary login-submit">
+                Se connecter
+            </button>
+
+            <a href="{{ path('app_forgot_password_request') }}" class="login-forgot-password">Mot de passe oublié ?</a>
+
+            {% if error %}
+                <p class="login-error" role="alert">
+                    Adresse e-mail ou mot de passe incorrect.
+                </p>
+            {% endif %}
+        </form>
+    </div>
+</main>
+{% endblock %}

@@ -91,14 +91,6 @@ final class AccueilController extends AbstractController
 
     // Routes provisoires pour les pages que nous coderons ensuite.
 
-    #[Route('/connexion', name: 'app_connexion', methods: ['GET'])]
-    public function connexion(): Response
-    {
-        return $this->render('accueil/a-venir.html.twig', [
-            'titre' => 'Connexion',
-        ]);
-    }
-
     #[Route('/mes-livres-mieux-notes', name: 'app_livres_mieux_notes', methods: ['GET'])]
     public function livresMieuxNotes(): Response
     {

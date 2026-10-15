@@ -1,0 +1,55 @@
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Mot de passe oublié | Incipit{% endblock %}
+
+{% block body %}
+<main class="login-page">
+    <div class="login-container">
+
+        <img src="{{ asset('images/livre2.png') }}"
+             alt=""
+             class="login-logo">
+
+        <h1>Ma Bibliothèque</h1>
+
+        <p class="login-subtitle">
+            Réinitialisez votre mot de passe.
+        </p>
+
+        <div class="login-card">
+
+            <p class="forgot-password-description">
+                Saisissez votre adresse e-mail et nous vous enverrons
+                un lien pour réinitialiser votre mot de passe.
+            </p>
+
+            {{ form_start(requestForm) }}
+
+                <div class="login-field">
+                    {{ form_label(requestForm.email) }}
+
+                    <div class="login-input-wrapper">
+                        <img src="{{ asset('images/mail.png') }}" alt="">
+
+                        {{ form_widget(requestForm.email) }}
+                    </div>
+
+                    {{ form_errors(requestForm.email) }}
+                </div>
+
+                <button type="submit" class="btn-primary login-submit">
+                    Envoyer le lien de réinitialisation
+                </button>
+
+            {{ form_end(requestForm) }}
+
+            <a href="{{ path('app_login') }}"
+               class="forgot-password-back">
+                ← Retour à la connexion
+            </a>
+
+        </div>
+    </div>
+</main>
+{% endblock %}
