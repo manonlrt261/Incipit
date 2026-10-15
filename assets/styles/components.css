@@ -1,0 +1,60 @@
+
+/* BOUTON PRINCIPAL */
+
+.btn-primary {
+    background-color: var(--color-secondary);
+    color: var(--color-white);
+    border: none;
+    cursor: pointer;
+}
+
+/* BOUTON SECONDAIRE */
+
+.btn-secondary {
+    background-color: var(--color-encadre);
+    color: var(--color-secondary);
+    border: none;
+    cursor: pointer;
+}
+
+/* CHAMP DE RECHERCHE */
+
+.search-input {
+    background-color: var(--color-white);
+    border: 1px solid var(--color-encadre);
+}
+
+/* CARTE BLANCHE */
+
+.card {
+    background-color: var(--color-white);
+    border-radius: 12px;
+}
+
+/* BADGE ENCADRÉ */
+
+.badge-encadre {
+    background-color: var(--color-encadre);
+    border-radius: 3px;
+}
+
+/* BADGE PRIMARY */
+
+.badge-primary {
+    background-color: var(--color-primary);
+    border-radius: 3px;
+}
+
+/* BADGE SECONDARY */
+
+.badge-secondary {
+    background-color: var(--color-secondary);
+    border-radius: 3px;
+}
+
+/* BADGE BGDARK */
+
+.badge-bgdark {
+    background-color: var(--color-bgdark);
+    border-radius: 3px;
+}
