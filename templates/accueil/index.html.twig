@@ -1,0 +1,168 @@
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil - Incipit{% endblock %}
+
+{% block body %}
+<div class="accueil">
+
+    <header class="accueil-header">
+        <div class="accueil-header-contenu">
+            <div class="accueil-identite">
+                <h1>Incipit</h1>
+                <p>Chaque livre commence quelque part.</p>
+            </div>
+
+            <a class="accueil-connexion" href="{{ path('app_connexion') }}">
+                <img src="{{ asset('images/personne.png') }}" alt="">
+                <span>Connexion</span>
+            </a>
+        </div>
+    </header>
+
+    <main class="accueil-main">
+
+        <div class="accueil-introduction">
+            <div class="accueil-livre-rond">
+                <img src="{{ asset('images/livre_rondbeige.png') }}" alt="">
+            </div>
+
+            <p>Bienvenue dans mon univers littéraire.</p>
+            <span class="accueil-trait"></span>
+        </div>
+
+        {# TOP DES LIVRES #}
+        <section class="accueil-section">
+            <div class="accueil-section-entete">
+                <img class="accueil-section-icone"
+                     src="{{ asset('images/etoilevide.png') }}"
+                     alt="">
+
+                <div class="accueil-section-titres">
+                    <h2>Le top de mes livres</h2>
+                    <p>Mes livres notés 5 étoiles.</p>
+                </div>
+
+                <a class="accueil-lien"
+                   href="{{ path('app_livres_mieux_notes') }}">
+                    Voir tous mes livres
+                </a>
+            </div>
+
+            {% if livres is empty %}
+                <p class="accueil-vide">
+                    Aucun livre noté 5 étoiles pour le moment.
+                </p>
+            {% else %}
+                <div class="accueil-grille-livres">
+                    {% for livre in livres %}
+                        <article class="accueil-carte-livre">
+
+                            <div class="accueil-couverture">
+                                {% if livre.image_couverture %}
+                                    <img src="{{ livre.image_couverture }}"
+                                         alt="Couverture de {{ livre.titre }}">
+                                {% else %}
+                                    <span>Couverture indisponible</span>
+                                {% endif %}
+                            </div>
+
+                            <h3>{{ livre.titre }}</h3>
+                            <p>{{ livre.auteurs ?: 'Auteur non renseigné' }}</p>
+
+                            <div class="accueil-etoiles"
+                                 aria-label="Note : {{ livre.note }} sur 5">
+                                {% for etoile in 1..5 %}
+                                    {% if livre.note >= etoile %}
+                                        <img src="{{ asset('images/etoileremplie.png') }}" alt="">
+                                    {% elseif livre.note >= etoile - 0.5 %}
+                                        <img src="{{ asset('images/demieetoile.png') }}" alt="">
+                                    {% else %}
+                                        <img src="{{ asset('images/etoilevide.png') }}" alt="">
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </section>
+
+        {# AUTEURS LES PLUS LUS #}
+        <section class="accueil-section">
+            <div class="accueil-section-entete">
+                <img class="accueil-section-icone"
+                     src="{{ asset('images/statistiques.png') }}"
+                     alt="">
+
+                <div class="accueil-section-titres">
+                    <h2>Mes 5 auteurs les plus lus de l’année</h2>
+                    <p>Les auteurs que j’ai le plus lus cette année.</p>
+                </div>
+            </div>
+
+            {% if auteurs is empty %}
+                <p class="accueil-vide">
+                    Aucune lecture terminée cette année.
+                </p>
+            {% else %}
+                <div class="accueil-grille-auteurs">
+                    {% for auteur in auteurs %}
+                        <div class="accueil-auteur">
+                            <h3>{{ auteur.nom_affichage }}</h3>
+                            <p>
+                                {{ auteur.nombre_lectures }}
+                                {{ auteur.nombre_lectures == 1 ? 'lecture' : 'lectures' }}
+                            </p>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </section>
+
+        {# WISHLIST #}
+        <section class="accueil-section">
+            <div class="accueil-section-entete">
+                <img class="accueil-section-icone"
+                     src="{{ asset('images/coeur.png') }}"
+                     alt="">
+
+                <div class="accueil-section-titres">
+                    <h2>Ma wishlist</h2>
+                    <p>Les livres que j’aimerais découvrir prochainement.</p>
+                </div>
+
+                <a class="accueil-lien"
+                   href="{{ path('app_wishlist') }}">
+                    Voir toute ma wishlist
+                </a>
+            </div>
+
+            {% if wishlist is empty %}
+                <p class="accueil-vide">
+                    Aucun livre dans ma wishlist pour le moment.
+                </p>
+            {% else %}
+                <div class="accueil-grille-livres">
+                    {% for livre in wishlist %}
+                        <article class="accueil-carte-livre">
+                            <div class="accueil-couverture">
+                                {% if livre.image_couverture %}
+                                    <img src="{{ livre.image_couverture }}"
+                                         alt="Couverture de {{ livre.titre }}">
+                                {% else %}
+                                    <span>Couverture indisponible</span>
+                                {% endif %}
+                            </div>
+
+                            <h3>{{ livre.titre }}</h3>
+                            <p>{{ livre.auteurs ?: 'Auteur non renseigné' }}</p>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </section>
+
+    </main>
+</div>
+{% endblock %}

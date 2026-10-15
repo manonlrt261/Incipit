@@ -1,0 +1,12 @@
+
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ titre }} - Incipit{% endblock %}
+
+{% block body %}
+<main style="max-width: 800px; margin: 100px auto; text-align: center; padding: 20px;">
+    <h1>{{ titre }}</h1>
+    <p>Cette page sera prochainement disponible.</p>
+    <a href="{{ path('app_accueil') }}">Retour à l'accueil</a>
+</main>
+{% endblock %}

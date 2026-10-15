@@ -1,2 +1,14 @@
 @import url('./colors.css');
 @import url('./typography.css');
+@import url('./components.css');
+@import url('./accueil.css');
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+body {
+    background-color: var(--color-fond);
+}

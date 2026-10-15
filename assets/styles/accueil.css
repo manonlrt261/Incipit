@@ -1,0 +1,341 @@
+
+/* PAGE ACCUEIL */
+
+.accueil {
+    background: var(--color-fond);
+    color: var(--color-bgdark);
+    min-height: 100vh;
+}
+
+/* HEADER */
+
+.accueil-header {
+    min-height: 245px;
+    background-image: url('../images/image_header.png');
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+.accueil-header-contenu {
+    max-width: 1140px;
+    margin: auto;
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+}
+
+.accueil-identite h1 {
+    color: var(--color-white);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 72px;
+    line-height: 1;
+    margin: 0;
+}
+
+.accueil-identite p {
+    color: var(--color-white);
+    font-size: 18px;
+    margin: 12px 0 0;
+}
+
+.accueil-connexion {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 12px 22px;
+    border-radius: 10px;
+    background: var(--color-white);
+    color: var(--color-secondary);
+    text-decoration: none;
+    font-size: 16px;
+    white-space: nowrap;
+}
+
+.accueil-connexion img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+}
+
+/* CONTENU PRINCIPAL */
+
+.accueil-main {
+    position: relative;
+    max-width: 1200px;
+    margin: -34px auto 0;
+    padding: 0 20px 35px;
+    z-index: 1;
+}
+
+.accueil-main::before {
+    content: '';
+    position: absolute;
+    inset: 0 -20px auto;
+    height: 100px;
+    background: var(--color-fond);
+    border-radius: 50% 50% 0 0 / 55% 55% 0 0;
+    z-index: -1;
+}
+
+.accueil-introduction {
+    text-align: center;
+    padding: 0 0 24px;
+}
+
+.accueil-livre-rond {
+    width: 110px;
+    height: 110px;
+    margin: -66px auto 8px;
+    position: relative;
+    background: transparent;
+}
+
+.accueil-livre-rond img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: transparent;
+}
+
+.accueil-introduction p {
+    font-size: 18px;
+    color: var(--color-secondary);
+    margin: 0 0 12px;
+}
+
+.accueil-trait {
+    display: block;
+    width: 36px;
+    height: 2px;
+    margin: auto;
+    background: var(--color-primary);
+}
+
+/* SECTIONS */
+
+.accueil-section {
+    background: var(--color-white);
+    border-radius: 12px;
+    padding: 20px 22px 16px;
+    margin-bottom: 14px;
+    box-shadow: 0 4px 30px rgba(52, 40, 32, 0.035);
+}
+
+.accueil-section-entete {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    margin-bottom: 16px;
+}
+
+.accueil-section-icone {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.accueil-section-titres {
+    flex: 1;
+    min-width: 0;
+}
+
+.accueil-section-titres h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--color-bgdark);
+    margin: 0;
+}
+
+.accueil-section-titres p {
+    font-size: 14px;
+    color: var(--color-secondary);
+    margin: 2px 0 0;
+}
+
+.accueil-lien {
+    display: inline-block;
+    border: 1px solid var(--color-encadre);
+    border-radius: 9px;
+    padding: 12px 16px;
+    text-decoration: none;
+    color: var(--color-secondary);
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.accueil-lien:hover {
+    background: var(--color-encadre);
+}
+
+/* LIVRES ET WISHLIST */
+
+.accueil-grille-livres {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.accueil-carte-livre {
+    min-width: 0;
+    padding: 12px 14px;
+    background: var(--color-white);
+    border-radius: 12px;
+    box-shadow: 0 2px 18px rgba(52, 40, 32, 0.055);
+}
+
+.accueil-couverture {
+    width: 108px;
+    height: 132px;
+    max-width: 100%;
+    margin: 0 auto 10px;
+    border-radius: 6px;
+    background: var(--color-encadre);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.accueil-couverture img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.accueil-couverture span {
+    font-size: 12px;
+    text-align: center;
+    color: var(--color-secondary);
+    padding: 8px;
+}
+
+.accueil-carte-livre h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 2px;
+    overflow-wrap: anywhere;
+}
+
+.accueil-carte-livre p {
+    color: var(--color-secondary);
+    font-size: 14px;
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.accueil-etoiles {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    margin-top: 10px;
+}
+
+.accueil-etoiles img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
+
+/* AUTEURS */
+
+.accueil-grille-auteurs {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.accueil-auteur {
+    padding: 12px 18px;
+    border-right: 1px solid var(--color-encadre);
+}
+
+.accueil-auteur:last-child {
+    border-right: none;
+}
+
+.accueil-auteur h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 4px;
+}
+
+.accueil-auteur p {
+    font-size: 14px;
+    color: var(--color-secondary);
+    margin: 0;
+}
+
+/* ÉTAT VIDE */
+
+.accueil-vide {
+    padding: 28px 15px;
+    text-align: center;
+    color: var(--color-secondary);
+    background: var(--color-fond);
+    border-radius: 12px;
+    font-size: 14px;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 900px) {
+    .accueil-grille-livres {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .accueil-grille-auteurs {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+    }
+}
+
+@media (max-width: 600px) {
+    .accueil-header {
+        min-height: 240px;
+    }
+
+    .accueil-identite h1 {
+        font-size: 48px;
+    }
+
+    .accueil-identite p {
+        font-size: 14px;
+    }
+
+    .accueil-connexion {
+        padding: 10px;
+    }
+
+    .accueil-connexion span {
+        display: none;
+    }
+
+    .accueil-section-entete {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .accueil-lien {
+        margin-left: 0;
+    }
+
+    .accueil-grille-livres {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .accueil-grille-auteurs {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .accueil-auteur {
+        border-right: none;
+        border-bottom: 1px solid var(--color-encadre);
+    }
+}
