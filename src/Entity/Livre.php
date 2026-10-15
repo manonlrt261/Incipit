@@ -3,7 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\LivreRepository;
-use Doctrine\DBAL\Types\Types;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: LivreRepository::class)]
@@ -31,7 +32,7 @@ class Livre
     private ?string $resume = null;
 
     #[ORM\Column(name: 'date_publication', type: 'date', nullable: true)]
-    private ?\DateTimeInterface $datePublication = null;
+    private ?\DateTime $datePublication = null;
 
     #[ORM\Column(name: 'nombre_pages', type: 'integer', nullable: true)]
     private ?int $nombrePages = null;
@@ -43,10 +44,31 @@ class Livre
     private ?string $imageCouverture = null;
 
     #[ORM\Column(name: 'date_creation', type: 'datetime')]
-    private ?\DateTimeInterface $dateCreation = null;
+    private ?\DateTime $dateCreation = null;
 
     #[ORM\Column(name: 'date_modification', type: 'datetime')]
-    private ?\DateTimeInterface $dateModification = null;
+    private ?\DateTime $dateModification = null;
+
+    #[ORM\ManyToMany(targetEntity: Auteur::class)]
+    #[ORM\JoinTable(name: 'livre_auteur')]
+    #[ORM\JoinColumn(
+    name: 'livre_id',
+    referencedColumnName: 'id',
+    onDelete: 'CASCADE'
+)]
+    #[ORM\InverseJoinColumn(
+    name: 'auteur_id',
+    referencedColumnName: 'id',
+    onDelete: 'CASCADE'
+)]
+    private Collection $auteurs;
+
+    public function __construct()
+    {
+        $this->auteurs = new ArrayCollection();
+        $this->dateCreation = new \DateTime();
+        $this->dateModification = new \DateTime();
+    }
 
     public function getId(): ?int
     {
@@ -181,6 +203,30 @@ class Livre
     public function setDateModification(\DateTime $dateModification): static
     {
         $this->dateModification = $dateModification;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Auteur>
+     */
+    public function getAuteurs(): Collection
+    {
+        return $this->auteurs;
+    }
+
+    public function addAuteur(Auteur $auteur): static
+    {
+        if (!$this->auteurs->contains($auteur)) {
+            $this->auteurs->add($auteur);
+        }
+
+        return $this;
+    }
+
+    public function removeAuteur(Auteur $auteur): static
+    {
+        $this->auteurs->removeElement($auteur);
 
         return $this;
     }

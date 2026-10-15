@@ -1,0 +1,37 @@
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Ajouter un livre - Incipit{% endblock %}
+
+{% block body %}
+
+<div style="max-width: 800px; margin: 50px auto; padding: 30px;">
+
+    <h1>Ajouter un livre</h1>
+
+    <p>
+        Complétez les informations pour ajouter un nouveau livre
+        à votre bibliothèque Incipit.
+    </p>
+
+    {% for message in app.flashes('success') %}
+        <div style="
+            padding: 15px;
+            margin-bottom: 20px;
+            background-color: #e8f5e9;
+            color: #256029;
+            border-radius: 8px;
+        ">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    {{ form_start(form) }}
+
+        {{ form_widget(form) }}
+
+    {{ form_end(form) }}
+
+</div>
+
+{% endblock %}
