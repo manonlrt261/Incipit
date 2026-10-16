@@ -1,0 +1,225 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes lectures | Incipit{% endblock %}
+
+{% block body %}
+
+<div class="espace-layout">
+
+    {# Réutilise la navigation commune avec l’onglet Lectures actif. #}
+    {% include 'components/_sidebar.html.twig' %}
+
+    <main
+        id="page-mes-lectures"
+        class="espace-contenu page-lectures"
+    >
+
+        <header class="bibliotheque-header">
+
+            {# Permet de rechercher les livres affichés sans recharger la page. #}
+            <div class="lectures-recherche">
+                <img
+                    src="{{ asset('images/rechercher.png') }}"
+                    alt=""
+                >
+
+                <input
+                    type="search"
+                    id="lectures-recherche"
+                    placeholder="Rechercher un titre ou un auteur..."
+                    aria-label="Rechercher un livre"
+                >
+            </div>
+
+            <img
+                src="{{ asset('images/incipit.png') }}"
+                alt="Incipit"
+                class="bibliotheque-logo"
+            >
+
+        </header>
+
+        <div class="lectures-introduction">
+
+            <div>
+                <h1>Mes lectures</h1>
+                <p>Suivez et gérez toutes vos sessions de lecture.</p>
+            </div>
+
+            {# Ouvre le formulaire d’ajout déjà utilisé par la bibliothèque. #}
+            <button
+                type="button"
+                id="ouvrir-ajout-lecture-page"
+                class="lectures-bouton-ajouter"
+                onclick="document.getElementById('modal-ajout-livre').showModal()"
+            >
+                Ajouter une lecture
+            </button>
+
+        </div>
+
+        <section
+            class="lectures-statistiques"
+            aria-label="Filtrer les livres par statut"
+        >
+
+            {# Définit les compteurs qui servent aussi de filtres par statut. #}
+            {% set encadres = [
+                {
+                    filtre: 'tous',
+                    titre: 'Livres possédés',
+                    image: 'lecturestotales2'
+                },
+                {
+                    filtre: 'en-cours',
+                    titre: 'En cours',
+                    image: 'encours'
+                },
+                {
+                    filtre: 'termine',
+                    titre: 'Terminées',
+                    image: 'termine'
+                },
+                {
+                    filtre: 'en-pause',
+                    titre: 'En pause',
+                    image: 'pause'
+                },
+                {
+                    filtre: 'abandonne',
+                    titre: 'Abandonnés',
+                    image: 'abandonnee'
+                },
+                {
+                    filtre: 'pas-commence',
+                    titre: 'Pas commencé',
+                    image: 'pascommence2'
+                }
+            ] %}
+
+            {# Active le filtre « Livres possédés » par défaut et expose les autres statuts au JavaScript. #}
+            {% for encadre in encadres %}
+
+                <button
+                    type="button"
+                    class="lectures-statistique {{ loop.first ? 'actif' : '' }}"
+                    data-filtre="{{ encadre.filtre }}"
+                    aria-pressed="{{ loop.first ? 'true' : 'false' }}"
+                >
+
+                    <span class="lectures-statistique-icone">
+                        <img
+                            src="{{ asset('images/' ~ encadre.image ~ '.png') }}"
+                            alt=""
+                        >
+                    </span>
+
+                    <span class="lectures-statistique-informations">
+                        <strong data-compteur="{{ encadre.filtre }}">
+                            {{ statistiques[encadre.filtre] }}
+                        </strong>
+
+                        <span>{{ encadre.titre }}</span>
+                    </span>
+
+                </button>
+
+            {% endfor %}
+
+        </section>
+
+        {# Le JavaScript actualise ce compteur et annonce les changements aux lecteurs d’écran. #}
+        <p id="lectures-resultats-compteur" class="lectures-resultats-compteur" aria-live="polite"></p>
+
+        <section
+            id="bibliotheque-livres"
+            class="lectures-livres"
+            aria-label="Livres de ma collection"
+        >
+
+            {# Associe les statuts affichés aux valeurs attendues par les filtres JavaScript. #}
+        {% set statutsFiltres = {
+            'En cours': 'en-cours',
+            'Terminé': 'termine',
+            'En pause': 'en-pause',
+            'Abandonné': 'abandonne'
+        } %}
+
+        {# Fournit les données de recherche et de statut aux cartes accessibles au clic et au clavier. #}
+        {% for livre in livres %}
+
+                {% set statutFiltre = statutsFiltres[livre.statut] ?? 'pas-commence' %}
+
+                <article
+                    class="bibliotheque-livre lectures-carte"
+                    data-livre-id="{{ livre.id }}"
+                    data-statut="{{ statutFiltre }}"
+                    data-recherche="{{ (livre.titre ~ ' ' ~ livre.auteurs)|lower|e('html_attr') }}"
+                    tabindex="0"
+                    role="button"
+                    aria-label="Voir les détails de {{ livre.titre }}"
+                >
+
+                    {# Affiche la couverture disponible ou un emplacement de remplacement. #}
+                    {% if livre.image_couverture %}
+
+                        <img
+                            class="lectures-couverture"
+                            src="{{ asset(livre.image_couverture) }}"
+                            alt="Couverture de {{ livre.titre }}"
+                        >
+
+                    {% else %}
+
+                        <div
+                            class="lectures-couverture lectures-couverture-vide"
+                            aria-label="Aucune couverture"
+                        ></div>
+
+                    {% endif %}
+
+                    <div class="lectures-carte-informations">
+
+                        <h2>{{ livre.titre }}</h2>
+
+                        <p class="lectures-auteur">
+                            {{ livre.auteurs ?: 'Auteur non renseigné' }}
+                        </p>
+
+                        {# Réutilise le badge commun pour garder les mêmes couleurs de statut sur toutes les pages. #}
+                        {% include 'components/_badge_lecture.html.twig' with {
+                            statut: livre.statut
+                        } only %}
+
+                        {# Affiche uniquement les notes renseignées, en conservant les demi-étoiles et la note zéro. #}
+                        {% if livre.note is not null %}
+
+                            <p class="lectures-note">
+                                <span aria-hidden="true">★</span>
+                                {{ livre.note|number_format(1, ',', ' ')|replace({',0': ''}) }}/5
+                            </p>
+
+                        {% endif %}
+
+                    </div>
+
+                </article>
+
+            {% endfor %}
+
+        </section>
+
+        {# Ce message est affiché par le JavaScript lorsqu’aucun livre ne correspond aux filtres. #}
+        <p id="lectures-aucun-resultat" class="lectures-vide" hidden>
+            Aucun livre ne correspond à ce filtre.
+        </p>
+
+    </main>
+
+</div>
+
+{# Charge les fenêtres communes nécessaires à l’ajout et à la consultation des livres. #}
+{% include 'livre/_modal_ajout.html.twig' %}
+{% include 'livre/_modal_details.html.twig' %}
+
+{% endblock %}

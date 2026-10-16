@@ -1,0 +1,371 @@
+/* =======================================
+   LECTURES
+   ======================================= */
+
+/* Mise en page des lectures*/
+.page-lectures {
+    padding: 0 36px 50px;
+    background: var(--color-fond);
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+.page-lectures .bibliotheque-header {
+    padding-top: 20px;
+}
+
+/* Barre de recherche*/
+.lectures-recherche {
+    box-sizing: border-box;
+    min-width: 0;
+    max-width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: min(570px, 70%);
+    padding: 12px 15px;
+    border: 1px solid var(--color-encadre);
+    border-radius: 8px;
+    background: var(--color-white);
+}
+
+.lectures-recherche img {
+    width: 21px;
+    height: 21px;
+    object-fit: contain;
+}
+
+.lectures-recherche input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    font: inherit;
+    color: var(--color-bgdark);
+}
+
+/* Présentation de la page*/
+.lectures-introduction {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 20px;
+    margin: 30px 0;
+}
+
+.lectures-introduction h1 {
+    margin: 0;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 43px;
+    color: var(--color-bgdark);
+}
+
+.lectures-introduction p {
+    margin: 4px 0 0;
+    color: var(--color-secondary);
+    font-size: 17px;
+}
+
+/* Bouton d’ajout d’une lecture*/
+.lectures-bouton-ajouter {
+    padding: 13px 22px;
+    border: none;
+    border-radius: 8px;
+    background: var(--color-secondary);
+    color: var(--color-fond);
+    font: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.lectures-bouton-ajouter:hover {
+    opacity: 0.9;
+}
+
+/* Compteurs et filtres par statut*/
+.lectures-statistiques {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 28px;
+}
+
+.lectures-statistique {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+    padding: 19px 15px;
+    border: 1px solid var(--color-encadre);
+    border-radius: 12px;
+    background: var(--color-white);
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.lectures-statistique:hover {
+    background: var(--color-fond);
+}
+
+.lectures-statistique.actif {
+    background: var(--color-encadre);
+    border-color: var(--color-secondary);
+}
+
+.lectures-statistique-icone {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--color-fond);
+}
+
+.lectures-statistique-icone img {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+}
+
+.lectures-statistique-informations {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.lectures-statistique-informations strong {
+    font-size: 25px;
+    color: var(--color-bgdark);
+}
+
+.lectures-statistique-informations > span {
+    font-size: 13px;
+    color: var(--color-secondary);
+}
+
+.lectures-resultats-compteur {
+    margin: 0 0 15px;
+    color: var(--color-secondary);
+    font-size: 14px;
+}
+
+/* Liste des livres et sessions de lecture*/
+.lectures-livres {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+}
+
+/* Carte d’un livre*/
+.lectures-carte {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-width: 0;
+    padding: 20px;
+    border: 1px solid var(--color-encadre);
+    border-radius: 12px;
+    background: var(--color-white);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.lectures-carte:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(52, 40, 32, 0.08);
+}
+
+.lectures-carte:focus-visible,
+.lectures-statistique:focus-visible {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 3px;
+}
+
+.lectures-couverture {
+    display: block;
+    width: 100%;
+    height: 165px;
+    object-fit: contain;
+    border-radius: 6px;
+}
+
+.lectures-couverture-vide {
+    background: var(--color-encadre);
+}
+
+.lectures-carte-informations {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    flex: 1;
+}
+
+.lectures-carte-informations h2 {
+    margin: 0;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 21px;
+    line-height: 1.15;
+    color: var(--color-bgdark);
+}
+
+.lectures-auteur {
+    margin: 0;
+    font-size: 13px;
+    color: var(--color-secondary);
+}
+
+.lectures-note {
+    margin: auto 0 0;
+    padding-top: 14px;
+    font-size: 15px;
+    color: var(--color-bgdark);
+}
+
+.lectures-note span {
+    color: #d88920;
+    font-size: 19px;
+}
+
+.lectures-vide {
+    padding: 35px;
+    text-align: center;
+    color: var(--color-secondary);
+}
+
+.lectures-carte[hidden],
+.lectures-vide[hidden] {
+    display: none;
+}
+
+.lectures-modal-selection {
+    width: min(450px, calc(100% - 32px));
+    box-sizing: border-box;
+    padding: 30px;
+    border: 1px solid var(--color-encadre);
+    border-radius: 14px;
+    background: var(--color-fond);
+    color: var(--color-bgdark);
+}
+
+.lectures-modal-selection::backdrop {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.lectures-modal-selection h2 {
+    margin: 0 0 10px;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 30px;
+}
+
+.lectures-modal-selection label {
+    display: block;
+    margin: 20px 0 8px;
+    font-weight: 600;
+}
+
+.lectures-modal-selection select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px;
+    border: 1px solid var(--color-primary);
+    border-radius: 8px;
+    background: var(--color-white);
+    color: var(--color-bgdark);
+    font: inherit;
+}
+
+.lectures-selection-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 25px;
+}
+
+.lectures-selection-actions button {
+    padding: 12px 18px;
+    border: none;
+    border-radius: 8px;
+    font: inherit;
+    cursor: pointer;
+}
+
+.lectures-selection-annuler {
+    background: var(--color-primary);
+    color: var(--color-secondary);
+}
+
+.lectures-selection-valider {
+    background: var(--color-secondary);
+    color: var(--color-fond);
+}
+
+
+/* Adaptation aux écrans : (max-width: 1250px)*/
+@media (max-width: 1250px) {
+    
+    .lectures-livres {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+
+/* Adaptation aux écrans : (max-width: 950px)*/
+@media (max-width: 950px) {
+    
+    .lectures-statistiques {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .lectures-livres {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+
+/* Adaptation aux écrans : (max-width: 650px)*/
+@media (max-width: 650px) {
+    
+    .page-lectures {
+        padding: 0 16px 30px;
+    }
+
+    .lectures-introduction {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .lectures-statistiques {
+        grid-template-columns: 1fr 1fr;
+        gap: 9px;
+    }
+
+    .lectures-statistique {
+        padding: 12px;
+        gap: 8px;
+    }
+
+    .lectures-statistique-icone {
+        width: 38px;
+        height: 38px;
+    }
+
+    .lectures-statistique-icone img {
+        width: 23px;
+        height: 23px;
+    }
+
+    .lectures-livres {
+        grid-template-columns: 1fr;
+    }
+
+    .lectures-recherche {
+        width: 100%;
+    }
+}
