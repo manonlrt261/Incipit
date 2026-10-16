@@ -1,0 +1,548 @@
+/* =======================================
+   STATISTIQUES
+   ======================================= */
+
+.statistiques {
+    color: #392317;
+}
+
+/* Présentation des statistiques*/
+.stats-entete {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.stats-entete h1 {
+    font-size: clamp(30px, 3vw, 44px);
+    margin: 0 0 7px;
+}
+
+.stats-entete p {
+    margin: 0;
+    color: var(--color-secondary);
+    font-size: 18px;
+}
+
+.stats-periode {
+    color: #74675d;
+    font-size: 13px;
+    margin: 0 0 10px;
+}
+
+/* Compteurs des statuts de lecture*/
+.stats-compteurs {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.stats-compteur,
+.stats-panneau {
+    background: #fffdfa;
+    border: 1px solid #eee5dc;
+    border-radius: 11px;
+    box-shadow: 0 2px 7px #54352205;
+}
+
+.stats-compteur {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    padding: 20px;
+}
+
+.stats-icone {
+    display: grid;
+    place-items: center;
+    width: 55px;
+    height: 55px;
+    flex: 0 0 55px;
+    border-radius: 50%;
+    background: #f4e8dd;
+}
+
+.stats-icone img {
+    width: 34px;
+    height: 34px;
+    object-fit: contain;
+}
+
+.stats-compteur div {
+    display: grid;
+    gap: 6px;
+}
+
+.stats-compteur strong {
+    font-size: 27px;
+    color: #241b15;
+}
+
+.stats-compteur div span {
+    font-size: 14px;
+    color: #64656a;
+}
+
+/* Choix de l’année*/
+.stats-filtre {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    margin: 22px 0 16px;
+    color: #74675d;
+    font-size: 14px;
+}
+
+.stats-filtre select {
+    padding: 10px 16px;
+    min-width: 100px;
+    border: 1px solid var(--color-encadre);
+    border-radius: 8px;
+    color: #392317;
+    font: inherit;
+    background: #fffdfa;
+}
+
+/* Disposition des graphiques*/
+.stats-grille {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: 18px;
+}
+
+/* Encadrés des graphiques*/
+.stats-panneau {
+    min-width: 0;
+    padding: 22px;
+}
+
+.stats-panneau header {
+    display: flex;
+    gap: 15px;
+    align-items: flex-start;
+    margin-bottom: 16px;
+}
+
+.stats-panneau header > img {
+    height: 30px;
+    width: 30px;
+    object-fit: contain;
+    flex: 0 0 30px;
+}
+
+.stats-panneau h2 {
+    font-size: 22px;
+    line-height: 1.2;
+    margin: 0 0 6px;
+}
+
+.stats-panneau header p {
+    color: #6b6b70;
+    font-size: 14px;
+    line-height: 1.4;
+    margin: 0;
+}
+
+.stats-barres {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.stats-barres text {
+    fill: #6b6b70;
+    font: 12px Arial, sans-serif;
+}
+
+.stats-barres .stats-valeur {
+    fill: #392317;
+}
+
+.stats-graduation {
+    stroke: #eee5dc;
+    stroke-width: 1;
+}
+
+.stats-barre {
+    fill: #aa7d62;
+}
+
+.stats-barre:nth-of-type(2n) {
+    fill: #c6a38a;
+}
+
+.stats-objectif-contenu,
+.stats-genres-contenu {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    padding: 12px 0;
+}
+
+/* Graphiques circulaires de progression*/
+.stats-anneau {
+    border-radius: 50%;
+    background: var(--segments, #efe5db);
+    width: clamp(135px, 14vw, 195px);
+    aspect-ratio: 1;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+}
+
+.stats-anneau > div {
+    border-radius: 50%;
+    width: 76%;
+    height: 76%;
+    background: #fffdfa;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    align-items: center;
+    justify-content: center;
+}
+
+.stats-anneau strong {
+    font-size: 36px;
+    line-height: 1;
+    color: #241b15;
+}
+
+.stats-anneau span {
+    font-size: 15px;
+    color: #6b6b70;
+}
+
+.stats-objectif-texte > strong {
+    font-size: 27px;
+}
+
+.stats-objectif-texte p {
+    color: #6b6b70;
+    font-size: 14px;
+}
+
+.stats-objectif-texte button,
+.stats-modale button {
+    font: inherit;
+    background: var(--color-secondary);
+    color: #fff;
+    border: 0;
+    padding: 12px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.stats-objectif-texte button {
+    white-space: nowrap;
+    font-size: 14px;
+}
+
+/* Légendes des graphiques*/
+.stats-legende {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 13px;
+    flex: 1;
+    min-width: 0;
+}
+
+.stats-legende li {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.stats-legende strong {
+    margin-left: auto;
+}
+
+.stats-pastille {
+    flex: 0 0 11px;
+    height: 11px;
+    border-radius: 50%;
+}
+
+.stats-classement {
+    display: grid;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.stats-classement li {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 11px 0;
+    border-bottom: 1px solid #eee5dc;
+    color: #62616a;
+    font-size: 15px;
+}
+
+.stats-classement li:last-child {
+    border: 0;
+}
+
+.stats-classement strong {
+    margin-left: auto;
+    color: #392317;
+}
+
+.stats-rang {
+    display: grid;
+    place-items: center;
+    flex: 0 0 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #e7c7aa;
+    color: #392317;
+}
+
+.stats-classement li:first-child .stats-rang {
+    background: #925537;
+    color: #fff;
+}
+
+.stats-comparaison {
+    grid-column: 1 / -1;
+}
+
+.stats-comparaison .stats-barres {
+    max-height: 230px;
+}
+
+.stats-defilement {
+    overflow-x: auto;
+}
+
+.stats-note {
+    font-size: 12px;
+    line-height: 1.5;
+    color: #74675d;
+    margin: 15px 0 0;
+}
+
+.stats-vide {
+    color: #74675d;
+    font-size: 14px;
+    padding: 28px 0;
+    text-align: center;
+}
+
+/* Lectures terminées par mois*/
+.stats-mensuel .stats-vide {
+    padding: 0;
+}
+
+.stats-sans-date {
+    margin-bottom: 20px;
+}
+
+.stats-modale {
+    box-sizing: border-box;
+    width: min(450px, calc(100% - 32px));
+    border: 0;
+    border-radius: 14px;
+    padding: 28px;
+    color: #392317;
+}
+
+.stats-modale::backdrop {
+    background: #0006;
+}
+
+.stats-modale h2 {
+    margin: 0 0 16px;
+}
+
+.statistiques button:focus-visible,
+.statistiques select:focus-visible {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 3px;
+}
+
+#stats-chargement[hidden],
+#stats-erreur[hidden] {
+    display: none;
+}
+
+#stats-erreur {
+    color: #a42828;
+}
+
+
+/* Adaptation aux écrans : @media(max-width: 1150px)*/
+@media(max-width: 1150px) {
+    
+    .stats-compteurs {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .stats-objectif-contenu,
+    .stats-genres-contenu {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .stats-legende {
+        flex-basis: 45%;
+    }
+}
+
+
+/* Adaptation aux écrans : @media(max-width: 850px)*/
+@media(max-width: 850px) {
+    
+    .stats-grille {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .stats-objectif-contenu,
+    .stats-genres-contenu {
+        flex-wrap: nowrap;
+    }
+}
+
+
+/* Adaptation aux écrans : @media(max-width: 550px)*/
+@media(max-width: 550px) {
+    
+    .stats-compteurs {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .stats-entete {
+        align-items: flex-start;
+    }
+
+    .stats-entete p {
+        font-size: 15px;
+    }
+
+    .stats-panneau {
+        padding: 16px;
+    }
+
+    .stats-panneau h2 {
+        font-size: 19px;
+    }
+
+    .stats-objectif-contenu,
+    .stats-genres-contenu {
+        flex-wrap: wrap;
+    }
+
+    .stats-anneau {
+        width: 155px;
+    }
+
+    .stats-legende {
+        flex-basis: 100%;
+    }
+
+    .stats-filtre {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+}
+
+.stats-entete > div {
+    min-width: 0;
+}
+
+.stats-objectif-affichage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 20px 0 28px;
+}
+
+.stats-objectif-affichage > div {
+    display: grid;
+    gap: 5px;
+    text-align: center;
+}
+
+#stats-objectif-valeur {
+    font-size: 54px;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.stats-modale .stats-modifier-objectif {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    padding: 9px;
+    background: transparent;
+    border: 1px solid var(--color-encadre);
+}
+
+.stats-modifier-objectif img {
+    width: 23px;
+    height: 23px;
+    object-fit: contain;
+}
+
+#stats-objectif-form {
+    display: grid;
+    gap: 12px;
+    padding: 16px 0 20px;
+}
+
+#stats-objectif-nombre {
+    box-sizing: border-box;
+    width: 100%;
+    font: inherit;
+    font-size: 24px;
+    padding: 12px;
+    border: 1px solid var(--color-encadre);
+    border-radius: 8px;
+    color: var(--color-bgdark);
+}
+
+.stats-objectif-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.stats-modale #stats-annuler-objectif {
+    background: var(--color-encadre);
+    color: var(--color-secondary);
+}
+
+#stats-objectif-form[hidden],
+#stats-objectif-affichage[hidden],
+#stats-objectif-erreur[hidden],
+#stats-objectif-succes[hidden] {
+    display: none;
+}
+
+#stats-objectif-erreur {
+    color: #a42828;
+}
+
+#stats-objectif-succes {
+    color: #476646;
+}
+
+.stats-modale :focus-visible {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 3px;
+}
+
+.stats-modale button:disabled {
+    opacity: .6;
+    cursor: wait;
+}

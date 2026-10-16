@@ -1,0 +1,106 @@
+{% extends 'base.html.twig' %}
+{% block title %}Mes statistiques | Incipit{% endblock %}
+{% block body %}
+    <div class="espace-layout stats-layout">
+
+        {# Réutilise la navigation commune avec l’onglet Statistiques actif. #}
+        {% include 'components/_sidebar.html.twig' %}
+        <main id="page-statistiques" class="espace-contenu bibliotheque statistiques">
+            <header class="stats-entete">
+                <div>
+                    <h1>Mes statistiques</h1>
+                    <p>Découvrez un aperçu de vos habitudes de lecture.</p>
+                </div>
+                <img src="{{ asset('images/incipit.png') }}" class="bibliotheque-logo" alt="Incipit">
+            </header>
+            <p class="stats-periode">Toutes vos lectures, toutes années confondues</p>
+
+            {# Affiche les totaux par statut pour toutes les années, indépendamment de l’année des graphiques. #}
+            <div class="stats-compteurs">
+                {% set indicateurs = [
+                    {cle: 'terminé', nom: 'Lectures terminées', image: 'lecturestotales2.png'},
+                    {cle: 'en cours', nom: 'En cours', image: 'encours.png'},
+                    {cle: 'pas commencé', nom: 'Pas commencé', image: 'pascommence2.png'},
+                    {cle: 'abandonné', nom: 'Abandonné', image: 'abandonnee.png'}
+                ] %}
+                {% for indicateur in indicateurs %}
+                    <article class="stats-compteur" data-statut="{{ indicateur.cle }}">
+                        <span class="stats-icone">
+                            <img src="{{ asset('images/' ~ indicateur.image) }}" alt="">
+                        </span>
+                        <div>
+                            <strong>{{ compteurs[indicateur.cle] }}</strong>
+                            <span>{{ indicateur.nom }}</span>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+
+            {# Le changement d’année recharge seulement les graphiques grâce au JavaScript. #}
+            <div class="stats-filtre">
+                <label for="stats-annee">Année des graphiques</label>
+                <select id="stats-annee" data-url="{{ path('app_espace_statistiques') }}">
+                    {% for valeur in annees %}
+                        <option value="{{ valeur }}" {{ valeur == annee ? 'selected' : '' }}>{{ valeur }}</option>
+                    {% endfor %}
+                </select>
+                <span id="stats-chargement" role="status" hidden>Chargement…</span>
+            </div>
+            <p id="stats-erreur" role="alert" hidden></p>
+
+            {# Regroupe les graphiques remplacés après un changement d’année ou d’objectif. #}
+            <div id="stats-graphiques" aria-live="polite">
+                {% include 'statistiques/_graphiques.html.twig' %}
+            </div>
+        </main>
+    </div>
+
+    {# Fenêtre de consultation de l’objectif de l’année sélectionnée, avec passage en modification au clic sur le crayon. #}
+    <dialog id="stats-objectif-modal" class="stats-modale" aria-labelledby="stats-objectif-titre">
+        <h2 id="stats-objectif-titre">
+            Mon objectif pour <span id="stats-objectif-annee"></span>
+        </h2>
+        <p id="stats-objectif-description"></p>
+        <div id="stats-objectif-affichage" class="stats-objectif-affichage">
+            <div>
+                <output id="stats-objectif-valeur">—</output>
+                <span>livres</span>
+            </div>
+            <button
+                type="button"
+                id="stats-modifier-objectif"
+                class="stats-modifier-objectif"
+                aria-label="Modifier mon objectif"
+                title="Modifier mon objectif"
+            >
+                <img src="{{ asset('images/modifier.png') }}" alt="">
+            </button>
+        </div>
+
+        {# Enregistre un objectif entier entre 1 et 10 000 livres avec le jeton vérifié par le serveur. #}
+        <form id="stats-objectif-form" action="{{ path('app_statistiques_objectif') }}" method="post" hidden>
+            <input type="hidden" name="_token" value="{{ csrf_token('modifier_objectif') }}">
+            <input type="hidden" id="stats-objectif-annee-champ" name="annee">
+            <label for="stats-objectif-nombre">Nombre de livres à lire</label>
+            <input
+                type="number"
+                id="stats-objectif-nombre"
+                name="nombre"
+                min="1"
+                max="10000"
+                step="1"
+                required
+                inputmode="numeric"
+            >
+            <div class="stats-objectif-actions">
+                <button type="button" id="stats-annuler-objectif">Annuler</button>
+                <button type="submit" id="stats-enregistrer-objectif">Enregistrer</button>
+            </div>
+        </form>
+
+        {# Affiche le résultat de l’enregistrement sans fermer la fenêtre ni perdre la saisie. #}
+        <p id="stats-objectif-erreur" role="alert" hidden></p>
+        <p id="stats-objectif-succes" role="status" hidden></p>
+        <button type="button" id="stats-fermer-objectif">Fermer</button>
+    </dialog>
+{% endblock %}

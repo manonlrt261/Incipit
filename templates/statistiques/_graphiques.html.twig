@@ -1,0 +1,212 @@
+<div class="stats-grille">
+
+    {# Répartit les lectures terminées datées sur les douze mois de l’année sélectionnée. #}
+    <section class="stats-panneau stats-mensuel">
+        <header>
+            <img src="{{ asset('images/statistiques.png') }}" alt="">
+            <div>
+                <h2>Lectures terminées par mois</h2>
+                <p>Nombre de lectures terminées chaque mois en {{ annee }}.</p>
+            </div>
+        </header>
+
+        {# Choisit une échelle d’au moins quatre lectures, divisible en quatre graduations égales. #}
+        {% set echelle = maximumMois < 4 ? 4 : (maximumMois / 4)|round(0, 'ceil') * 4 %}
+        <svg class="stats-barres" viewBox="0 0 680 230" role="img" aria-labelledby="stats-mois-titre">
+            <title id="stats-mois-titre">Lectures terminées par mois en {{ annee }} : {{ termineesAnnee }} au total</title>
+            {% for i in 0..4 %}
+                {% set y = 180 - i * 40 %}
+                <line x1="35" y1="{{ y }}" x2="670" y2="{{ y }}" class="stats-graduation"/>
+                <text x="25" y="{{ y + 4 }}" text-anchor="end">{{ echelle * i / 4 }}</text>
+            {% endfor %}
+            {% set nomsMois = ['Jan', 'Fév', 'Mars', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sept', 'Oct', 'Nov', 'Déc'] %}
+            {% for numero, nombre in mois %}
+                {% set x = 44 + (numero - 1) * 52 %}
+                {% set hauteur = nombre / echelle * 160 %}
+                <rect
+                    x="{{ x }}"
+                    y="{{ 180 - hauteur }}"
+                    width="33"
+                    height="{{ hauteur }}"
+                    rx="2"
+                    class="stats-barre"
+                >
+                    <title>{{ nomsMois[numero - 1] }} : {{ nombre }} lecture(s)</title>
+                </rect>
+                <text x="{{ x + 16.5 }}" y="{{ 172 - hauteur }}" text-anchor="middle" class="stats-valeur">{{ nombre }}</text>
+                <text x="{{ x + 16.5 }}" y="204" text-anchor="middle">{{ nomsMois[numero - 1] }}</text>
+            {% endfor %}
+        </svg>
+        {% if termineesAnnee == 0 %}
+            <p class="stats-vide">Aucune lecture terminée datée en {{ annee }}.</p>
+        {% endif %}
+    </section>
+
+    {# Compare les lectures terminées de l’année à l’objectif ; prévoit aussi le cas où aucun objectif n’est défini. #}
+    <section class="stats-panneau stats-objectif">
+        <header>
+            <img src="{{ asset('images/objectif.png') }}" alt="">
+            <div>
+                <h2>Objectif annuel</h2>
+                <p>Votre progression en {{ annee }}.</p>
+            </div>
+        </header>
+
+        {# Limite le remplissage de l’anneau à 100 % tout en conservant le pourcentage réel dans le texte. #}
+        {% set progressionAnneau = objectif ? min(progression, 100) : 0 %}
+        <div class="stats-objectif-contenu">
+            <div
+                class="stats-anneau"
+                style="--segments: conic-gradient(#925537 0% {{ progressionAnneau }}%, #efe5db {{ progressionAnneau }}% 100%);"
+                role="img"
+                aria-label="{{ termineesAnnee }} lecture{{ termineesAnnee > 1 ? 's terminées' : ' terminée' }}{{ objectif ? ' sur un objectif de ' ~ objectif : ', aucun objectif défini' }}"
+            >
+                <div>
+                    <strong>{{ termineesAnnee }}</strong>
+                    <span
+                    >{{ objectif ? 'sur ' ~ objectif : (termineesAnnee > 1 ? 'lectures' : 'lecture') }}</span>
+                </div>
+            </div>
+            <div class="stats-objectif-texte">
+                {% if objectif %}
+                    <strong>{{ progression }} %</strong>
+                    <p>de l’objectif atteint</p>
+                {% else %}
+                    <p>Aucun objectif défini</p>
+                {% endif %}
+                <button
+                    type="button"
+                    data-voir-objectif
+                    data-annee="{{ annee }}"
+                    data-objectif="{{ objectif }}"
+                >Voir mon objectif</button>
+            </div>
+        </div>
+    </section>
+
+    {# Construit les segments et la légende à partir des genres des livres terminés. #}
+    <section class="stats-panneau stats-genres">
+        <header>
+            <img src="{{ asset('images/graphique.png') }}" alt="">
+            <div>
+                <h2>Répartition des genres</h2>
+                <p>Genres des livres terminés en {{ annee }}.</p>
+            </div>
+        </header>
+        {% if genres is empty %}
+            <p class="stats-vide">Aucun livre terminé pour cette année.</p>
+        {% else %}
+            {% set segments = [] %}
+            {% for genre in genres %}
+                {% set segments = segments|merge([genre.couleur ~ ' ' ~ genre.debut ~ '% ' ~ genre.fin ~ '%']) %}
+            {% endfor %}
+            <div class="stats-genres-contenu">
+                <div
+                    class="stats-anneau"
+                    style="--segments: conic-gradient({{ segments|join(', ') }});"
+                    role="img"
+                    aria-label="Répartition des genres de {{ livresLus }} livre{{ livresLus > 1 ? 's lus' : ' lu' }} en {{ annee }}"
+                >
+                    <div>
+                        <strong>{{ livresLus }}</strong>
+                        <span>livre{{ livresLus > 1 ? 's' : '' }}</span>
+                    </div>
+                </div>
+                <ul class="stats-legende">
+                    {% for genre in genres %}
+                        <li>
+                            <span class="stats-pastille" style="background: {{ genre.couleur }}"></span>
+                            <span>{{ genre.nom }}</span>
+                            <strong>{{ genre.nombre }}</strong>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <p
+                class="stats-note"
+            >Chaque livre est compté une fois par genre. Un livre peut avoir plusieurs genres.</p>
+        {% endif %}
+    </section>
+
+    {# Affiche les auteurs classés par nombre de lectures terminées, ou un message si le classement est vide. #}
+    <section class="stats-panneau stats-auteurs">
+        <header>
+            <img src="{{ asset('images/personne.png') }}" alt="">
+            <div>
+                <h2>Auteurs les plus lus</h2>
+                <p>Classement par nombre de lectures terminées en {{ annee }}.</p>
+            </div>
+        </header>
+        {% if auteurs is empty %}
+            <p class="stats-vide">Aucun auteur renseigné pour les lectures terminées cette année.</p>
+        {% else %}
+            <ol class="stats-classement">
+                {% for auteur in auteurs %}
+                    <li>
+                        <span class="stats-rang">{{ loop.index }}</span>
+                        <span>{{ auteur.nom }}</span>
+                        <strong>{{ auteur.nombre }}</strong>
+                    </li>
+                {% endfor %}
+            </ol>
+        {% endif %}
+    </section>
+
+    {# Compare les totaux par année et adapte la largeur du graphique pour permettre son défilement. #}
+    <section class="stats-panneau stats-comparaison">
+        <header>
+            <img src="{{ asset('images/statistiques.png') }}" alt="">
+            <div>
+                <h2>Comparaison annuelle</h2>
+                <p>Nombre de lectures terminées par année.</p>
+            </div>
+        </header>
+        {% set largeur = max(680, comparaison|length * 95) %}
+        {% set echelleAn = maximumAnnuel < 4 ? 4 : (maximumAnnuel / 4)|round(0, 'ceil') * 4 %}
+        <div
+            class="stats-defilement"
+            tabindex="0"
+            role="region"
+            aria-label="Graphique des lectures par année"
+        >
+            <svg
+                class="stats-barres stats-annuelles"
+                style="min-width: {{ largeur }}px"
+                viewBox="0 0 {{ largeur }} 220"
+                role="img"
+                aria-labelledby="stats-annees-titre"
+            >
+                <title id="stats-annees-titre">Comparaison des lectures terminées par année</title>
+                {% for i in 0..4 %}
+                    {% set y = 170 - i * 35 %}
+                    <line x1="35" y1="{{ y }}" x2="{{ largeur - 10 }}" y2="{{ y }}" class="stats-graduation"/>
+                    <text x="25" y="{{ y + 4 }}" text-anchor="end">{{ echelleAn * i / 4 }}</text>
+                {% endfor %}
+                {% set pas = (largeur - 50) / comparaison|length %}
+                {% for an, nombre in comparaison %}
+                    {% set hauteur = nombre / echelleAn * 140 %}
+                    {% set x = 40 + (loop.index0 + 0.2) * pas %}
+                    <rect
+                        x="{{ x }}"
+                        y="{{ 170 - hauteur }}"
+                        width="{{ pas * 0.6 }}"
+                        height="{{ hauteur }}"
+                        rx="3"
+                        class="stats-barre"
+                    >
+                        <title>{{ an }} : {{ nombre }} lecture(s)</title>
+                    </rect>
+                    <text x="{{ x + pas * 0.3 }}" y="{{ 162 - hauteur }}" text-anchor="middle" class="stats-valeur">{{ nombre }}</text>
+                    <text x="{{ x + pas * 0.3 }}" y="196" text-anchor="middle">{{ an }}</text>
+                {% endfor %}
+            </svg>
+        </div>
+    </section>
+</div>
+
+{# Explique pourquoi les lectures terminées sans date sont incluses dans le total mais absentes des graphiques annuels. #}
+{% if sansDate > 0 %}
+    <p
+        class="stats-note stats-sans-date"
+    >{{ sansDate }} lecture{{ sansDate > 1 ? 's terminées n’ont' : ' terminée n’a' }} pas de date de fin : {{ sansDate > 1 ? 'elles sont comptées' : 'elle est comptée' }} dans le total, mais pas dans les graphiques par année.</p>
+{% endif %}
