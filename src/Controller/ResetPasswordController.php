@@ -25,17 +25,16 @@ class ResetPasswordController extends AbstractController
 {
     use ResetPasswordControllerTrait;
 
+    // Reçoit les services nécessaires à la création des liens de réinitialisation et à la mise à jour du compte.
     public function __construct(
         private ResetPasswordHelperInterface $resetPasswordHelper,
         private EntityManagerInterface $entityManager
     ) {
     }
 
-    /**
-     * Display & process form to request a password reset.
-     */
     #[Route('', name: 'app_forgot_password_request')]
-    public function request(Request $request, MailerInterface $mailer, TranslatorInterface $translator): Response
+    // Traite la demande de lien de réinitialisation du mot de passe.
+    public function request(Request $request, MailerInterface $mailer): Response
     {
         $form = $this->createForm(ResetPasswordRequestFormType::class);
         $form->handleRequest($request);
@@ -44,8 +43,7 @@ class ResetPasswordController extends AbstractController
             /** @var string $email */
             $email = $form->get('email')->getData();
 
-            return $this->processSendingPasswordResetEmail($email, $mailer, $translator
-);
+            return $this->processSendingPasswordResetEmail($email, $mailer);
         }
 
         return $this->render('reset_password/request.html.twig', [
@@ -53,10 +51,8 @@ class ResetPasswordController extends AbstractController
         ]);
     }
 
-    /**
-     * Confirmation page after a user has requested a password reset.
-     */
     #[Route('/check-email', name: 'app_check_email')]
+    // Affiche la confirmation d’envoi sans révéler si l’adresse appartient à un compte.
     public function checkEmail(): Response
     {
         // Generate a fake token if the user does not exist or someone hit this page directly.
@@ -70,10 +66,8 @@ class ResetPasswordController extends AbstractController
         ]);
     }
 
-    /**
-     * Validates and process the reset URL that the user clicked in their email.
-     */
     #[Route('/reset/{token}', name: 'app_reset_password')]
+    // Vérifie le lien de réinitialisation et traite le formulaire du nouveau mot de passe.
     public function reset(Request $request, UserPasswordHasherInterface $passwordHasher, TranslatorInterface $translator, ?string $token = null): Response
     {
         if ($token) {
@@ -128,7 +122,8 @@ class ResetPasswordController extends AbstractController
         ]);
     }
 
-    private function processSendingPasswordResetEmail(string $emailFormData, MailerInterface $mailer, TranslatorInterface $translator): RedirectResponse
+    // Prépare et envoie le lien de réinitialisation en gardant une réponse identique pour les adresses inconnues.
+    private function processSendingPasswordResetEmail(string $emailFormData, MailerInterface $mailer): RedirectResponse
     {
         $user = $this->entityManager->getRepository(Utilisateur::class)->findOneBy([
             'email' => $emailFormData,
@@ -141,17 +136,8 @@ class ResetPasswordController extends AbstractController
 
         try {
             $resetToken = $this->resetPasswordHelper->generateResetToken($user);
-        } catch (ResetPasswordExceptionInterface $e) {
-            // If you want to tell the user why a reset email was not sent, uncomment
-            // the lines below and change the redirect to 'app_forgot_password_request'.
-            // Caution: This may reveal if a user is registered or not.
-            //
-            // $this->addFlash('reset_password_error', sprintf(
-            //     '%s - %s',
-            //     $translator->trans(ResetPasswordExceptionInterface::MESSAGE_PROBLEM_HANDLE, [], 'ResetPasswordBundle'),
-            //     $translator->trans($e->getReason(), [], 'ResetPasswordBundle')
-            // ));
-
+        } catch (ResetPasswordExceptionInterface) {
+            // Garde la même réponse en cas de refus pour ne pas révéler l’existence d’un compte.
             return $this->redirectToRoute('app_check_email');
         }
 

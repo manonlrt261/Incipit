@@ -5,6 +5,7 @@
 
 {% block body %}
 
+{# Permet de revenir à l’accueil public sans se connecter. #}
 <a href="{{ path('app_accueil') }}" class="login-back-home">
     ← Retour à l'accueil
 </a>
@@ -18,11 +19,13 @@
             Connectez-vous pour accéder à votre bibliothèque.
         </p>
 
+        {# Envoie les identifiants à Symfony Security pour ouvrir la session. #}
         <form method="post" action="{{ path('app_login') }}" class="login-card">
             <div class="login-field">
                 <label for="username">Adresse e-mail</label>
                 <div class="login-input-wrapper">
                     <img src="{{ asset('images/mail.png') }}" alt="">
+                    {# Conserve la dernière adresse saisie après un échec de connexion. #}
                     <input
                         type="email"
                         id="username"
@@ -48,6 +51,7 @@
                         required
                     >
                    
+                    {# Le JavaScript permet d’afficher ou de masquer le mot de passe et adapte l’icône du bouton. #}
                     <button
                         type="button"
                         id="toggle-password"
@@ -67,6 +71,7 @@
                 </div>
             </div>
 
+            {# Transmet le jeton vérifié par Symfony lors de l’authentification. #}
             <input
                 type="hidden"
                 name="_csrf_token"
@@ -77,13 +82,15 @@
                 Se connecter
             </button>
 
+            {# Ouvre la demande d’un lien de réinitialisation du mot de passe. #}
             <a href="{{ path('app_forgot_password_request') }}" class="login-forgot-password">Mot de passe oublié ?</a>
 
+            {# Affiche le message d’échec traduit renvoyé par Symfony Security. #}
             {% if error %}
-                <p class="login-error" role="alert">
-                    Adresse e-mail ou mot de passe incorrect.
-                </p>
-            {% endif %}
+    <p class="login-error" role="alert">
+        {{ error.messageKey|trans(error.messageData, 'security') }}
+    </p>
+{% endif %}
         </form>
     </div>
 </main>

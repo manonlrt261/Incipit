@@ -1,4 +1,8 @@
+/* =======================================
+   CONNEXION
+   ======================================= */
 
+/* Mise en page et fond de la connexion*/
 .login-page {
     min-height: 100vh;
     padding: 70px 20px;
@@ -13,12 +17,14 @@
     box-sizing: border-box;
 }
 
+/* Conteneur du formulaire de connexion*/
 .login-container {
     width: 100%;
     max-width: 430px;
     text-align: center;
 }
 
+/* Logo de la connexion*/
 .login-logo {
     width: 52px;
     height: 52px;
@@ -37,6 +43,7 @@
     margin: 0 0 32px;
 }
 
+/* Formulaire de connexion*/
 .login-card {
     background: var(--color-white);
     border-radius: 16px;
@@ -45,6 +52,7 @@
     box-shadow: 0 8px 30px rgba(52, 40, 32, 0.06);
 }
 
+/* Champs de saisie*/
 .login-field {
     margin-bottom: 24px;
 }
@@ -105,6 +113,7 @@
     object-fit: contain;
 }
 
+/* Validation de la connexion*/
 .login-submit {
     width: 100%;
     margin-top: 8px;
@@ -121,6 +130,7 @@
     text-decoration: underline;
 }
 
+/* Message d’échec de connexion*/
 .login-error {
     margin: 18px 0 0;
     text-align: center;
@@ -128,7 +138,10 @@
     font-size: 14px;
 }
 
+
+/* Adaptation aux écrans : (max-width: 480px)*/
 @media (max-width: 480px) {
+    
     .login-page {
         padding: 45px 16px;
     }
@@ -148,7 +161,6 @@
     margin: 0 auto 20px;
 }
 
-
 .login-back-home {
     position: absolute;
     top: 30px;
@@ -162,7 +174,10 @@
     text-decoration: underline;
 }
 
+
+/* Adaptation aux écrans : (max-width: 480px)*/
 @media (max-width: 480px) {
+    
     .login-back-home {
         top: 20px;
         left: 20px;

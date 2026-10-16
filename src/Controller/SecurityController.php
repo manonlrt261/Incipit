@@ -10,6 +10,7 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 class SecurityController extends AbstractController
 {
     #[Route(path: '/connexion', name: 'app_login', methods: ['GET', 'POST'])]
+    // Affiche la connexion et sa dernière erreur, ou redirige une personne déjà connectée vers le tableau de bord.
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
         if ($this->getUser()) {
@@ -23,6 +24,7 @@ class SecurityController extends AbstractController
     }
 
     #[Route(path: '/logout', name: 'app_logout')]
+    // Déclare la route de déconnexion ; Symfony Security intercepte la requête et termine la session.
     public function logout(): void
     {
         throw new \LogicException(
