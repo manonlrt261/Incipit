@@ -1,0 +1,30 @@
+{# Carte commune ; une note n’est affichée que pour les livres favoris. #}
+<article class="accueil-carte-livre">
+
+    <div class="accueil-couverture">
+        {% if livre.image_couverture %}
+            <img src="{{ livre.image_couverture }}"
+                 alt="Couverture de {{ livre.titre }}">
+        {% else %}
+            <span>Couverture indisponible</span>
+        {% endif %}
+    </div>
+
+    <h3>{{ livre.titre }}</h3>
+    <p>{{ livre.auteurs ?: 'Auteur non renseigné' }}</p>
+
+    {% if note is not null %}
+        <div class="accueil-etoiles"
+             aria-label="Note : {{ note }} sur 5">
+            {% for etoile in 1..5 %}
+                {% if note >= etoile %}
+                    <img src="{{ asset('images/etoileremplie.png') }}" alt="">
+                {% elseif note >= etoile - 0.5 %}
+                    <img src="{{ asset('images/demieetoile.png') }}" alt="">
+                {% else %}
+                    <img src="{{ asset('images/etoilevide.png') }}" alt="">
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endif %}
+</article>

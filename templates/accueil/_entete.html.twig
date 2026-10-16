@@ -1,0 +1,14 @@
+{# En-tête commun aux pages publiques de l’accueil. #}
+<header class="accueil-header">
+    <div class="accueil-header-contenu">
+        <div class="accueil-identite">
+            <h1>Incipit</h1>
+            <p>Chaque livre commence quelque part.</p>
+        </div>
+
+        <a class="accueil-connexion" href="{{ path('app_login') }}">
+            <img src="{{ asset('images/personne.png') }}" alt="">
+            <span>Connexion</span>
+        </a>
+    </div>
+</header>

@@ -1,0 +1,266 @@
+/* =======================================
+   PROFIL
+   ======================================= */
+
+/* Présentation du profil*/
+.profil-entete {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 28px;
+}
+
+.profil-entete h1 {
+    margin: 0 0 8px;
+    font-size: clamp(29px, 3vw, 42px);
+}
+
+.profil-entete p {
+    color: var(--color-secondary);
+    margin: 0;
+}
+
+.profil-entete > div {
+    min-width: 0;
+}
+
+/* Navigation entre compte et visibilité*/
+.profil-onglets {
+    display: flex;
+    gap: 8px;
+    border-bottom: 1px solid var(--color-encadre);
+    margin-bottom: 24px;
+}
+
+.profil-onglets button {
+    border: 0;
+    border-bottom: 3px solid transparent;
+    background: transparent;
+    padding: 13px 20px;
+    color: #74675d;
+    font: inherit;
+    cursor: pointer;
+}
+
+.profil-onglets button[aria-selected="true"] {
+    border-bottom-color: var(--color-secondary);
+    color: var(--color-secondary);
+    font-weight: 600;
+}
+
+/* Encadrés et formulaires du compte*/
+.profil-carte {
+    background: #fffdfa;
+    border: 1px solid #eee5dc;
+    border-radius: 12px;
+    padding: 28px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 7px #54352205;
+}
+
+.profil-carte header {
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+    margin-bottom: 22px;
+}
+
+.profil-carte header > img {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+}
+
+.profil-carte h2 {
+    margin: 0 0 7px;
+    font-size: 24px;
+}
+
+.profil-carte header p {
+    margin: 0;
+    color: #68646a;
+    overflow-wrap: anywhere;
+}
+
+.profil-carte button {
+    padding: 12px 18px;
+    background: var(--color-secondary);
+    color: #fff;
+    font: inherit;
+    border: 1px solid var(--color-secondary);
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.profil-carte form[data-profil-form] {
+    display: grid;
+    gap: 12px;
+    max-width: 750px;
+}
+
+.profil-carte label {
+    font-weight: 500;
+}
+
+.profil-carte input:not([type="checkbox"]):not([type="hidden"]) {
+    box-sizing: border-box;
+    width: 100%;
+    border: 1px solid var(--color-encadre);
+    border-radius: 8px;
+    padding: 12px;
+    background: #fff;
+    color: #392317;
+    font: inherit;
+}
+
+/* Validation et annulation des modifications*/
+.profil-actions {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.profil-carte button[data-annuler-profil] {
+    color: var(--color-secondary);
+    background: transparent;
+    border-color: var(--color-encadre);
+}
+
+.profil [hidden] {
+    display: none !important;
+}
+
+.profil button:focus-visible,
+.profil input:focus-visible {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 3px;
+}
+
+.profil button:disabled,
+.profil input:disabled {
+    cursor: wait;
+    opacity: .6;
+}
+
+/* Messages de résultat des modifications*/
+.profil-erreur {
+    color: #a42828;
+}
+
+.profil-succes {
+    color: #476646;
+}
+
+/* Réglages de visibilité des sections publiques*/
+.profil-visibilite-ligne {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 22px 0;
+    border-top: 1px solid var(--color-encadre);
+    cursor: pointer;
+}
+
+.profil-visibilite-ligne > div:first-child {
+    display: grid;
+    gap: 8px;
+}
+
+.profil-visibilite-ligne strong {
+    font-size: 17px;
+}
+
+.profil-visibilite-ligne span:not(.profil-etat) {
+    color: #74675d;
+    font-size: 14px;
+}
+
+/* Interrupteurs de visibilité*/
+.profil-interrupteur {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.profil-interrupteur input {
+    appearance: none;
+    width: 48px;
+    height: 27px;
+    padding: 3px;
+    margin: 0;
+    border-radius: 20px;
+    background: #d8cfc7;
+    cursor: pointer;
+    transition: background .15s;
+}
+
+.profil-interrupteur input::before {
+    content: '';
+    display: block;
+    height: 21px;
+    width: 21px;
+    background: white;
+    border-radius: 50%;
+    transition: transform .15s;
+}
+
+.profil-interrupteur input:checked {
+    background: var(--color-secondary);
+}
+
+.profil-interrupteur input:checked::before {
+    transform: translateX(21px);
+}
+
+.profil-etat {
+    width: 65px;
+    font-size: 14px;
+    color: #74675d;
+}
+
+
+/* Adaptation aux écrans : @media(max-width: 650px)*/
+@media(max-width: 650px) {
+    
+    .profil-carte {
+        padding: 20px;
+    }
+
+    .profil-visibilite-ligne {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .profil-entete {
+        align-items: flex-start;
+    }
+}
+
+.profil {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Déconnexion en bas de page*/
+.profil-deconnexion {
+    display: flex;
+    justify-content: center;
+    margin-top: auto;
+    padding-top: 32px;
+}
+
+.profil-bouton-deconnexion {
+    padding: 13px 28px;
+    border: 0;
+    border-radius: 8px;
+    background-color: var(--color-secondary);
+    color: var(--color-fond);
+    font: inherit;
+    cursor: pointer;
+}

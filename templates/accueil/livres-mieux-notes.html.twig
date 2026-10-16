@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Livres les mieux notés - Incipit{% endblock %}
+
+{% block body %}
+<div class="accueil">
+
+    {# Réutilise l’en-tête public et son lien de connexion. #}
+    {% include 'accueil/_entete.html.twig' only %}
+
+    <main class="accueil-main">
+
+        <section class="accueil-section">
+
+            <div class="accueil-section-entete">
+                <img class="accueil-section-icone"
+                     src="{{ asset('images/etoilevide.png') }}"
+                     alt="">
+
+                <div class="accueil-section-titres">
+                    <h2>Livres les mieux notés</h2>
+                    <p>Mes livres notés 5 étoiles.</p>
+                </div>
+
+                <a class="accueil-lien" href="{{ path('app_accueil') }}">
+                    ← Retour à l'accueil
+                </a>
+            </div>
+
+            {# Affiche un message si la liste des livres notés cinq étoiles est vide. #}
+            {% if livres is empty %}
+                <p class="accueil-vide">
+                    Aucun livre noté 5 étoiles pour le moment.
+                </p>
+            {% else %}
+                <div class="accueil-grille-livres">
+                    {# Affiche tous les favoris avec la carte commune et leur note de cinq étoiles. #}
+                    {% for livre in livres %}
+                        {% include 'accueil/_carte_livre.html.twig' with {livre: livre, note: 5} only %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+        </section>
+
+    </main>
+</div>
+{% endblock %}

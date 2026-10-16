@@ -1,0 +1,263 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon profil et paramètres | Incipit{% endblock %}
+
+{% block body %}
+<div class="espace-layout profil-layout">
+    {# Réutilise la navigation commune avec l’onglet du profil actif. #}
+    {% include 'components/_sidebar.html.twig' %}
+
+    <main id="page-profil" class="espace-contenu bibliotheque profil">
+        <header class="profil-entete">
+            <div>
+                <h1>Mon profil et paramètres</h1>
+                <p>Gérez votre compte et la visibilité de votre accueil public.</p>
+            </div>
+
+            <img
+                src="{{ asset('images/incipit.png') }}"
+                class="bibliotheque-logo"
+                alt="Incipit"
+            >
+        </header>
+
+        {# Le JavaScript permet de changer d’onglet au clic et au clavier ; le compte est affiché par défaut. #}
+        <div class="profil-onglets" role="tablist" aria-label="Paramètres du profil">
+            <button
+                id="profil-tab-compte"
+                type="button"
+                role="tab"
+                aria-selected="true"
+                aria-controls="profil-compte"
+                tabindex="0"
+            >
+                Mon compte
+            </button>
+
+            <button
+                id="profil-tab-visibilite"
+                type="button"
+                role="tab"
+                aria-selected="false"
+                aria-controls="profil-visibilite"
+                tabindex="-1"
+            >
+                Visibilité
+            </button>
+        </div>
+
+        <section id="profil-compte" role="tabpanel" aria-labelledby="profil-tab-compte">
+            {# Affiche l’adresse actuelle et propose sa modification après confirmation du mot de passe. #}
+            <section class="profil-carte">
+                <header>
+                    <img src="{{ asset('images/mail.png') }}" alt="">
+                    <div>
+                        <h2>Adresse e-mail</h2>
+                        <p id="profil-email-actuel">{{ app.user.email }}</p>
+                    </div>
+                </header>
+
+                <button
+                    type="button"
+                    data-ouvrir-profil="email"
+                    aria-controls="profil-form-email"
+                    aria-expanded="false"
+                >
+                    Modifier mon adresse e-mail
+                </button>
+
+                {# Le formulaire reste masqué jusqu’à son ouverture et est envoyé sans recharger la page. #}
+                <form
+                    id="profil-form-email"
+                    data-profil-form="email"
+                    action="{{ path('app_profil_email') }}"
+                    method="post"
+                    hidden
+                >
+                    <input type="hidden" name="_token" value="{{ csrf_token('profil_email') }}">
+
+                    <label for="profil-nouvel-email">Nouvelle adresse e-mail</label>
+                    <input
+                        id="profil-nouvel-email"
+                        type="email"
+                        name="email"
+                        autocomplete="email"
+                        maxlength="180"
+                        required
+                    >
+
+                    <label for="profil-email-password">Mot de passe actuel</label>
+                    <input
+                        id="profil-email-password"
+                        type="password"
+                        name="actuel"
+                        autocomplete="current-password"
+                        required
+                    >
+
+                    <div class="profil-actions">
+                        <button type="button" data-annuler-profil="email">Annuler</button>
+                        <button type="submit">Enregistrer</button>
+                    </div>
+                </form>
+
+                {# Affiche le résultat de la modification avec une annonce adaptée aux lecteurs d’écran. #}
+                <p id="profil-erreur-email" class="profil-erreur" role="alert" hidden></p>
+                <p id="profil-succes-email" class="profil-succes" role="status" hidden></p>
+            </section>
+
+            {# Vérifie le mot de passe actuel et demande la confirmation du nouveau mot de passe. #}
+            <section class="profil-carte">
+                <header>
+                    <img src="{{ asset('images/cadenas.png') }}" alt="">
+                    <div>
+                        <h2>Modifier mon mot de passe</h2>
+                        <p>Choisissez un nouveau mot de passe pour votre compte.</p>
+                    </div>
+                </header>
+
+                <button
+                    type="button"
+                    data-ouvrir-profil="password"
+                    aria-controls="profil-form-password"
+                    aria-expanded="false"
+                >
+                    Modifier mon mot de passe
+                </button>
+
+                <form
+                    id="profil-form-password"
+                    data-profil-form="password"
+                    action="{{ path('app_profil_mot_de_passe') }}"
+                    method="post"
+                    hidden
+                >
+                    <input type="hidden" name="_token" value="{{ csrf_token('profil_mot_de_passe') }}">
+
+                    <label for="profil-password-actuel">Mot de passe actuel</label>
+                    <input
+                        id="profil-password-actuel"
+                        type="password"
+                        name="actuel"
+                        autocomplete="current-password"
+                        required
+                    >
+
+                    <label for="profil-password-nouveau">Nouveau mot de passe</label>
+                    <input
+                        id="profil-password-nouveau"
+                        type="password"
+                        name="nouveau"
+                        autocomplete="new-password"
+                        minlength="12"
+                        maxlength="4096"
+                        aria-describedby="profil-password-aide"
+                        required
+                    >
+                    <small id="profil-password-aide">Au moins 12 caractères.</small>
+
+                    <label for="profil-password-confirmation">Confirmer le nouveau mot de passe</label>
+                    <input
+                        id="profil-password-confirmation"
+                        type="password"
+                        name="confirmation"
+                        autocomplete="new-password"
+                        minlength="12"
+                        maxlength="4096"
+                        required
+                    >
+
+                    <div class="profil-actions">
+                        <button type="button" data-annuler-profil="password">Annuler</button>
+                        <button type="submit">Enregistrer</button>
+                    </div>
+                </form>
+
+                <p id="profil-erreur-password" class="profil-erreur" role="alert" hidden></p>
+                <p id="profil-succes-password" class="profil-succes" role="status" hidden></p>
+            </section>
+        </section>
+
+        {# Chaque interrupteur enregistre immédiatement la visibilité de sa section sur l’accueil public. #}
+        <section
+            id="profil-visibilite"
+            role="tabpanel"
+            aria-labelledby="profil-tab-visibilite"
+            hidden
+        >
+            <div class="profil-carte">
+                <header>
+                    <img src="{{ asset('images/parametres.png') }}" alt="">
+                    <div>
+                        <h2>Visibilité de l’accueil public</h2>
+                        <p>Choisissez les sections visibles avant connexion. Les changements sont enregistrés automatiquement.</p>
+                    </div>
+                </header>
+
+                <form
+                    id="profil-visibilite-form"
+                    action="{{ path('app_profil_visibilite') }}"
+                    method="post"
+                >
+                    <input type="hidden" name="_token" value="{{ csrf_token('profil_visibilite') }}">
+
+                    {# Centralise les intitulés et les explications des trois sections configurables. #}
+                    {% set sections = [
+                        {
+                            cle: 'wishlist',
+                            nom: 'Ma wishlist',
+                            detail: 'Seuls les livres dont la case « Rendre publique » est cochée peuvent apparaître.'
+                        },
+                        {
+                            cle: 'auteurs',
+                            nom: 'Les auteurs les plus lus',
+                            detail: 'Le classement des auteurs de vos lectures terminées.'
+                        },
+                        {
+                            cle: 'favoris',
+                            nom: 'Mes livres préférés',
+                            detail: 'Uniquement les livres notés 5 étoiles.'
+                        }
+                    ] %}
+
+                    {# Utilise le même état pour la case à cocher et son libellé « Visible » ou « Masquée ». #}
+                    {% for section in sections %}
+                        {% set visible = visibilite[section.cle] %}
+
+                        <label class="profil-visibilite-ligne" for="profil-visible-{{ section.cle }}">
+                            <div>
+                                <strong>{{ section.nom }}</strong>
+                                <span>{{ section.detail }}</span>
+                            </div>
+
+                            <div class="profil-interrupteur">
+                                <input
+                                    id="profil-visible-{{ section.cle }}"
+                                    type="checkbox"
+                                    role="switch"
+                                    data-section="{{ section.cle }}"
+                                    aria-label="Afficher {{ section.nom }} sur l’accueil public"
+                                    {{ visible ? 'checked' : '' }}
+                                >
+                                <span class="profil-etat" data-etat="{{ section.cle }}">
+                                    {{ visible ? 'Visible' : 'Masquée' }}
+                                </span>
+                            </div>
+                        </label>
+                    {% endfor %}
+                </form>
+
+                <p id="profil-visibilite-erreur" class="profil-erreur" role="alert" hidden></p>
+                <p id="profil-visibilite-succes" class="profil-succes" role="status" hidden></p>
+            </div>
+        </section>
+
+        {# Envoie la déconnexion hors de Turbo pour laisser Symfony terminer la session et rediriger vers l’accueil public. #}
+        <footer class="profil-deconnexion">
+            <form action="{{ path('app_logout') }}" method="post" data-turbo="false">
+                <button type="submit" class="profil-bouton-deconnexion">Déconnexion</button>
+            </form>
+        </footer>
+    </main>
+</div>
+{% endblock %}
