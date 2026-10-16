@@ -25,4 +25,7 @@ return [
     '@hotwired/turbo' => [
         'version' => '8.0.23',
     ],
+    'html5-qrcode' => [
+        'version' => '2.3.8',
+    ],
 ];
