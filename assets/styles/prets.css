@@ -1,0 +1,291 @@
+/* =======================================
+   PRETS
+   ======================================= */
+
+.page-prets {
+    min-width: 0;
+}
+
+/* Présentation de la page des prêts*/
+.prets-introduction {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin: 32px 0;
+}
+
+.prets-introduction h1 {
+    margin: 0 0 8px;
+}
+
+.prets-introduction p {
+    margin: 0;
+}
+
+/* Bouton d’ajout d’un prêt*/
+.prets-bouton-ajouter {
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+/* Liste des prêts*/
+.prets-liste {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Informations et actions d’un prêt*/
+.prets-carte {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 24px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #fff;
+}
+
+.prets-informations {
+    flex: 1;
+    min-width: 0;
+}
+
+.prets-informations h2 {
+    margin: 0 0 8px;
+    font-size: 20px;
+}
+
+.prets-auteur {
+    margin: 0 0 12px;
+}
+
+.prets-emprunteur {
+    margin: 0;
+}
+
+/* Suppression d’un prêt*/
+.prets-supprimer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    padding: 8px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+}
+
+.prets-supprimer img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+}
+
+.prets-supprimer:hover {
+    opacity: 0.65;
+}
+
+.prets-carte[hidden],
+.prets-message-vide[hidden],
+.prets-message-erreur[hidden] {
+    display: none;
+}
+
+.prets-message-vide {
+    padding: 32px 0;
+    text-align: center;
+}
+
+.prets-message-erreur {
+    margin-top: 16px;
+    color: #b91c1c;
+}
+
+/* Fenêtres d’ajout et de confirmation*/
+.prets-modale {
+    width: min(450px, calc(100% - 32px));
+    padding: 28px;
+    border: none;
+    border-radius: 14px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+}
+
+.prets-modale::backdrop {
+    background: rgba(0, 0, 0, 0.45);
+}
+
+.prets-modale h2 {
+    margin: 0 0 16px;
+    font-size: 24px;
+}
+
+.prets-modale-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 28px;
+}
+
+.prets-modale-actions button {
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.prets-bouton-annuler {
+    border: 1px solid #d1d5db;
+    background: #fff;
+}
+
+.prets-bouton-supprimer {
+    border: none;
+    background: #dc2626;
+    color: #fff;
+}
+
+.prets-modale-entete {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.prets-modale-fermer {
+    border: none;
+    background: transparent;
+    font-size: 28px;
+    cursor: pointer;
+}
+
+
+/* Adaptation aux écrans : (max-width: 700px)*/
+@media (max-width: 700px) {
+    
+    .prets-introduction {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .prets-carte {
+        padding: 16px;
+    }
+}
+
+.prets-bouton-ajouter {
+    background: var(--color-secondary);
+    color: var(--color-white);
+    border: 0;
+    border-radius: 9px;
+    padding: 13px 20px;
+    font: inherit;
+}
+
+.prets-informations {
+    overflow-wrap: anywhere;
+}
+
+.prets-supprimer:focus-visible,
+.prets-bouton-ajouter:focus-visible,
+.prets-modale button:focus-visible {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 3px;
+}
+
+.prets-modale button:disabled {
+    opacity: .6;
+    cursor: wait;
+}
+
+.prets-champ {
+    display: grid;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.prets-champ label {
+    font-weight: 600;
+}
+
+.prets-champ label span {
+    font-weight: 400;
+}
+
+.prets-champ input {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--color-encadre);
+    border-radius: 8px;
+    background: var(--color-white);
+    color: var(--color-bgdark);
+    font: inherit;
+}
+
+.prets-champ input:focus-visible {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 2px;
+}
+
+.prets-modale {
+    box-sizing: border-box;
+    max-height: calc(100dvh - 32px);
+    overflow-y: auto;
+    color: var(--color-bgdark);
+}
+
+
+/* Adaptation aux écrans : (max-width: 480px)*/
+@media (max-width: 480px) {
+    
+    .prets-modale-actions {
+        flex-wrap: wrap;
+    }
+}
+
+/* Recherche parmi les livres possédés*/
+.prets-suggestions {
+    max-height: 190px;
+    overflow-y: auto;
+    border: 1px solid var(--color-encadre);
+    border-radius: 8px;
+}
+
+.prets-suggestions[hidden],
+.prets-suggestion[hidden] {
+    display: none;
+}
+
+.prets-suggestion {
+    display: grid;
+    gap: 4px;
+    width: 100%;
+    padding: 12px;
+    border: 0;
+    border-bottom: 1px solid var(--color-encadre);
+    background: var(--color-white);
+    text-align: left;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+
+.prets-suggestion:hover,
+.prets-suggestion:focus-visible {
+    background: var(--color-encadre);
+}
+
+.prets-suggestion span,
+#pret-recherche-aide {
+    font-size: 13px;
+}
+
+#pret-suggestions-vide {
+    margin: 0;
+    padding: 12px;
+    font-size: 13px;
+}

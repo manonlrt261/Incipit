@@ -1,0 +1,267 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes prêts | Incipit{% endblock %}
+
+{% block body %}
+
+<div class="espace-layout">
+
+    {# Réutilise la navigation commune avec l’onglet Prêts actif. #}
+    {% include 'components/_sidebar.html.twig' %}
+
+    <main
+        id="page-mes-prets"
+        class="espace-contenu bibliotheque page-prets"
+    >
+
+        <header class="bibliotheque-header">
+
+            {# Filtre les prêts par titre, auteur ou emprunteur sans recharger la page. #}
+            <form id="prets-formulaire-recherche" class="bibliotheque-recherche" role="search">
+                <img
+                    src="{{ asset('images/rechercher.png') }}"
+                    alt=""
+                >
+
+                <input
+                    type="search"
+                    id="prets-recherche"
+                    placeholder="Rechercher un livre prêté..."
+                    aria-label="Rechercher un prêt"
+                >
+                <button type="submit" aria-label="Lancer la recherche">Rechercher</button>
+            </form>
+
+            <img
+                src="{{ asset('images/incipit.png') }}"
+                alt="Incipit"
+                class="bibliotheque-logo"
+            >
+
+        </header>
+
+        <div class="prets-introduction">
+
+            <div>
+                <h1>Mes prêts</h1>
+                <p>
+                    Retrouvez et gérez tous les livres que vous avez prêtés.
+                </p>
+            </div>
+
+            {# Ouvre la fenêtre d’ajout et prépare un formulaire vide. #}
+            <button
+                type="button"
+                id="ouvrir-ajout-pret"
+                class="btn btn-secondary prets-bouton-ajouter"
+            >
+                Ajouter un prêt
+            </button>
+
+        </div>
+
+        <section
+            class="prets-liste"
+            aria-label="Liste de mes prêts"
+        >
+
+            {# Expose les données utilisées pour rechercher un prêt et identifier sa carte lors de la suppression. #}
+            {% for pret in prets %}
+
+                <article
+                    class="prets-carte"
+                    data-pret-id="{{ pret.id }}"
+                    data-recherche="{{ (pret.titre ~ ' ' ~ pret.auteur ~ ' ' ~ pret.emprunteur)|lower|e('html_attr') }}"
+                >
+
+                    <div class="prets-informations">
+
+                        <h2>{{ pret.titre }}</h2>
+
+                        <p class="prets-auteur">
+                            {{ pret.auteur }}
+                        </p>
+
+                        <p class="prets-emprunteur">
+                            Prêté à :
+                            <strong>{{ pret.emprunteur }}</strong>
+                        </p>
+
+                    </div>
+
+                    {# Transmet l’adresse de suppression et un jeton propre à chaque prêt pour la confirmation. #}
+                    <button
+                        type="button"
+                        class="prets-supprimer"
+                        data-id="{{ pret.id }}"
+                        data-titre="{{ pret.titre|e('html_attr') }}"
+                        data-url="{{ path('app_prets_supprimer', {id: pret.id}) }}"
+                        data-token="{{ csrf_token('supprimer_pret_' ~ pret.id) }}"
+                        aria-label="Supprimer le prêt de {{ pret.titre }}"
+                        title="Supprimer le prêt"
+                    >
+                        <img
+                            src="{{ asset('images/poubelle.png') }}"
+                            alt=""
+                        >
+                    </button>
+
+                </article>
+
+            {% endfor %}
+
+        </section>
+
+        {# Distingue une recherche sans résultat d’une liste ne contenant encore aucun prêt. #}
+        <p
+            id="prets-aucun-resultat"
+            class="prets-message-vide"
+            hidden
+        >
+            Aucun prêt ne correspond à votre recherche.
+        </p>
+
+        <p
+            id="prets-liste-vide"
+            class="prets-message-vide"
+            {% if prets is not empty %}hidden{% endif %}
+        >
+            Vous n'avez aucun prêt enregistré.
+        </p>
+
+        {# Affiche les erreurs de suppression sans quitter la page. #}
+        <p
+            id="prets-message-erreur"
+            class="prets-message-erreur"
+            role="alert"
+            hidden
+        ></p>
+
+    </main>
+
+</div>
+
+{# Demande une confirmation avant la suppression ; le JavaScript y reprend le titre du prêt sélectionné. #}
+
+<dialog
+    id="modal-suppression-pret"
+    class="prets-modale"
+    aria-labelledby="prets-suppression-titre"
+>
+
+    <h2 id="prets-suppression-titre">
+        Supprimer ce prêt ?
+    </h2>
+
+    <p id="prets-suppression-description">
+        Voulez-vous vraiment supprimer ce prêt ?
+    </p>
+
+    <div class="prets-modale-actions">
+
+        <button
+            type="button"
+            id="annuler-suppression-pret"
+            class="prets-bouton-annuler"
+        >
+            Annuler
+        </button>
+
+        <button
+            type="button"
+            id="confirmer-suppression-pret"
+            class="prets-bouton-supprimer"
+        >
+            Supprimer
+        </button>
+
+    </div>
+
+</dialog>
+
+{# Permet de prêter un livre possédé ou de saisir librement un titre absent de la bibliothèque. #}
+
+<dialog
+    id="modal-ajout-pret"
+    class="prets-modale"
+    aria-labelledby="prets-ajout-titre"
+>
+
+    <div class="prets-modale-entete">
+
+        <h2 id="prets-ajout-titre">
+            Ajouter un prêt
+        </h2>
+
+        <button
+            type="button"
+            id="fermer-ajout-pret"
+            class="prets-modale-fermer"
+            aria-label="Fermer"
+        >
+            &times;
+        </button>
+
+    </div>
+
+    {# Envoie les informations du prêt avec le jeton vérifié par le serveur. #}
+    <form id="form-ajout-pret" action="{{ path('app_prets_ajouter') }}" method="post">
+        <input type="hidden" name="_token" value="{{ csrf_token('ajouter_pret') }}">
+
+        <div class="prets-champ">
+            <label for="pret-titre">Titre</label>
+            <input
+                id="pret-titre"
+                name="titre"
+                type="text"
+                maxlength="255"
+                required
+                autofocus
+                autocomplete="off"
+                aria-describedby="pret-recherche-aide"
+                aria-controls="pret-livres-possedes"
+            >
+            {# Le JavaScript renseigne cet identifiant seulement lorsqu’un livre possédé est sélectionné. #}
+            <input type="hidden" id="pret-livre-id" name="livre_id">
+            <small id="pret-recherche-aide">Recherchez un titre ou un auteur dans votre bibliothèque, ou saisissez un autre livre.</small>
+            <div id="pret-livres-possedes" class="prets-suggestions" aria-label="Livres de ma bibliothèque" hidden>
+                {# Prépare les suggestions et leurs noms d’auteurs sans répéter l’assemblage des noms dans chaque bouton. #}
+                {% for livre in livresPossedes %}
+                    {% set auteurs = [] %}
+                    {% for auteur in livre.auteurs %}
+                        {% set auteurs = auteurs|merge([auteur.nomAffichage ?: (auteur.prenom ~ ' ' ~ auteur.nom)|trim]) %}
+                    {% endfor %}
+                    {% set nomsAuteurs = auteurs|join(', ') %}
+                    <button
+                        type="button"
+                        class="prets-suggestion"
+                        data-livre-id="{{ livre.id }}"
+                        data-titre="{{ livre.titre }}"
+                        data-auteur="{{ nomsAuteurs }}"
+                    >
+                        <strong>{{ livre.titre }}</strong>
+                        <span>{{ nomsAuteurs ?: 'Auteur non renseigné' }}</span>
+                    </button>
+                {% endfor %}
+                <p id="pret-suggestions-vide" role="status" hidden>Aucun livre trouvé dans votre bibliothèque. Vous pouvez saisir le titre librement.</p>
+            </div>
+        </div>
+        <div class="prets-champ">
+            <label for="pret-auteur">Auteur <span>(facultatif)</span></label>
+            <input id="pret-auteur" name="auteur" type="text" maxlength="255">
+        </div>
+        <div class="prets-champ">
+            <label for="pret-emprunteur">Personne à qui vous l’avez prêté</label>
+            <input id="pret-emprunteur" name="emprunteur" type="text" maxlength="255" required>
+        </div>
+        {# Conserve les erreurs de validation dans la fenêtre pour permettre de corriger la saisie. #}
+        <p id="prets-ajout-erreur" class="prets-message-erreur" role="alert" hidden></p>
+        <div class="prets-modale-actions">
+            <button type="button" id="annuler-ajout-pret" class="prets-bouton-annuler">Annuler</button>
+            <button type="submit" id="enregistrer-ajout-pret" class="prets-bouton-ajouter">Enregistrer le prêt</button>
+        </div>
+    </form>
+
+</dialog>
+
+{% endblock %}
