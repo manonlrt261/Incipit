@@ -1,0 +1,66 @@
+{% set route_active = app.request.attributes.get('_route') %}
+
+<aside class="sidebar">
+    <a href="{{ path('app_tableau_de_bord') }}" class="sidebar-logo">
+        <img src="{{ asset('images/logobeige2.png') }}" alt="">
+        <span>Ma<br>Bibliothèque</span>
+    </a>
+
+    <nav class="sidebar-navigation" aria-label="Navigation principale">
+
+        <a href="{{ path('app_tableau_de_bord') }}"
+           class="sidebar-lien {{ route_active == 'app_tableau_de_bord' ? 'sidebar-lien-actif' : '' }}"
+           {{ route_active == 'app_tableau_de_bord' ? 'aria-current="page"' : '' }}>
+            <picture><source media="(max-width: 700px)" srcset="{{ asset('images/maison.png') }}"><img src="{{ asset('images/maisonbeige2.png') }}" alt=""></picture>
+            <span>Tableau de bord</span>
+        </a>
+
+        <a href="{{ path('app_livre') }}"
+           class="sidebar-lien {{ route_active starts with 'app_livre' ? 'sidebar-lien-actif' : '' }}"
+           {{ route_active starts with 'app_livre' ? 'aria-current="page"' : '' }}>
+            <picture><source media="(max-width: 700px)" srcset="{{ asset('images/mabibliotheque3.png') }}"><img src="{{ asset('images/mabibliotheque2.png') }}" alt=""></picture>
+            <span class="sidebar-libelle-desktop">Ma bibliothèque</span>
+            <span class="sidebar-libelle-mobile">Bibliothèque</span>
+        </a>
+
+        <a href="{{ path('app_espace_lectures') }}"
+           class="sidebar-lien {{ route_active == 'app_espace_lectures' ? 'sidebar-lien-actif' : '' }}"
+           {{ route_active == 'app_espace_lectures' ? 'aria-current="page"' : '' }}>
+            <picture><source media="(max-width: 700px)" srcset="{{ asset('images/livre2.png') }}"><img src="{{ asset('images/livrebeige2.png') }}" alt=""></picture>
+            <span class="sidebar-libelle-desktop">Mes lectures</span>
+            <span class="sidebar-libelle-mobile">Lectures</span>
+        </a>
+
+        <a href="{{ path('app_prets_index') }}"
+           class="sidebar-lien {{ route_active in ['app_espace_prets', 'app_prets_index'] ? 'sidebar-lien-actif' : '' }}"
+           {{ route_active in ['app_espace_prets', 'app_prets_index'] ? 'aria-current="page"' : '' }}>
+            <picture><source media="(max-width: 700px)" srcset="{{ asset('images/pretsbeige3.png') }}"><img src="{{ asset('images/pretsbeige2.png') }}" alt=""></picture>
+            <span class="sidebar-libelle-desktop">Mes prêts</span>
+            <span class="sidebar-libelle-mobile">Prêts</span>
+        </a>
+
+        <a href="{{ path('app_espace_wishlist') }}"
+           class="sidebar-lien {{ route_active == 'app_espace_wishlist' ? 'sidebar-lien-actif' : '' }}"
+           {{ route_active == 'app_espace_wishlist' ? 'aria-current="page"' : '' }}>
+            <picture><source media="(max-width: 700px)" srcset="{{ asset('images/coeur.png') }}"><img src="{{ asset('images/coeurbeige2.png') }}" alt=""></picture>
+            <span class="sidebar-libelle-desktop">Ma wishlist</span>
+            <span class="sidebar-libelle-mobile">Wishlist</span>
+        </a>
+
+        <a href="{{ path('app_espace_statistiques') }}"
+           class="sidebar-lien {{ route_active == 'app_espace_statistiques' ? 'sidebar-lien-actif' : '' }}"
+           {{ route_active == 'app_espace_statistiques' ? 'aria-current="page"' : '' }}>
+            <picture><source media="(max-width: 700px)" srcset="{{ asset('images/statistiques.png') }}"><img src="{{ asset('images/statistiquesbeige.png') }}" alt=""></picture>
+            <span class="sidebar-libelle-desktop">Mes statistiques</span>
+            <span class="sidebar-libelle-mobile">Statistiques</span>
+        </a>
+
+        <a href="{{ path('app_espace_profil') }}"
+           class="sidebar-lien {{ route_active == 'app_espace_profil' ? 'sidebar-lien-actif' : '' }}"
+           {{ route_active == 'app_espace_profil' ? 'aria-current="page"' : '' }}>
+            <picture><source media="(max-width: 700px)" srcset="{{ asset('images/parametres2.png') }}"><img src="{{ asset('images/parametresbeige2.png') }}" alt=""></picture>
+            <span>Mon profil et paramètres</span>
+        </a>
+
+    </nav>
+</aside>

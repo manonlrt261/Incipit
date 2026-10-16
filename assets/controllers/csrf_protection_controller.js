@@ -1,3 +1,4 @@
+// Prépare les jetons, cookies et en-têtes utilisés par la protection CSRF de Symfony.
 const nameCheck = /^[-_a-zA-Z0-9]{4,22}$/;
 const tokenCheck = /^[-_/+a-zA-Z0-9]{24,}$/;
 
@@ -22,6 +23,7 @@ document.addEventListener('turbo:submit-end', function (event) {
     removeCsrfToken(event.detail.formSubmission.formElement);
 });
 
+// Prépare le jeton du formulaire et le cookie associé pour la vérification CSRF de Symfony.
 export function generateCsrfToken (formElement) {
     const csrfField = formElement.querySelector('input[data-controller="csrf-protection"], input[name="_csrf_token"]');
 
@@ -44,6 +46,7 @@ export function generateCsrfToken (formElement) {
     }
 }
 
+// Construit les en-têtes CSRF à transmettre avec les soumissions gérées par Turbo.
 export function generateCsrfHeaders (formElement) {
     const headers = {};
     const csrfField = formElement.querySelector('input[data-controller="csrf-protection"], input[name="_csrf_token"]');
@@ -61,6 +64,7 @@ export function generateCsrfHeaders (formElement) {
     return headers;
 }
 
+// Expire le cookie CSRF associé au formulaire une fois la soumission terminée.
 export function removeCsrfToken (formElement) {
     const csrfField = formElement.querySelector('input[data-controller="csrf-protection"], input[name="_csrf_token"]');
 

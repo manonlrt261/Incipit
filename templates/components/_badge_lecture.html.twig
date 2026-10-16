@@ -1,0 +1,18 @@
+{% set statut = statut|default('Pas commencé')|trim %}
+{% set statutNormalise = statut|lower %}
+
+{% set classe = 'pas-commence' %}
+
+{% if statutNormalise == 'en cours' %}
+    {% set classe = 'en-cours' %}
+{% elseif statutNormalise == 'en pause' %}
+    {% set classe = 'en-pause' %}
+{% elseif statutNormalise in ['terminé', 'termine'] %}
+    {% set classe = 'termine' %}
+{% elseif statutNormalise in ['abandonné', 'abandonne'] %}
+    {% set classe = 'abandonne' %}
+{% endif %}
+
+<span class="badge-lecture badge-lecture--{{ classe }}">
+    {{ statut }}
+</span>

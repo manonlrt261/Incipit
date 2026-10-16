@@ -1,0 +1,157 @@
+
+.sidebar {
+    width: 256px;
+    min-width: 256px;
+    min-height: 100vh;
+    box-sizing: border-box;
+    padding: 35px 12px;
+    background: linear-gradient(160deg, #593721 0%, #342820 100%);
+    color: var(--color-white);
+}
+
+.sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 0 28px;
+    margin-bottom: 30px;
+    color: var(--color-white);
+    text-decoration: none;
+}
+
+.sidebar-logo img {
+    width: 42px;
+    height: 42px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.sidebar-logo span {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 23px;
+    line-height: 1.05;
+    font-weight: 600;
+}
+
+.sidebar-navigation {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sidebar-lien {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    min-height: 48px;
+    box-sizing: border-box;
+    padding: 10px 22px;
+    border-radius: 9px;
+    color: var(--color-white);
+    text-decoration: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+}
+
+.sidebar-lien img {
+    width: 27px;
+    height: 27px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.sidebar-lien:hover,
+.sidebar-lien-actif {
+    background-color: rgba(185, 122, 83, 0.48);
+}
+
+.sidebar-lien-actif {
+    font-weight: 500;
+}
+
+.espace-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.espace-contenu {
+    flex: 1;
+    min-width: 0;
+}
+
+@media (max-width: 900px) {
+    .sidebar {
+        width: 220px;
+        min-width: 220px;
+    }
+
+    .sidebar-lien {
+        gap: 12px;
+        padding: 10px 14px;
+        font-size: 13px;
+    }
+}
+
+.sidebar-lien picture { display: flex; align-items: center; flex-shrink: 0; }
+.sidebar-lien:focus-visible { outline: 2px solid currentColor; outline-offset: -3px; }
+
+@media (max-width: 700px) {
+    .espace-layout { flex-direction: column; }
+    .sidebar {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        width: 100%;
+        min-width: 0;
+        min-height: 0;
+        padding: 6px 8px;
+        background: var(--color-fond);
+        color: var(--color-secondary);
+        border-bottom: 1px solid var(--color-encadre);
+    }
+    .sidebar-logo { display: none; }
+    .sidebar-navigation {
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: calc((100% - 20px) / 6);
+        gap: 4px;
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+        scrollbar-width: none;
+    }
+    .sidebar-navigation::-webkit-scrollbar { display: none; }
+    .sidebar-lien {
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 6px;
+        min-width: 0;
+        min-height: 76px;
+        padding: 8px 1px;
+        border-radius: 10px;
+        color: var(--color-secondary);
+        font-family: Arial, sans-serif;
+        font-size: clamp(9px, 2.55vw, 11px);
+        letter-spacing: -0.1px;
+        line-height: 1.2;
+        text-align: center;
+        white-space: normal;
+    }
+    .sidebar-lien picture, .sidebar-lien img { width: 36px; height: 36px; }
+    .sidebar-lien > span { display: grid; place-items: center; min-height: 24px; max-width: 100%; overflow-wrap: anywhere; }
+    .sidebar-lien:hover, .sidebar-lien-actif { background-color: var(--color-encadre); }
+}
+
+@media (max-width: 700px) {
+    .sidebar { position: fixed; top: auto; bottom: 0; left: 0; right: 0; padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--color-encadre); border-bottom: 0; }
+    .espace-layout { box-sizing: border-box; padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px)); }
+    html { scroll-padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px)); }
+}
+
+/* Les noms courts sont réservés à la navigation du téléphone. */
+.sidebar-lien > .sidebar-libelle-mobile { display: none; }
+@media (max-width: 700px) {
+    .sidebar-lien > .sidebar-libelle-desktop { display: none; }
+    .sidebar-lien > .sidebar-libelle-mobile { display: grid; }
+}

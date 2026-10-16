@@ -4,6 +4,12 @@
 @import url('./accueil.css');
 @import './login.css';
 @import url('./forgot-password.css');
+@import url('./sidebar.css');
+@import './tableau-de-bord.css';
+@import './bibliotheque.css';
+@import url('./modal-ajout-livre.css');
+@import url('./modal-details-livre.css');
+
 
 html,
 body {

@@ -6,6 +6,11 @@ import './stimulus_bootstrap.js';
  * which should already be in your base.html.twig.
  */
 import './styles/app.css';
+import './bibliotheque.js';
+import './modal-ajout-livre.js';
+import './modal-details-livre.js';
+import './styles/lectures.css';
+import './lectures.js';
 
 console.log('This log comes from assets/app.js - welcome to AssetMapper! 🎉');
 
@@ -44,3 +49,19 @@ if (document.readyState === 'loading') {
 } else {
     initialiserMotDePasse();
 }
+
+import './prets.js';
+import './styles/prets.css';
+
+import './wishlist.js';
+import './styles/wishlist.css';
+
+import './statistiques.js';
+import './styles/statistiques.css';
+
+import './profil.js';
+import './styles/profil.css';
+
+import './navigation.js';
+
+import './tableau-de-bord.js';

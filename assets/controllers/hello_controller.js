@@ -1,3 +1,4 @@
+// Contrôleur d’exemple Stimulus : remplace le texte de l’élément auquel il est associé.
 import { Controller } from '@hotwired/stimulus';
 
 /*
