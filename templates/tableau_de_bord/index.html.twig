@@ -1,0 +1,233 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tableau de bord | Incipit{% endblock %}
+
+{% block body %}
+<div class="espace-layout dashboard-layout">
+    {# Réutilise la navigation commune avec l’onglet Tableau de bord actif. #}
+    {% include 'components/_sidebar.html.twig' %}
+
+    <main id="page-dashboard" class="espace-contenu dashboard">
+
+        {# Sur téléphone, affiche le titre et un accès direct au profil à la place de l’en-tête de bureau. #}
+        <header class="dashboard-mobile-entete">
+            <h1>Tableau de bord</h1>
+            <a class="dashboard-profil-mobile" href="{{ path('app_espace_profil') }}">
+                <span>Profil</span>
+                <img src="{{ asset('images/profil.png') }}" alt="">
+            </a>
+            <p>Retrouvez votre univers littéraire en un coup d’œil.</p>
+        </header>
+
+        {# La recherche de bureau ouvre la bibliothèque en lui transmettant le texte saisi. #}
+        <header class="dashboard-header">
+            <form action="{{ path('app_livre') }}" method="get" class="dashboard-recherche">
+                <img src="{{ asset('images/rechercher.png') }}" alt="">
+                <input
+                    type="search"
+                    name="recherche"
+                    placeholder="Rechercher un titre, un auteur, un ISBN..."
+                    aria-label="Rechercher un livre"
+                >
+                <button type="submit">Rechercher</button>
+            </form>
+
+            <div class="dashboard-header-actions">
+                <a href="{{ path('app_logout') }}" class="bouton-deconnexion">
+                    Déconnexion
+                </a>
+
+                <img
+                    src="{{ asset('images/incipit.png') }}"
+                    alt="Incipit"
+                    class="dashboard-logo"
+                >
+            </div>
+        </header>
+
+        <div class="dashboard-introduction">
+            <h1>Mon tableau de bord</h1>
+            <p>Retrouvez votre univers littéraire en un coup d'œil.</p>
+        </div>
+
+        {# Génère les quatre compteurs avec une structure commune pour éviter de répéter les mêmes cartes. #}
+        <section class="dashboard-statistiques" aria-label="Statistiques de bibliothèque">
+
+            {% set indicateurs = [
+                {titre: 'Livres possédés', valeur: livresPossedes, image: 'livre_rond4.png'},
+                {titre: 'Livres terminés', valeur: livresTermines, image: 'check_rond.png'},
+                {titre: 'Livres à lire', valeur: livresALire, image: 'livre_rond4.png'},
+                {titre: 'Lectures en cours', valeur: lecturesEnCours, image: 'play_rond.png'}
+            ] %}
+
+            {% for indicateur in indicateurs %}
+                <article class="dashboard-stat">
+                    <img src="{{ asset('images/' ~ indicateur.image) }}" alt="">
+                    <div>
+                        <p>{{ indicateur.titre }}</p>
+                        <strong>{{ indicateur.valeur }}</strong>
+                    </div>
+                </article>
+            {% endfor %}
+
+        </section>
+
+        <div class="dashboard-colonnes">
+
+            <section class="dashboard-carte">
+                <div class="dashboard-titre-section">
+                    <img src="{{ asset('images/livre2.png') }}" alt="">
+                    <h2>Mes lectures en cours</h2>
+                    {# Le JavaScript affiche ou masque uniquement la liste associée à cette flèche. #}
+                    <button
+                        type="button"
+                        class="dashboard-basculer"
+                        aria-expanded="true"
+                        aria-controls="dashboard-lectures-liste"
+                        data-nom="mes lectures en cours"
+                        aria-label="Masquer mes lectures en cours"
+                    >
+                        <span class="dashboard-ligne-repli" aria-hidden="true"></span>
+                        <span class="dashboard-fleche-repli" aria-hidden="true"></span>
+                    </button>
+                </div>
+
+                {# Affiche les lectures en cours ou en pause, avec un message si la liste est vide. #}
+                <div id="dashboard-lectures-liste" class="dashboard-liste">
+                    {% for lecture in lectures %}
+                        <article class="dashboard-livre">
+                            {% if lecture.image_couverture %}
+                                <img
+                                    src="{{ asset(lecture.image_couverture) }}"
+                                    alt="Couverture de {{ lecture.titre }}"
+                                    class="dashboard-couverture"
+                                >
+                            {% else %}
+                                <div class="dashboard-couverture dashboard-sans-couverture">
+                                    Sans couverture
+                                </div>
+                            {% endif %}
+
+                            <div class="dashboard-livre-infos">
+                                <h3>{{ lecture.titre }}</h3>
+                                <p>{{ lecture.auteurs ?: 'Auteur non renseigné' }}</p>
+
+                                {% include 'components/_badge_lecture.html.twig' with {
+                                    statut: lecture.statut
+                                } only %}
+                            </div>
+                        </article>
+                    {% else %}
+                        <p class="dashboard-vide">
+                            Vous n'avez aucune lecture en cours ou en pause.
+                        </p>
+                    {% endfor %}
+                </div>
+
+            </section>
+
+            <section class="dashboard-carte">
+                <div class="dashboard-titre-section">
+                    <img src="{{ asset('images/ajout.png') }}" alt="">
+                    <h2>Derniers ajouts</h2>
+                    {# Le JavaScript affiche ou masque uniquement la liste associée à cette flèche. #}
+                    <button
+                        type="button"
+                        class="dashboard-basculer"
+                        aria-expanded="true"
+                        aria-controls="dashboard-ajouts-liste"
+                        data-nom="les derniers ajouts"
+                        aria-label="Masquer les derniers ajouts"
+                    >
+                        <span class="dashboard-ligne-repli" aria-hidden="true"></span>
+                        <span class="dashboard-fleche-repli" aria-hidden="true"></span>
+                    </button>
+                </div>
+
+                {# Affiche les derniers livres possédés transmis par le contrôleur ; les simples souhaits sont exclus. #}
+                <div id="dashboard-ajouts-liste" class="dashboard-liste">
+                    {% for livre in derniersAjouts %}
+                        <article class="dashboard-livre">
+                            {% if livre.image_couverture %}
+                                <img
+                                    src="{{ asset(livre.image_couverture) }}"
+                                    alt="Couverture de {{ livre.titre }}"
+                                    class="dashboard-couverture"
+                                >
+                            {% else %}
+                                <div class="dashboard-couverture dashboard-sans-couverture">
+                                    Sans couverture
+                                </div>
+                            {% endif %}
+
+                            <div class="dashboard-livre-infos">
+                                <h3>{{ livre.titre }}</h3>
+                                <p>{{ livre.auteurs ?: 'Auteur non renseigné' }}</p>
+                                <p class="dashboard-date">
+                                    <img src="{{ asset('images/calendrier.png') }}" alt="">
+                                    Ajouté le {{ livre.date_creation|date('d/m/Y') }}
+                                </p>
+                            </div>
+                        </article>
+                    {% else %}
+                        <p class="dashboard-vide">
+                            Aucun livre ajouté pour le moment.
+                        </p>
+                    {% endfor %}
+                </div>
+
+            </section>
+
+        </div>
+
+        <div class="dashboard-colonnes dashboard-colonnes-bas">
+
+            <section class="dashboard-carte">
+                <div class="dashboard-titre-section">
+                    <img src="{{ asset('images/statistiques.png') }}" alt="">
+                    <h2>Mes genres favoris</h2>
+                </div>
+
+                {# Présente les genres disponibles ou un message en attendant que des données soient renseignées. #}
+                {% if genresFavoris is not empty %}
+                    <div class="dashboard-genres">
+                        {% for genre in genresFavoris %}
+                            <div class="dashboard-genre">
+                                <span>{{ genre.nom }}</span>
+                                <strong>{{ genre.nombre }}</strong>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="dashboard-vide">
+                        Le graphique de vos genres favoris apparaîtra lorsque
+                        les genres seront renseignés dans votre bibliothèque.
+                    </p>
+                {% endif %}
+            </section>
+
+            <section class="dashboard-carte dashboard-carte-note">
+                <div class="dashboard-titre-section">
+                    <img src="{{ asset('images/etoilevide.png') }}" alt="">
+                    <h2>Ma note moyenne</h2>
+                </div>
+
+                {# Affiche la moyenne des notes renseignées ; le tiret distingue une absence de note d’une moyenne de zéro. #}
+                <div class="dashboard-note">
+                    {% if noteMoyenne is not null %}
+                        <strong>{{ noteMoyenne|number_format(1, ',', ' ') }}</strong>
+                    {% else %}
+                        <strong>—</strong>
+                    {% endif %}
+                    <span>/ 5</span>
+                </div>
+
+                <p class="dashboard-note-description">
+                    Moyenne des notes attribuées à vos lectures.
+                </p>
+            </section>
+
+        </div>
+    </main>
+</div>
+{% endblock %}
