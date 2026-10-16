@@ -35,6 +35,10 @@ class Exemplaire
     #[ORM\Column(type: 'datetime')]
     private ?\DateTimeInterface $dateCreation = null;
 
+
+    #[ORM\Column(name: 'date_retrait', type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $dateRetrait = null;
+
     #[ORM\ManyToOne(targetEntity: Livre::class)]
     #[ORM\JoinColumn(name: 'livre_id', referencedColumnName: 'id', nullable: false)]
     private ?Livre $livre = null;
@@ -139,4 +143,17 @@ class Exemplaire
 
         return $this;
     }
+
+public function getDateRetrait(): ?\DateTimeInterface
+{
+    return $this->dateRetrait;
+}
+
+public function setDateRetrait(?\DateTimeInterface $dateRetrait): static
+{
+    $this->dateRetrait = $dateRetrait;
+
+    return $this;
+}
+
 }

@@ -1,4 +1,3 @@
-
 {% extends 'base.html.twig' %}
 
 {% block title %}Ajouter un livre - Incipit{% endblock %}
@@ -14,6 +13,7 @@
         à votre bibliothèque Incipit.
     </p>
 
+    {# Affiche la confirmation après un ajout réussi avec le formulaire Symfony. #}
     {% for message in app.flashes('success') %}
         <div style="
             padding: 15px;
@@ -26,6 +26,7 @@
         </div>
     {% endfor %}
 
+    {# Laisse Symfony générer les champs, les erreurs de validation et la protection du formulaire. #}
     {{ form_start(form) }}
 
         {{ form_widget(form) }}

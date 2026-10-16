@@ -43,6 +43,15 @@ class Livre
     #[ORM\Column(name: 'image_couverture', length: 2048, nullable: true)]
     private ?string $imageCouverture = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $saga = null;
+
+    #[ORM\Column(type: 'integer', nullable: true)]
+    private ?int $tome = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $edition = null;
+
     #[ORM\Column(name: 'date_creation', type: 'datetime')]
     private ?\DateTime $dateCreation = null;
 
@@ -52,20 +61,35 @@ class Livre
     #[ORM\ManyToMany(targetEntity: Auteur::class)]
     #[ORM\JoinTable(name: 'livre_auteur')]
     #[ORM\JoinColumn(
-    name: 'livre_id',
-    referencedColumnName: 'id',
-    onDelete: 'CASCADE'
-)]
+        name: 'livre_id',
+        referencedColumnName: 'id',
+        onDelete: 'CASCADE'
+    )]
     #[ORM\InverseJoinColumn(
-    name: 'auteur_id',
-    referencedColumnName: 'id',
-    onDelete: 'CASCADE'
-)]
+        name: 'auteur_id',
+        referencedColumnName: 'id',
+        onDelete: 'CASCADE'
+    )]
     private Collection $auteurs;
+
+    #[ORM\ManyToMany(targetEntity: Genre::class)]
+    #[ORM\JoinTable(name: 'livre_genre')]
+    #[ORM\JoinColumn(
+        name: 'livre_id',
+        referencedColumnName: 'id',
+        onDelete: 'CASCADE'
+    )]
+    #[ORM\InverseJoinColumn(
+        name: 'genre_id',
+        referencedColumnName: 'id',
+        onDelete: 'CASCADE'
+    )]
+    private Collection $genres;
 
     public function __construct()
     {
         $this->auteurs = new ArrayCollection();
+        $this->genres = new ArrayCollection();
         $this->dateCreation = new \DateTime();
         $this->dateModification = new \DateTime();
     }
@@ -83,7 +107,6 @@ class Livre
     public function setTitre(string $titre): static
     {
         $this->titre = $titre;
-
         return $this;
     }
 
@@ -95,7 +118,6 @@ class Livre
     public function setSousTitre(?string $sousTitre): static
     {
         $this->sousTitre = $sousTitre;
-
         return $this;
     }
 
@@ -107,7 +129,6 @@ class Livre
     public function setIsbn13(?string $isbn13): static
     {
         $this->isbn13 = $isbn13;
-
         return $this;
     }
 
@@ -119,7 +140,6 @@ class Livre
     public function setIsbn10(?string $isbn10): static
     {
         $this->isbn10 = $isbn10;
-
         return $this;
     }
 
@@ -131,7 +151,6 @@ class Livre
     public function setResume(?string $resume): static
     {
         $this->resume = $resume;
-
         return $this;
     }
 
@@ -143,7 +162,6 @@ class Livre
     public function setDatePublication(?\DateTime $datePublication): static
     {
         $this->datePublication = $datePublication;
-
         return $this;
     }
 
@@ -155,7 +173,6 @@ class Livre
     public function setNombrePages(?int $nombrePages): static
     {
         $this->nombrePages = $nombrePages;
-
         return $this;
     }
 
@@ -167,7 +184,6 @@ class Livre
     public function setLangue(?string $langue): static
     {
         $this->langue = $langue;
-
         return $this;
     }
 
@@ -179,7 +195,39 @@ class Livre
     public function setImageCouverture(?string $imageCouverture): static
     {
         $this->imageCouverture = $imageCouverture;
+        return $this;
+    }
 
+    public function getSaga(): ?string
+    {
+        return $this->saga;
+    }
+
+    public function setSaga(?string $saga): static
+    {
+        $this->saga = $saga;
+        return $this;
+    }
+
+    public function getTome(): ?int
+    {
+        return $this->tome;
+    }
+
+    public function setTome(?int $tome): static
+    {
+        $this->tome = $tome;
+        return $this;
+    }
+
+    public function getEdition(): ?string
+    {
+        return $this->edition;
+    }
+
+    public function setEdition(?string $edition): static
+    {
+        $this->edition = $edition;
         return $this;
     }
 
@@ -191,7 +239,6 @@ class Livre
     public function setDateCreation(\DateTime $dateCreation): static
     {
         $this->dateCreation = $dateCreation;
-
         return $this;
     }
 
@@ -203,7 +250,6 @@ class Livre
     public function setDateModification(\DateTime $dateModification): static
     {
         $this->dateModification = $dateModification;
-
         return $this;
     }
 
@@ -227,7 +273,29 @@ class Livre
     public function removeAuteur(Auteur $auteur): static
     {
         $this->auteurs->removeElement($auteur);
+        return $this;
+    }
 
+    /**
+     * @return Collection<int, Genre>
+     */
+    public function getGenres(): Collection
+    {
+        return $this->genres;
+    }
+
+    public function addGenre(Genre $genre): static
+    {
+        if (!$this->genres->contains($genre)) {
+            $this->genres->add($genre);
+        }
+
+        return $this;
+    }
+
+    public function removeGenre(Genre $genre): static
+    {
+        $this->genres->removeElement($genre);
         return $this;
     }
 }

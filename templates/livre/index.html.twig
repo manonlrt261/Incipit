@@ -1,67 +1,218 @@
-
 {% extends 'base.html.twig' %}
 
-{% block title %}Ma bibliothèque - Incipit{% endblock %}
+{% block title %}Ma bibliothèque | Incipit{% endblock %}
 
 {% block body %}
-<main style="max-width: 1100px; margin: 50px auto; padding: 20px;">
+<div class="espace-layout">
+    {# Réutilise la navigation commune avec l’onglet Bibliothèque actif. #}
+    {% include 'components/_sidebar.html.twig' %}
 
-    <h1>Ma bibliothèque</h1>
+    <main class="espace-contenu bibliotheque">
 
-    <p>Retrouvez tous les livres enregistrés dans Incipit.</p>
+        {# Recherche par titre, auteur ou ISBN ; les résultats sont filtrés par JavaScript sans rechargement. #}
+        <header class="bibliotheque-header">
+            <form id="bibliotheque-recherche" class="bibliotheque-recherche" role="search">
+                <img src="{{ asset('images/rechercher.png') }}" alt="">
+                <input
+                    type="search"
+                    id="recherche-livre"
+                    placeholder="Rechercher un titre, un auteur, un ISBN..."
+                    aria-label="Rechercher un livre"
+                >
+                <button type="submit" aria-label="Lancer la recherche">
+                    Rechercher
+                </button>
+            </form>
 
-    <a href="{{ path('app_livre_ajouter') }}">
-        Ajouter un livre
-    </a>
+            <img
+                src="{{ asset('images/incipit.png') }}"
+                alt="Incipit"
+                class="bibliotheque-logo"
+            >
+        </header>
 
-    {% if livres is empty %}
-        <p>Votre bibliothèque est vide pour le moment.</p>
-    {% else %}
-        <div style="
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 24px;
-            margin-top: 30px;
-        ">
-            {% for livre in livres %}
-                <article style="
-                    padding: 20px;
-                    border: 1px solid #ddd;
-                    border-radius: 10px;
-                ">
-                    {% if livre.imageCouverture %}
-                        <img
-                            src="{{ livre.imageCouverture }}"
-                            alt="Couverture de {{ livre.titre }}"
-                            style="width: 100%; height: 250px; object-fit: contain;"
-                        >
-                    {% endif %}
+        <div class="bibliotheque-introduction">
+            <div>
+                <h1>Ma bibliothèque</h1>
+                <p>Les livres que vous possédez.</p>
+            </div>
 
-                    <h2>{{ livre.titre }}</h2>
-
-                    {% if livre.sousTitre %}
-                        <p>{{ livre.sousTitre }}</p>
-                    {% endif %}
-
-                    {% if livre.auteurs is not empty %}
-                        <p>
-                            {% for auteur in livre.auteurs %}
-                                {{ auteur.nomAffichage }}{% if not loop.last %}, {% endif %}
-                            {% endfor %}
-                        </p>
-                    {% endif %}
-
-                    {% if livre.nombrePages %}
-                        <p>{{ livre.nombrePages }} pages</p>
-                    {% endif %}
-
-                    {% if livre.langue %}
-                        <p>Langue : {{ livre.langue }}</p>
-                    {% endif %}
-                </article>
-            {% endfor %}
+            {# Ouvre le formulaire commun d’ajout d’un livre. #}
+            <button type="button" id="ouvrir-ajout" class="bibliotheque-ajouter">
+                Ajouter un livre
+            </button>
         </div>
-    {% endif %}
 
-</main>
+        {# Combine les filtres de genre et de statut, avec une remise à zéro de la recherche. #}
+        <form id="bibliotheque-filtres" class="bibliotheque-filtres">
+            <div class="bibliotheque-selects">
+                <label class="bibliotheque-select">
+                    <span class="sr-only">Genre</span>
+                    <select id="filtre-genre">
+                        <option value="">Genre</option>
+                        {% for genre in genres %}
+                            <option value="{{ genre.nom }}">{{ genre.nom }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+
+                <label class="bibliotheque-select">
+                    <span class="sr-only">Statut de lecture</span>
+                    <select id="filtre-statut">
+                        <option value="">Statut de lecture</option>
+                        <option value="Pas commencé">Pas commencé</option>
+                        <option value="En cours">En cours</option>
+                        <option value="En pause">En pause</option>
+                        <option value="Terminé">Terminé</option>
+                        <option value="À lire">À lire</option>
+                        <option value="Abandonné">Abandonné</option>
+                    </select>
+                </label>
+
+                <button type="submit" class="bibliotheque-valider">
+                    Valider
+                </button>
+            </div>
+
+            <button type="button" id="reinitialiser-filtres" class="bibliotheque-reinitialiser">
+                <span aria-hidden="true">↻</span>
+                Réinitialiser les filtres
+            </button>
+        </form>
+
+        {# Regroupe le compteur, le repli de la liste et le choix entre grille et liste. #}
+        <div class="bibliotheque-outils">
+            <p id="bibliotheque-compteur" aria-live="polite">
+                {{ livres|length }} livres dans ma bibliothèque
+            </p>
+
+            <button type="button" id="bibliotheque-basculer-livres" class="bibliotheque-basculer-livres" aria-expanded="true" aria-controls="bibliotheque-liste-zone" aria-label="Masquer les livres">
+                <span class="bibliotheque-ligne-repli" aria-hidden="true"></span>
+                <span class="bibliotheque-fleche-repli" aria-hidden="true"></span>
+            </button>
+
+            <div class="bibliotheque-vues" aria-label="Mode d'affichage">
+                <button
+                    type="button"
+                    id="vue-grille"
+                    class="bibliotheque-vue actif"
+                    aria-pressed="true"
+                >
+                    <img src="{{ asset('images/grille.png') }}" alt="">
+                    Grille
+                </button>
+
+                <button
+                    type="button"
+                    id="vue-liste"
+                    class="bibliotheque-vue"
+                    aria-pressed="false"
+                >
+                    <img src="{{ asset('images/liste.png') }}" alt="">
+                    Liste
+                </button>
+            </div>
+        </div>
+
+        <div id="bibliotheque-liste-zone">
+            <section
+                id="bibliotheque-livres"
+                class="bibliotheque-livres vue-grille"
+            >
+                {# Expose les données nécessaires à la recherche, aux filtres et à l’ouverture de la fiche de chaque livre. #}
+                {% for livre in livres %}
+
+                    <article
+                        class="bibliotheque-livre"
+                        data-livre-id="{{ livre.id }}"
+                        data-recherche="{{ (livre.titre ~ ' ' ~ livre.sous_titre ~ ' ' ~ livre.auteurs ~ ' ' ~ livre.isbn13 ~ ' ' ~ livre.isbn10)|lower|e('html_attr') }}"
+                        data-genres="{{ livre.genres|e('html_attr') }}"
+                        data-statut="{{ livre.statut|e('html_attr') }}"
+                    >
+                        {# Affiche une couverture de remplacement lorsque le livre ne possède pas d’image. #}
+                        {% if livre.image_couverture %}
+                            <img
+                                class="bibliotheque-couverture"
+                                src="{{ asset(livre.image_couverture) }}"
+                                alt="Couverture de {{ livre.titre }}"
+                            >
+                        {% else %}
+                            <div class="bibliotheque-couverture bibliotheque-sans-couverture" aria-label="Couverture non renseignée"></div>
+                        {% endif %}
+
+                        <div class="bibliotheque-livre-infos">
+                            <h2>{{ livre.titre }}</h2>
+
+                            <p class="bibliotheque-auteur">
+                                {{ livre.auteurs ?: 'Auteur non renseigné' }}
+                            </p>
+
+                            {# Réutilise le badge de statut commun aux pages de livres et de lectures. #}
+                            {% include 'components/_badge_lecture.html.twig' with {
+                                statut: livre.statut
+                            } only %}
+                        </div>
+                    </article>
+                {% endfor %}
+            </section>
+
+            {# Ce message est affiché par JavaScript si aucun livre ne correspond aux critères. #}
+            <p id="bibliotheque-aucun-resultat" class="bibliotheque-vide" hidden>
+                Aucun livre ne correspond à votre recherche ou à vos filtres.
+            </p>
+        </div>
+
+        {# Conserve l’accès aux titres retirés de la collection et à leur historique. #}
+        <section class="bibliotheque-retires">
+            <button
+                type="button"
+                id="basculer-retires"
+                class="bibliotheque-retires-entete"
+                aria-expanded="true"
+                aria-controls="contenu-retires"
+            >
+                <img src="{{ asset('images/poubelle.png') }}" alt="">
+
+                <span class="bibliotheque-retires-titre">
+                    <strong>Livres retirés de ma collection</strong>
+                    <small>
+                        Ces livres ne sont plus dans votre bibliothèque,
+                        mais leur historique est conservé.
+                    </small>
+                </span>
+
+                <span id="chevron-retires" aria-hidden="true">⌃</span>
+            </button>
+
+            <div id="contenu-retires" class="bibliotheque-retires-liste">
+                {% for livre in livresRetires %}
+                    <article class="bibliotheque-livre-retire">
+                        {% if livre.image_couverture %}
+                            <img
+                                src="{{ asset(livre.image_couverture) }}"
+                                alt="Couverture de {{ livre.titre }}"
+                            >
+                        {% else %}
+                            <div class="bibliotheque-couverture-retire-vide"></div>
+                        {% endif %}
+
+                        <div>
+                            <h3>{{ livre.titre }}</h3>
+                            <p>{{ livre.auteurs ?: 'Auteur non renseigné' }}</p>
+                        </div>
+                    </article>
+                {% else %}
+                    <p class="bibliotheque-vide">
+                        Aucun livre retiré de votre collection.
+                    </p>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+</div>
+
+{# Charge les fenêtres communes d’ajout, de modification et de consultation des livres. #}
+{% include 'livre/_modal_ajout.html.twig' %}
+{% include 'livre/_modal_details.html.twig' %}
+
 {% endblock %}

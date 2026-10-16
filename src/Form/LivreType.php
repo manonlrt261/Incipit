@@ -2,15 +2,14 @@
 
 namespace App\Form;
 
-use App\Entity\Auteur;
+use App\Entity\Genre;
 use App\Entity\Livre;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -23,8 +22,10 @@ class LivreType extends AbstractType
         $builder
             ->add('titre', TextType::class, [
                 'label' => 'Titre du livre',
+                'required' => true,
                 'attr' => [
                     'placeholder' => 'Saisir le titre du livre',
+                    'maxlength' => 255,
                 ],
             ])
 
@@ -49,11 +50,41 @@ class LivreType extends AbstractType
                 ],
             ])
 
-            ->add('resume', TextareaType::class, [
-                'label' => 'Résumé',
+            ->add('saga', TextType::class, [
+                'label' => 'Saga',
                 'required' => false,
                 'attr' => [
-                    'rows' => 6,
+                    'placeholder' => 'Nom de la saga',
+                ],
+            ])
+
+            ->add('tome', IntegerType::class, [
+                'label' => 'Tome',
+                'required' => false,
+                'attr' => [
+                    'min' => 1,
+                ],
+            ])
+
+            ->add('genres', EntityType::class, [
+                'class' => Genre::class,
+                'choice_label' => 'nom',
+                'label' => 'Genre(s)',
+                'multiple' => true,
+                'expanded' => false,
+                'required' => false,
+            ])
+
+            ->add('edition', TextType::class, [
+                'label' => 'Édition',
+                'required' => false,
+            ])
+
+            ->add('langue', TextType::class, [
+                'label' => 'Langue',
+                'required' => false,
+                'attr' => [
+                    'placeholder' => 'Français, anglais...',
                 ],
             ])
 
@@ -72,34 +103,17 @@ class LivreType extends AbstractType
                 ],
             ])
 
-            ->add('langue', TextType::class, [
-                'label' => 'Langue',
+            ->add('resume', TextareaType::class, [
+                'label' => 'Résumé',
                 'required' => false,
                 'attr' => [
-                    'placeholder' => 'Français, anglais...',
+                    'rows' => 5,
                 ],
             ])
 
             ->add('imageCouverture', TextType::class, [
                 'label' => 'URL de la couverture',
                 'required' => false,
-            ])
-
-            ->add('auteurs', EntityType::class, [
-                'class' => Auteur::class,
-                'choice_label' => 'nomAffichage',
-                'label' => 'Auteur(s)',
-                'multiple' => true,
-                'expanded' => false,
-                'required' => false,
-                'placeholder' => false,
-                'attr' => [
-                    'size' => 5,
-                ],
-            ])
-
-            ->add('enregistrer', SubmitType::class, [
-                'label' => 'Ajouter le livre',
             ])
         ;
     }

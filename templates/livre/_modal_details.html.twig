@@ -1,0 +1,306 @@
+<dialog id="modal-details-livre" class="modal-details-livre" aria-labelledby="details-livre-titre">
+
+    {# Transmet le jeton vérifié par le serveur lors du retrait du livre de la collection. #}
+    <input
+        type="hidden"
+        id="details-livre-token-retrait"
+        value="{{ csrf_token('retirer_livre') }}"
+    >
+
+    <div class="details-livre-contenu">
+
+        {# Réutilise le bouton de fermeture commun aux fenêtres modales. #}
+        <header class="details-livre-entete">
+            <h2 id="details-livre-titre">Détails du livre</h2>
+
+            {% include 'components/_bouton_fermer.html.twig' with { id: 'fermer-details-livre' } %}
+        </header>
+
+        {# Permet de modifier la fiche ou de retirer le livre sans supprimer son historique. #}
+        <div class="details-livre-actions">
+            <button type="button" id="modifier-details-livre" class="details-livre-modifier">
+                <img src="{{ asset('images/modifier.png') }}" alt="">
+                Modifier le livre
+            </button>
+
+            <button type="button" id="retirer-details-livre" class="details-livre-retirer">
+                <img src="{{ asset('images/poubelle.png') }}" alt="">
+                Retirer de ma collection
+            </button>
+        </div>
+
+        {# Le JavaScript remplit la couverture et les informations avec les données du livre sélectionné. #}
+        <section class="details-livre-principal">
+
+            <div class="details-livre-couverture-zone">
+                <div id="details-livre-couverture" class="details-livre-couverture">
+                    <span>Aucune couverture</span>
+                </div>
+
+                {% include 'components/_bouton_couverture.html.twig' with {
+                    id: 'modifier-couverture-details',
+                    texte: 'Modifier la couverture'
+                } only %}
+
+            {# Propose une couverture depuis un fichier, une photo ou une recherche en ligne. #}
+            <div id="details-options-couverture" class="menu-options-couverture" hidden>
+                <button type="button" id="details-couverture-fichier">
+                    Importer une image depuis la galerie
+                </button>
+
+                <button type="button" id="details-couverture-photo">
+                    Prendre une photo
+                </button>
+
+                <button type="button" id="details-couverture-en-ligne">
+                    Rechercher une image en ligne
+                </button>
+            </div>
+
+            {# Ce champ masqué reçoit le fichier choisi depuis la galerie. #}
+            <input
+                type="file"
+                id="details-fichier-couverture"
+                accept="image/jpeg,image/png,image/webp"
+                hidden
+            >
+
+            {# Zone vidéo et commandes affichées pendant la prise de photo de la couverture. #}
+            <div id="details-camera-zone" class="modal-camera-zone" hidden>
+                <video
+                    id="details-camera-video"
+                    autoplay
+                    playsinline
+                    muted
+                ></video>
+
+                <div class="modal-camera-actions">
+                    <button type="button" id="details-camera-capturer">
+                        Prendre la photo
+                    </button>
+
+                    <button type="button" id="details-camera-annuler">
+                        Annuler
+                    </button>
+                </div>
+
+                <p id="details-camera-erreur" role="alert" hidden></p>
+            </div>
+
+            {# Conserve l’URL choisie lorsque la couverture provient de la recherche en ligne. #}
+            <input
+                type="hidden"
+                id="details-image-couverture"
+            >
+
+            {# Le JavaScript remplit cette zone avec les couvertures correspondant au titre ou à l’auteur. #}
+            <div
+                id="details-recherche-couverture-zone"
+                class="modal-recherche-couverture-zone"
+                hidden
+            >
+                <label for="details-recherche-couverture-input">
+                    Rechercher une couverture
+                </label>
+
+                <div class="modal-recherche-couverture-formulaire">
+                    <input
+                        type="search"
+                        id="details-recherche-couverture-input"
+                        placeholder="Titre du livre ou auteur..."
+                    >
+
+                    <button type="button" id="details-lancer-recherche-couverture">
+                        Rechercher
+                    </button>
+                </div>
+
+                <p
+                    id="details-recherche-couverture-message"
+                    role="status"
+                    aria-live="polite"
+                ></p>
+
+                <div
+                    id="details-resultats-couvertures"
+                    class="modal-resultats-couvertures"
+                ></div>
+
+                <button type="button" id="details-fermer-recherche-couverture">
+                    Fermer la recherche
+                </button>
+            </div>
+
+            </div>
+
+            <div class="details-livre-informations">
+                <h3 id="details-livre-nom">Titre du livre</h3>
+                <p id="details-livre-sous-titre"></p>
+                <p id="details-livre-auteurs">Auteur non renseigné</p>
+
+                <div class="details-livre-metadonnees">
+                    <div>
+                        <strong>Saga</strong>
+                        <span id="details-livre-saga">—</span>
+                    </div>
+
+                    <div>
+                        <strong>Tome</strong>
+                        <span id="details-livre-tome">—</span>
+                    </div>
+
+                    <div>
+                        <strong>Genre(s)</strong>
+                        <span id="details-livre-genres">—</span>
+                    </div>
+
+                    <div>
+                        <strong>ISBN-13</strong>
+                        <span id="details-livre-isbn13">—</span>
+                    </div>
+
+                    <div>
+                        <strong>ISBN-10</strong>
+                        <span id="details-livre-isbn10">—</span>
+                    </div>
+
+                    <div>
+                        <strong>Éditeur</strong>
+                        <span id="details-livre-edition">—</span>
+                    </div>
+
+                    <div>
+                        <strong>Date de publication</strong>
+                        <span id="details-livre-publication">—</span>
+                    </div>
+
+                    <div>
+                        <strong>Nombre de pages</strong>
+                        <span id="details-livre-pages">—</span>
+                    </div>
+
+                    <div>
+                        <strong>Langue</strong>
+                        <span id="details-livre-langue">—</span>
+                    </div>
+                </div>
+
+                <div class="details-livre-resume">
+                    <h4>Résumé</h4>
+                    <p id="details-livre-texte-resume">
+                        Aucun résumé renseigné.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        {# Affiche les sessions du livre et permet d’en ajouter une nouvelle. #}
+        <section class="details-livre-lectures">
+            <div class="details-livre-lectures-entete">
+                <div class="details-livre-lectures-titre">
+                    <img src="{{ asset('images/play.png') }}" alt="">
+                    <h3>Mes lectures</h3>
+                </div>
+
+                <button
+                    type="button"
+                    id="ajouter-lecture-details"
+                    class="details-livre-ajouter-lecture"
+                >
+                    Ajouter une lecture
+                </button>
+            </div>
+
+            {# Formulaire masqué jusqu’à l’ajout d’une session ; les erreurs restent affichées dans cette zone. #}
+            <div id="details-formulaire-lecture" class="details-formulaire-lecture" hidden>
+
+                <h4 class="details-formulaire-lecture-titre">
+                    Ajouter une session de lecture
+                </h4>
+
+                <form id="form-ajouter-lecture">
+
+                    <input
+                        type="hidden"
+                        name="_token"
+                        value="{{ csrf_token('ajouter_lecture') }}"
+                    >
+
+                    <div class="details-lecture-grille">
+
+                        <div class="details-lecture-champ">
+                            <label for="lecture-date-debut">Date de début</label>
+                            <input
+                                type="date"
+                                id="lecture-date-debut"
+                                name="dateDebut"
+                            >
+                        </div>
+
+                        <div class="details-lecture-champ">
+                            <label for="lecture-date-fin">Date de fin</label>
+                            <input
+                                type="date"
+                                id="lecture-date-fin"
+                                name="dateFin"
+                            >
+                        </div>
+
+                        <div class="details-lecture-champ">
+                            <label for="lecture-note">Note sur 5</label>
+                            <input
+                                type="number"
+                                id="lecture-note"
+                                name="note"
+                                min="0"
+                                max="5"
+                                step="0.5"
+                                placeholder="Ex. : 4,5"
+                            >
+                        </div>
+
+                        <div class="details-lecture-champ details-lecture-champ-large">
+                            <label for="lecture-commentaire">Commentaire</label>
+                            <textarea
+                                id="lecture-commentaire"
+                                name="avis"
+                                rows="4"
+                                placeholder="Ton avis sur cette lecture..."
+                            ></textarea>
+                        </div>
+
+                    </div>
+
+                    <p id="lecture-message-erreur" role="alert" hidden></p>
+
+                    <div class="details-lecture-actions">
+                        <button
+                            type="button"
+                            id="annuler-ajout-lecture"
+                            class="details-lecture-annuler"
+                        >
+                            Annuler
+                        </button>
+
+                        <button
+                            type="submit"
+                            class="details-lecture-enregistrer"
+                        >
+                            Enregistrer la lecture
+                        </button>
+                    </div>
+
+                </form>
+
+            </div>
+
+            {# Le JavaScript remplace ce contenu par les sessions enregistrées et leurs notes. #}
+            <div id="details-livre-liste-lectures">
+                <p class="details-livre-aucune-lecture">
+                    Aucune lecture enregistrée pour ce livre.
+                </p>
+            </div>
+        </section>
+
+    </div>
+</dialog>

@@ -1,0 +1,395 @@
+{# Initialise le mode une seule fois pour les pages qui ne passent pas ce paramètre. #}
+{% set wishlist_mode = wishlist_mode|default(false) %}
+
+{# Fenêtre commune pour ajouter un livre possédé, ajouter un souhait ou modifier un livre. #}
+<dialog id="modal-ajout-livre" class="bibliotheque-modal" aria-labelledby="modal-titre-fenetre">
+    <div class="bibliotheque-modal-entete">
+        <div>
+            <h2 id="modal-titre-fenetre">Ajouter un livre</h2>
+            <p id="modal-description-fenetre">
+                {{ wishlist_mode ? 'Complétez les informations pour enrichir votre wishlist.' : 'Complétez les informations pour enrichir votre bibliothèque.' }}
+            </p>
+        </div>
+        <button
+            type="button"
+            id="fermer-ajout"
+            aria-label="Fermer"
+        >
+            &times;
+        </button>
+    </div>
+
+    {# Adapte la destination du formulaire au parcours bibliothèque ou wishlist. #}
+    <form
+        id="form-ajout-livre"
+        action="{{ path(wishlist_mode ? 'app_wishlist_ajouter' : 'app_livre_modal_ajouter') }}"
+        data-wishlist="{{ wishlist_mode ? '1' : '0' }}"
+        method="post"
+        enctype="multipart/form-data"
+    >
+
+    {# Le JavaScript renseigne cet identifiant pour passer de l’ajout à la modification. #}
+        <input type="hidden" id="modal-livre-id" name="livreId" value="">
+
+        <input
+            type="hidden"
+            name="_token"
+            value="{{ csrf_token('ajouter_livre') }}"
+        >
+
+        <section class="modal-section">
+            <h3>
+                <img src="{{ asset('images/rechercher.png') }}" alt="">
+                Rechercher un livre
+            </h3>
+
+            {# Permet de préremplir les informations par ISBN saisi ou scanné avec la caméra. #}
+            <div class="modal-recherche-isbn">
+                <label for="modal-isbn-recherche">ISBN-10 ou ISBN-13</label>
+                <div class="modal-recherche-ligne">
+                    <input
+                        type="text"
+                        id="modal-isbn-recherche"
+                        placeholder="Saisir un ISBN..."
+                        maxlength="17"
+                        inputmode="text"
+                    >
+                    <button type="button" id="modal-bouton-recherche-isbn">
+                        <img src="{{ asset('images/rechercherbeige.png') }}" alt="">
+                        Rechercher
+                    </button>
+                    <button type="button" id="modal-bouton-scanner-isbn">
+                        <img src="{{ asset('images/scan.png') }}" alt="">
+                        Scanner un ISBN
+                    </button>
+                </div>
+
+                <div id="modal-zone-scanner" hidden>
+
+                    <p id="modal-instructions-scanner">
+                        Autorise la caméra, puis place le code-barres devant elle.
+                    </p>
+
+                <button
+                    type="button"
+                    id="modal-arreter-scanner"
+                    class="modal-scanner-primary"
+                >
+                    Arrêter le scan
+                </button>
+
+                <div id="modal-lecteur-isbn"></div>
+
+                </div>
+
+                <p id="modal-message-isbn" role="status" aria-live="polite"></p>
+            </div>
+        </section>
+
+        <section class="modal-section">
+            <h3>
+                <img src="{{ asset('images/livre.png') }}" alt="">
+                Informations du livre
+            </h3>
+
+            <div class="modal-livre-disposition">
+                {# Regroupe l’aperçu et les choix de couverture : fichier local, photo ou recherche en ligne. #}
+                <div class="modal-couverture-zone">
+                    <div id="modal-apercu-couverture" class="modal-apercu-couverture">
+                        <span>Aucune couverture</span>
+                    </div>
+
+                    {% include 'components/_bouton_couverture.html.twig' with {
+                        id: 'modal-bouton-couverture',
+                        texte: 'Ajouter une couverture'
+                    } only %}
+
+                    <div id="modal-options-couverture" hidden>
+                        <button type="button" id="modal-couverture-fichier">
+                            Importer une image depuis la galerie
+                        </button>
+
+                        <button type="button" id="modal-couverture-photo">
+                            Prendre une photo
+                        </button>
+
+                        <button type="button" id="modal-couverture-en-ligne">
+                            Rechercher une image en ligne
+                        </button>
+                    </div>
+
+                    <input
+                        type="file"
+                        id="modal-fichier-couverture"
+                        name="fichierCouverture"
+                        accept="image/jpeg,image/png,image/webp"
+                        hidden
+                    >
+
+                    {# Propose aussi la prise de photo native sur les appareils compatibles. #}
+                    <input
+                        type="file"
+                        id="modal-photo-couverture"
+                        accept="image/*"
+                        capture="environment"
+                        hidden
+                    >
+
+                    {# Zone vidéo activée par JavaScript pendant la prise de photo de la couverture. #}
+                    <div id="modal-camera-zone" class="modal-camera-zone" hidden>
+    <video id="modal-camera-video" autoplay playsinline muted></video>
+
+    <div class="modal-camera-actions">
+        <button type="button" id="modal-camera-capturer">
+            Prendre la photo
+        </button>
+
+        <button type="button" id="modal-camera-annuler">
+            Annuler
+        </button>
+    </div>
+
+    <p id="modal-camera-erreur" role="alert" hidden></p>
+</div>
+
+                    <input
+    type="hidden"
+    id="modal-image-couverture"
+    name="imageCouverture"
+>
+
+{# Affiche les résultats de recherche de couvertures et permet d’en sélectionner une. #}
+<div id="modal-recherche-couverture-zone" class="modal-recherche-couverture-zone" hidden>
+    <label for="modal-recherche-couverture-input">
+        Rechercher une couverture
+    </label>
+
+    <div class="modal-recherche-couverture-formulaire">
+        <input
+            type="search"
+            id="modal-recherche-couverture-input"
+            placeholder="Titre du livre ou auteur..."
+        >
+
+        <button type="button" id="modal-lancer-recherche-couverture">
+            Rechercher
+        </button>
+    </div>
+
+    <p id="modal-recherche-couverture-message" role="status" aria-live="polite"></p>
+
+    <div id="modal-resultats-couvertures" class="modal-resultats-couvertures"></div>
+
+    <button type="button" id="modal-fermer-recherche-couverture">
+    Fermer la recherche
+</button>
+</div>
+
+</div>
+
+                <div class="modal-champs-livre">
+                    <div class="modal-champ">
+                        <label for="modal-titre">Titre du livre *</label>
+                        <input
+                            type="text"
+                            id="modal-titre"
+                            name="titre"
+                            maxlength="255"
+                            required
+                        >
+                    </div>
+
+                    <div class="modal-champ">
+                        <label for="modal-sous-titre">Sous-titre</label>
+                        <input type="text" id="modal-sous-titre" name="sousTitre">
+                    </div>
+
+                    <div class="modal-champ">
+                        <label>Auteur(s)</label>
+                        {# Permet d’ajouter plusieurs auteurs avec les champs créés par JavaScript. #}
+                        <div id="modal-liste-auteurs">
+                            <div class="modal-auteur-ligne">
+                                <input
+                                    type="text"
+                                    name="auteurs[]"
+                                    maxlength="255"
+                                    placeholder="Nom de l'auteur"
+                                >
+                            </div>
+                        </div>
+                        <button type="button" id="modal-ajouter-auteur">
+                            + Ajouter un auteur
+                        </button>
+                    </div>
+
+                    <div class="modal-deux-colonnes">
+                        <div class="modal-champ">
+                            <label for="modal-saga">Saga</label>
+                            <input type="text" id="modal-saga" name="saga">
+                        </div>
+                        <div class="modal-champ">
+                            <label for="modal-tome">Tome</label>
+                            <input
+                                type="number"
+                                id="modal-tome"
+                                name="tome"
+                                min="1"
+                            >
+                        </div>
+                    </div>
+
+{# Le menu permet de sélectionner plusieurs genres et transmet leurs identifiants au serveur. #}
+<div class="modal-champ">
+    <label id="modal-genres-label">Genre(s)</label>
+
+    <div class="modal-genres-dropdown">
+        <button
+            type="button"
+            id="modal-genres-bouton"
+            class="modal-genres-bouton"
+            aria-expanded="false"
+            aria-controls="modal-genres-options"
+            aria-labelledby="modal-genres-label modal-genres-texte"
+        >
+            <span id="modal-genres-texte">
+                Sélectionner un ou plusieurs genres
+            </span>
+            <span class="modal-genres-fleche" aria-hidden="true"></span>
+        </button>
+
+        <div id="modal-genres-options" class="modal-genres-options" hidden>
+            {% for genre in genres %}
+                <label class="modal-genre-option">
+                    <input
+                        type="checkbox"
+                        name="genres[]"
+                        value="{{ genre.id }}"
+                    >
+                    <span>{{ genre.nom }}</span>
+                </label>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+                    <div class="modal-deux-colonnes">
+                        <div class="modal-champ">
+                            <label for="modal-isbn13">ISBN-13</label>
+                            <input
+                                type="text"
+                                id="modal-isbn13"
+                                name="isbn13"
+                                maxlength="17"
+                            >
+                        </div>
+                        <div class="modal-champ">
+                            <label for="modal-isbn10">ISBN-10</label>
+                            <input
+                                type="text"
+                                id="modal-isbn10"
+                                name="isbn10"
+                                maxlength="13"
+                            >
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="modal-section">
+            <h3>
+                <img src="{{ asset('images/informations.png') }}" alt="">
+                Informations complémentaires
+            </h3>
+
+            <div class="modal-deux-colonnes">
+                <div class="modal-champ">
+                    <label for="modal-edition">Édition</label>
+                    <input type="text" id="modal-edition" name="edition">
+                </div>
+                <div class="modal-champ">
+                    <label for="modal-langue">Langue</label>
+                    <input
+                        type="text"
+                        id="modal-langue"
+                        name="langue"
+                        placeholder="Français, anglais..."
+                    >
+                </div>
+                <div class="modal-champ">
+                    <label for="modal-date-publication">Date de publication</label>
+                    <input
+                        type="date"
+                        id="modal-date-publication"
+                        name="datePublication"
+                    >
+                </div>
+                <div class="modal-champ">
+                    <label for="modal-nombre-pages">Nombre de pages</label>
+                    <input
+                        type="number"
+                        id="modal-nombre-pages"
+                        name="nombrePages"
+                        min="1"
+                    >
+                </div>
+            </div>
+
+            <div class="modal-champ">
+                <label for="modal-resume">Résumé</label>
+                <textarea id="modal-resume" name="resume" rows="4"></textarea>
+            </div>
+        </section>
+
+        {# La wishlist propose la visibilité publique ; les livres possédés proposent plutôt un statut de lecture et une note. #}
+        {% if wishlist_mode %}
+        <section class="modal-section">
+            <label class="wishlist-visibilite"><input type="checkbox" id="modal-publique" name="publique" value="1">Rendre publique</label>
+            <p>Ce livre apparaîtra dans la wishlist de l’accueil public si cette case est cochée.</p>
+        </section>
+        {% else %}
+        <section class="modal-section">
+            <h3>Statut de lecture et note</h3>
+
+            <div class="modal-deux-colonnes">
+                <div class="modal-champ">
+                    <label for="modal-statut">Statut de lecture</label>
+                    <select id="modal-statut" name="statut">
+                        <option value="Pas commencé">Pas commencé</option>
+                        <option value="En cours">En cours</option>
+                        <option value="En pause">En pause</option>
+                        <option value="Terminé">Terminé</option>
+                        <option value="À lire">À lire</option>
+                    </select>
+                </div>
+
+                <div class="modal-champ">
+                    <label for="modal-note">Note sur 5 (facultative)</label>
+                    <input
+                        type="number"
+                        id="modal-note"
+                        name="note"
+                        min="0"
+                        max="5"
+                        step="0.5"
+                        placeholder="Ex. : 4,5"
+                    >
+                </div>
+            </div>
+        </section>
+
+        {% endif %}
+
+        {# Affiche les erreurs renvoyées lors de l’enregistrement sans fermer le formulaire. #}
+        <p id="modal-erreur-ajout" role="alert" hidden></p>
+
+        <div class="modal-actions">
+            <button type="button" id="modal-annuler-ajout">
+                Annuler
+            </button>
+            <button type="submit" id="modal-valider-ajout">
+                Ajouter le livre
+            </button>
+        </div>
+    </form>
+</dialog>
