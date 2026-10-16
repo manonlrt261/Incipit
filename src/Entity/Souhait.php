@@ -39,6 +39,16 @@ class Souhait
     #[ORM\JoinColumn(name: 'livre_id', referencedColumnName: 'id', nullable: false)]
     private ?Livre $livre = null;
 
+    #[ORM\Column(options: ['default' => false])]
+    private bool $publique = false;
+
+    public function isPublique(): bool { return $this->publique; }
+    public function setPublique(bool $publique): static
+    {
+        $this->publique = $publique;
+        return $this;
+    }
+
     public function getId(): ?int
     {
         return $this->id;

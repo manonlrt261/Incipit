@@ -1,0 +1,202 @@
+/* =======================================
+   WISHLIST
+   ======================================= */
+
+/* Filtres, tri et ajout d’un livre*/
+.wishlist-outils {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin: 25px 0;
+}
+
+.wishlist-outils button,
+.wishlist-outils select {
+    box-sizing: border-box;
+    height: 46px;
+    line-height: 20px;
+    padding: 12px 16px;
+    border: 1px solid var(--color-encadre);
+    border-radius: 9px;
+    background: #fff;
+    color: var(--color-secondary);
+    font: inherit;
+    cursor: pointer;
+}
+
+.wishlist-outils .bibliotheque-ajouter {
+    margin-left: auto;
+    background: var(--color-secondary);
+    color: #fff;
+}
+
+.wishlist-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+}
+
+/* Disposition des livres souhaités*/
+.wishlist-grille {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+}
+
+/* Carte d’un livre de la wishlist*/
+.wishlist-carte {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    border: 1px solid #e8dfd7;
+    border-radius: 12px;
+    background: #fffdfa;
+    box-shadow: 0 2px 8px #40261805;
+}
+
+.wishlist-couverture {
+    height: 160px;
+    margin-bottom: 18px;
+}
+
+.wishlist-couverture img,
+.wishlist-couverture span {
+    display: block;
+    width: 104px;
+    height: 160px;
+    object-fit: cover;
+    border-radius: 6px;
+    background: #e7dfd6;
+}
+
+.wishlist-carte h2 {
+    font-size: 21px;
+    margin: 0 0 7px;
+    overflow-wrap: anywhere;
+}
+
+.wishlist-auteur {
+    margin: 0 0 16px;
+    color: #6a6260;
+    overflow-wrap: anywhere;
+}
+
+.wishlist-date {
+    display: flex;
+    gap: 9px;
+    align-items: center;
+    color: #6a6260;
+    font-size: 14px;
+    margin: auto 0 22px;
+    padding-top: 20px;
+}
+
+.wishlist-date img {
+    width: 19px;
+    height: 19px;
+    object-fit: contain;
+}
+
+/* Achat, modification et suppression d’un livre*/
+.wishlist-actions {
+    display: flex;
+    gap: 7px;
+}
+
+.wishlist-actions button {
+    background: transparent;
+    border: 1px solid var(--color-encadre);
+    border-radius: 8px;
+    min-height: 42px;
+    padding: 8px;
+    color: var(--color-secondary);
+    cursor: pointer;
+    font: inherit;
+    font-size: 12px;
+}
+
+.wishlist-actions button:first-child {
+    flex: 1;
+}
+
+.wishlist-actions img {
+    width: 19px;
+    height: 19px;
+    object-fit: contain;
+}
+
+.wishlist button:focus-visible,
+.wishlist select:focus-visible {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 3px;
+}
+
+.wishlist button:disabled {
+    opacity: .5;
+    cursor: wait;
+}
+
+.wishlist-carte[hidden],
+#wishlist-vide[hidden],
+#wishlist-aucun-resultat[hidden],
+#wishlist-message[hidden] {
+    display: none;
+}
+
+#wishlist-message {
+    color: #a42828;
+}
+
+/* Visibilité publique du livre*/
+.wishlist-visibilite {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.wishlist-visibilite input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--color-secondary);
+}
+
+/* Page publique de la wishlist*/
+.wishlist-publique {
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+
+/* Adaptation aux écrans : @media(max-width: 1250px)*/
+@media(max-width: 1250px) {
+    
+    .wishlist-grille {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+
+/* Adaptation aux écrans : @media(max-width: 1050px)*/
+@media(max-width: 1050px) {
+    
+    .wishlist-grille {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+
+/* Adaptation aux écrans : @media(max-width: 650px)*/
+@media(max-width: 650px) {
+    
+    .wishlist-grille {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .wishlist-outils .bibliotheque-ajouter {
+        margin-left: 0;
+    }
+}

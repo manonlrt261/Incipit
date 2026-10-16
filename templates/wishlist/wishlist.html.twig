@@ -1,0 +1,134 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ma wishlist | Incipit{% endblock %}
+
+{% block body %}
+<div class="espace-layout">
+    {# Réutilise la navigation commune avec l’onglet Wishlist actif. #}
+    {% include 'components/_sidebar.html.twig' %}
+
+    <main id="page-wishlist" class="espace-contenu bibliotheque wishlist">
+        {# Filtre les livres souhaités par titre, auteur ou ISBN sans recharger la page. #}
+        <header class="bibliotheque-header">
+            <form id="wishlist-recherche-form" class="bibliotheque-recherche" role="search">
+                <img src="{{ asset('images/rechercher.png') }}" alt="">
+                <input
+                    id="wishlist-recherche"
+                    type="search"
+                    placeholder="Rechercher un titre, un auteur, un ISBN..."
+                    aria-label="Rechercher dans ma wishlist"
+                >
+                <button type="submit" aria-label="Lancer la recherche">Rechercher</button>
+            </form>
+
+            <img src="{{ asset('images/incipit.png') }}" class="bibliotheque-logo" alt="Incipit">
+        </header>
+
+        <div class="bibliotheque-introduction">
+            <div>
+                <h1>Ma wishlist</h1>
+                <p>Les livres que vous souhaitez lire un jour.</p>
+            </div>
+        </div>
+
+        {# Combine le genre et le tri par date ; la réinitialisation rétablit les ajouts les plus récents. #}
+        <div class="wishlist-outils">
+            <label class="wishlist-genre">
+                <span class="wishlist-label">Genre</span>
+                <select id="wishlist-genre">
+                    <option value="">Genre</option>
+                    {% for genre in genres %}
+                        <option value="{{ genre.id }}">{{ genre.nom }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+
+            <button
+                id="wishlist-date"
+                type="button"
+                aria-label="Date d’ajout : plus récents d’abord. Inverser le tri."
+            >
+                Date d’ajout : plus récents ↓
+            </button>
+            <button id="wishlist-reinitialiser" type="button" class="bibliotheque-reinitialiser">
+                Réinitialiser les filtres
+            </button>
+            <button id="ouvrir-ajout" type="button" class="bibliotheque-ajouter">
+                + Ajouter un livre
+            </button>
+        </div>
+
+        {# Le JavaScript actualise le compteur et affiche les erreurs des actions sans quitter la page. #}
+        <p id="wishlist-compteur" aria-live="polite">{{ souhaits|length }} livre(s) dans ma wishlist</p>
+        <p id="wishlist-message" role="alert" hidden></p>
+
+        <div id="wishlist-livres" class="wishlist-grille">
+            {% for souhait in souhaits %}
+                {% set livre = souhait.livre %}
+
+                {# Prépare les auteurs pour l’affichage et les identifiants des genres pour les filtres. #}
+                {% set auteurs = [] %}
+                {% for auteur in livre.auteurs %}
+                    {% set auteurs = auteurs|merge([
+                        auteur.nomAffichage ?: (auteur.prenom ~ ' ' ~ auteur.nom)|trim
+                    ]) %}
+                {% endfor %}
+
+                {% set idsGenres = [] %}
+                {% for genre in livre.genres %}
+                    {% set idsGenres = idsGenres|merge([genre.id]) %}
+                {% endfor %}
+
+                {# Transmet au JavaScript les données de recherche, le tri, les routes d’action et le jeton du souhait. #}
+                <article
+                    class="wishlist-carte"
+                    data-id="{{ souhait.id }}"
+                    data-date="{{ souhait.dateAjout|date('U') }}"
+                    data-recherche="{{ livre.titre ~ ' ' ~ livre.sousTitre ~ ' ' ~ auteurs|join(' ') ~ ' ' ~ livre.isbn13 ~ ' ' ~ livre.isbn10 }}"
+                    data-genres="{{ idsGenres|join('|') }}"
+                    data-token="{{ csrf_token('wishlist_' ~ souhait.id) }}"
+                    data-acheter="{{ path('app_wishlist_action', {id: souhait.id, action: 'acheter'}) }}"
+                    data-supprimer="{{ path('app_wishlist_action', {id: souhait.id, action: 'supprimer'}) }}"
+                >
+                    {# Affiche la couverture disponible ou conserve un emplacement de remplacement. #}
+                    <div class="wishlist-couverture">
+                        {% if livre.imageCouverture %}
+                            <img
+                                src="{{ livre.imageCouverture starts with 'http' or livre.imageCouverture starts with '/' ? livre.imageCouverture : '/' ~ livre.imageCouverture }}"
+                                alt="Couverture de {{ livre.titre }}"
+                            >
+                        {% else %}
+                            <span aria-label="Couverture non renseignée"></span>
+                        {% endif %}
+                    </div>
+
+                    <h2>{{ livre.titre }}</h2>
+                    <p class="wishlist-auteur">{{ auteurs|join(', ') ?: 'Auteur non renseigné' }}</p>
+                    <p class="wishlist-date">
+                        <img src="{{ asset('images/calendrier.png') }}" alt="">
+                        Ajouté le {{ souhait.dateAjout|date('d/m/Y') }}
+                    </p>
+
+                    {# L’achat transfère le livre vers la bibliothèque ; la modification ouvre le formulaire commun. #}
+                    <div class="wishlist-actions">
+                        <button type="button" data-action="acheter">Marquer comme acheté</button>
+                        <button type="button" data-action="modifier" aria-label="Modifier {{ livre.titre }}">
+                            <img src="{{ asset('images/modifier.png') }}" alt="">
+                        </button>
+                        <button type="button" data-action="supprimer" aria-label="Supprimer {{ livre.titre }} de la wishlist">
+                            <img src="{{ asset('images/poubelle.png') }}" alt="">
+                        </button>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+
+        {# Distingue une wishlist vide d’une recherche ne correspondant à aucun livre. #}
+        <p id="wishlist-vide" hidden>Aucun livre dans votre wishlist.</p>
+        <p id="wishlist-aucun-resultat" hidden>Aucun livre ne correspond à votre recherche.</p>
+    </main>
+</div>
+
+{# Active le mode wishlist du formulaire partagé, avec sa case de visibilité publique. #}
+{% include 'livre/_modal_ajout.html.twig' with {wishlist_mode: true} %}
+{% endblock %}
