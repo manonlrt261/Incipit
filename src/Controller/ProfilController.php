@@ -47,7 +47,8 @@ final class ProfilController extends AbstractController
             $user->setEmail($email)->setDateModification(new \DateTime());
             $em->flush();
             return $this->json(['success' => true, 'email' => $email, 'message' => 'Votre adresse e-mail a été modifiée.']);
-        } catch (UniqueConstraintViolationException $exception) {
+        } catch (UniqueConstraintViolationException) {
+            // La contrainte en base couvre aussi deux modifications concurrentes vers la même adresse.
             return $this->json(['success' => false, 'message' => 'Cette adresse e-mail est déjà utilisée.'], 409);
         }
     }

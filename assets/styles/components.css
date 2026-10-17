@@ -2,7 +2,7 @@
    COMPOSANTS COMMUNS
    ======================================= */
 
-/* Bouton principal*/
+/* Bouton principal */
 .btn-primary {
     background-color: var(--color-secondary);
     color: var(--color-white);
@@ -10,7 +10,7 @@
     cursor: pointer;
 }
 
-/* Bouton secondaire*/
+/* Bouton secondaire */
 .btn-secondary {
     background-color: var(--color-encadre);
     color: var(--color-secondary);
@@ -18,13 +18,13 @@
     cursor: pointer;
 }
 
-/* Encadré commun aux pages*/
+/* Encadré commun aux pages */
 .card {
     background-color: var(--color-white);
     border-radius: 12px;
 }
 
-/* Fermeture des fenêtres modales*/
+/* Fermeture des fenêtres modales */
 .modal-bouton-fermer {
     display: flex;
     align-items: center;
@@ -56,7 +56,7 @@
     outline-offset: 4px;
 }
 
-/* Badges des statuts de lecture*/
+/* Badges des statuts de lecture */
 .badge-lecture {
     display: inline-flex;
     align-items: center;
@@ -97,7 +97,7 @@
     color: var(--color-fond);
 }
 
-/* Bouton de déconnexion*/
+/* Bouton de déconnexion */
 .bouton-deconnexion {
     display: inline-flex;
     align-items: center;
@@ -120,7 +120,7 @@
     color: var(--color-fond);
 }
 
-/* Modification de la couverture*/
+/* Modification de la couverture */
 .bouton-couverture {
     display: inline-flex;
     justify-content: center;
@@ -244,6 +244,10 @@
     font-weight: inherit;
 }
 
+/* =======================================
+   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 700PX)
+   ======================================= */
+
 @media (max-width: 700px) {
     .espace-contenu .bibliotheque-recherche,
     .espace-contenu .lectures-recherche,
@@ -280,6 +284,10 @@
     width: 95px;
     max-height: 62px;
 }
+
+/* =======================================
+   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 800PX)
+   ======================================= */
 
 @media (max-width: 800px) {
     .espace-contenu.bibliotheque,
@@ -386,7 +394,7 @@
 :root .accueil-auteur h3,
 :root .stats-auteurs .stats-classement li > span:not(.stats-rang),
 :root #pret-livres-possedes .prets-suggestion > span,
-:root #modal-liste-auteurs input[name="auteurs[]"],
+:root #modal-liste-auteurs input[name='auteurs[]'],
 :root #pret-auteur {
     font-family: 'Inter', sans-serif;
     font-weight: 400;
@@ -401,10 +409,10 @@
 :root .dashboard-livre-infos > .dashboard-date,
 :root .wishlist-date,
 :root .details-lecture-dates,
-:root input[type="date"],
-:root label[for="modal-date-publication"],
-:root label[for="lecture-date-debut"],
-:root label[for="lecture-date-fin"] {
+:root input[type='date'],
+:root label[for='modal-date-publication'],
+:root label[for='lecture-date-debut'],
+:root label[for='lecture-date-fin'] {
     color: var(--color-primary);
 }
 

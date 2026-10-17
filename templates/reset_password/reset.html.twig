@@ -5,6 +5,7 @@
 {% block body %}
     <h1>Reset your password</h1>
 
+    {# Affiche les champs et erreurs du nouveau mot de passe ; le contrôleur a déjà vérifié le jeton reçu. #}
     {{ form_start(resetForm) }}
         {{ form_row(resetForm.plainPassword) }}
         <button class="btn btn-primary">Reset password</button>

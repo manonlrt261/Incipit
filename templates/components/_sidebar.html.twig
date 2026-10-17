@@ -1,3 +1,4 @@
+{# Détermine l’onglet actif depuis la route pour synchroniser son apparence et son annonce aux lecteurs d’écran. #}
 {% set route_active = app.request.attributes.get('_route') %}
 
 <aside class="sidebar">
@@ -6,6 +7,7 @@
         <span>Ma<br>Bibliothèque</span>
     </a>
 
+    {# Les images et les libellés courts s’adaptent au téléphone sans dupliquer les liens. #}
     <nav class="sidebar-navigation" aria-label="Navigation principale">
 
         <a href="{{ path('app_tableau_de_bord') }}"

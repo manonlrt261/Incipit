@@ -1,4 +1,4 @@
-// Garde l’onglet actif visible dans la barre de navigation sur téléphone.
+// Gère le focus des cartes et garde l’onglet actif visible dans la navigation mobile.
 import { initialiserPage } from './components/initialisation-page.js';
 
 initialiserPage((ecouter) => {

@@ -1,4 +1,4 @@
-// Gère la recherche de prêts, leur ajout et leur suppression avec confirmation.
+// Gère les prêts, les contacts enregistrés et leurs suggestions dans le formulaire de prêt.
 import { initialiserPage } from './components/initialisation-page.js';
 import { creerFiltresLivres } from './components/filtres-livres.js';
 
@@ -94,6 +94,7 @@ initialiserPage((ecouter) => {
     const alphabetContacts = new Intl.Collator('fr', { sensitivity: 'base' });
     let contactEnregistrement = false;
 
+    // Relit les cartes pour utiliser les contacts ajoutés ou modifiés sans recharger la page.
     function contactsDisponibles() {
         return [...listeContacts.querySelectorAll('.prets-contact')].map(carte => ({ ...carte.dataset, carte }));
     }
@@ -122,8 +123,10 @@ initialiserPage((ecouter) => {
             suggestionsContacts.appendChild(message);
         }
     }
+    // Une saisie manuelle détache le contact sélectionné et relance les suggestions.
     ecouter(saisieContact, 'input', () => { contactPretId.value = ''; rechercherContacts(); });
     ecouter(saisieContact, 'focus', rechercherContacts);
+    // Conserve l’identifiant du contact choisi pour distinguer les personnes portant le même prénom.
     ecouter(suggestionsContacts, 'click', event => {
         if (!(event.target instanceof Element)) return;
         const bouton = event.target.closest('[data-contact-id]');
@@ -133,10 +136,12 @@ initialiserPage((ecouter) => {
         saisieContact.value = nomContact(contact);
         suggestionsContacts.hidden = true;
     });
+    // Masque les suggestions de contacts lorsque le clic a lieu en dehors de leur liste.
     ecouter(document, 'click', event => {
         if (event.target instanceof Element && event.target !== saisieContact && !suggestionsContacts.contains(event.target)) suggestionsContacts.hidden = true;
     });
 
+    // Classe les contacts par prénom puis par nom et actualise le message de liste vide.
     function trierContacts() {
         const contacts = contactsDisponibles().sort((a, b) => alphabetContacts.compare(a.prenom, b.prenom) || alphabetContacts.compare(a.nom, b.nom) || Number(a.contactId) - Number(b.contactId));
         contacts.forEach(contact => listeContacts.appendChild(contact.carte));
@@ -155,6 +160,14 @@ initialiserPage((ecouter) => {
         const nombre = document.createElement('p'); nombre.textContent = `${contact.encours} prêt${contact.encours > 1 ? 's' : ''} en cours`;
         infos.append(titre, nombre);
         const actions = document.createElement('div'); actions.className = 'prets-contact-actions';
+        // Conserve aussi l’accès aux prêts sur les contacts créés ou modifiés sans rechargement.
+        const voirPrets = document.createElement('button');
+        voirPrets.type = 'button';
+        voirPrets.className = 'prets-contact-voir';
+        voirPrets.dataset.actionContact = 'voir';
+        voirPrets.textContent = 'Voir les prêts';
+        voirPrets.setAttribute('aria-label', `Voir les prêts de ${nomContact(contact)}`);
+        actions.appendChild(voirPrets);
         for (const action of ['modifier', 'supprimer']) {
             const bouton = document.createElement('button'); bouton.type = 'button'; bouton.dataset.actionContact = action;
             bouton.setAttribute('aria-label', `${action === 'modifier' ? 'Modifier' : 'Supprimer'} ${nomContact(contact)}`);
@@ -174,6 +187,7 @@ initialiserPage((ecouter) => {
         filtrerPrets();
     }
 
+    // Prépare le même formulaire pour créer un contact ou modifier celui qui est sélectionné.
     function ouvrirContact(contact = null) {
         formContact.reset();
         contactId.value = contact?.contactId || '';
@@ -184,8 +198,10 @@ initialiserPage((ecouter) => {
         modalContact.showModal(); contactPrenom.focus();
     }
     ecouter(document.getElementById('ouvrir-ajout-contact'), 'click', () => ouvrirContact());
+    // Protège la saisie contre une fermeture pendant l’enregistrement du contact.
     modalContact.querySelectorAll('[data-fermer-contact]').forEach(bouton => ecouter(bouton, 'click', () => { if (!contactEnregistrement) modalContact.close(); }));
     ecouter(modalContact, 'cancel', event => { if (contactEnregistrement) event.preventDefault(); });
+    // Enregistre le contact puis met à jour ses cartes et les prêts associés sans recharger la page.
     ecouter(formContact, 'submit', async event => {
         event.preventDefault();
         if (contactEnregistrement) return;
@@ -219,6 +235,7 @@ initialiserPage((ecouter) => {
     let contactASupprimer = null;
     let suppressionContactEnCours = false;
     let demandeSuppression = 0;
+    // Adapte l’avertissement et bloque la suppression si le contact possède encore des prêts liés.
     function avertirSuppression(contact) {
         confirmerContact.disabled = Number(contact.total) > 0;
         descriptionContact.textContent = Number(contact.encours) > 0
@@ -227,12 +244,52 @@ initialiserPage((ecouter) => {
                 ? 'Ce contact est lié à l’historique de prêts. Supprimez les prêts concernés avant de supprimer ce contact.'
                 : `Voulez-vous supprimer ${nomContact(contact)} ? Cette suppression est définitive.`;
     }
+    const modalPretsContact = document.getElementById('modal-prets-contact');
+    const listePretsContact = document.getElementById('contact-liste-prets');
+
+    // Construit une liste en lecture seule à partir de tous les prêts, même ceux masqués par les filtres.
+    function afficherPretsContact(contact) {
+        document.getElementById('contact-prets-titre').textContent = `Prêts de ${nomContact(contact)}`;
+        // Reconstruit le contenu à chaque ouverture pour éviter les doublons et les anciennes informations.
+        listePretsContact.replaceChildren();
+        // Compare les identifiants plutôt que les noms pour séparer les contacts homonymes.
+        const prets = [...liste.querySelectorAll('.prets-carte')]
+            .filter(pret => pret.dataset.contactId === contact.contactId);
+        // Reprend uniquement le titre et l’auteur, sans copier les boutons de suppression ni les identifiants des cartes.
+        prets.forEach(pret => {
+            const carte = document.createElement('article');
+            carte.className = 'prets-carte';
+            const informations = document.createElement('div');
+            informations.className = 'prets-informations';
+            const titre = document.createElement('h2');
+            titre.textContent = pret.querySelector('h2').textContent;
+            const auteur = document.createElement('p');
+            auteur.className = 'prets-auteur';
+            auteur.textContent = pret.querySelector('.prets-auteur').textContent;
+            informations.append(titre, auteur);
+            carte.appendChild(informations);
+            listePretsContact.appendChild(carte);
+        });
+        // Affiche une explication si aucun prêt n’est lié à la personne sélectionnée.
+        document.getElementById('contact-prets-vide').hidden = prets.length !== 0;
+        if (!modalPretsContact.open) modalPretsContact.showModal();
+    }
+
+    // Ferme la consultation sans changer d’onglet ni modifier les filtres de la liste des prêts.
+    ecouter(document.getElementById('fermer-prets-contact'), 'click', () => modalPretsContact.close());
+
+    // Partage les actions des contacts ; seule une suppression nécessite de relire les liens sur le serveur.
     ecouter(listeContacts, 'click', async event => {
         if (!(event.target instanceof Element)) return;
         const bouton = event.target.closest('[data-action-contact]');
         const carte = bouton?.closest('.prets-contact');
         if (!carte) return;
         const contact = { ...carte.dataset };
+        // La délégation couvre aussi les boutons des contacts ajoutés ou modifiés sans rechargement.
+        if (bouton.dataset.actionContact === 'voir') {
+            afficherPretsContact(contact);
+            return;
+        }
         if (bouton.dataset.actionContact === 'modifier') { ouvrirContact(contact); return; }
         const demande = ++demandeSuppression;
         contactASupprimer = contact;
@@ -250,9 +307,11 @@ initialiserPage((ecouter) => {
             erreurSuppressionContact.textContent = erreur.message; erreurSuppressionContact.hidden = false;
         }
     });
+    // Évite les fermetures pendant la suppression et ignore les vérifications devenues obsolètes.
     ecouter(annulerContact, 'click', () => { if (!suppressionContactEnCours) modalSuppressionContact.close(); });
     ecouter(modalSuppressionContact, 'cancel', event => { if (suppressionContactEnCours) event.preventDefault(); });
     ecouter(modalSuppressionContact, 'close', () => { demandeSuppression++; contactASupprimer = null; });
+    // Supprime le contact après confirmation et retire sa sélection du formulaire de prêt.
     ecouter(confirmerContact, 'click', async () => {
         if (!contactASupprimer || confirmerContact.disabled || suppressionContactEnCours) return;
         const contact = contactASupprimer;
@@ -283,7 +342,7 @@ initialiserPage((ecouter) => {
         }
     });
 
-    // 1. RECHERCHE INSTANTANÉE
+    // Combine la recherche par titre, auteur ou nom complet du contact avec les filtres et les tris existants.
 
     const filtres = creerFiltresLivres({
         page, conteneur: liste, selecteur: '.prets-carte', recherche, ecouter,
@@ -296,8 +355,9 @@ initialiserPage((ecouter) => {
     });
     const filtrerPrets = filtres.appliquer;
 
-    // Actualise les résultats à mesure que la recherche est saisie.
+    // Recherche dans les données des cartes, sans tenir compte des accents ni des majuscules.
     ecouter(recherche, 'input', filtrerPrets);
+    // Le bouton Rechercher et la touche Entrée appliquent les mêmes critères sans rechargement.
     ecouter(document.getElementById('prets-formulaire-recherche'), 'submit', event => {
         event.preventDefault();
         filtrerPrets();
@@ -333,12 +393,12 @@ initialiserPage((ecouter) => {
         modalSuppression.close();
     });
 
-    // Gère la fermeture de la confirmation de suppression.
+    // Oublie le prêt sélectionné lorsque la confirmation est fermée.
     ecouter(modalSuppression, 'close', () => {
         pretASupprimer = null;
     });
 
-    // Gère la fermeture de la confirmation de suppression.
+    // Empêche Échap de fermer la confirmation pendant la suppression du prêt.
     ecouter(modalSuppression, 'cancel', event => {
         if (boutonConfirmer.disabled) event.preventDefault();
     });
@@ -386,7 +446,7 @@ initialiserPage((ecouter) => {
                     const reponseContact = await fetch(contactLie.details, { headers: { Accept: 'application/json' } });
                     const resultatContact = await reponseContact.json();
                     if (reponseContact.ok && resultatContact.success && page.isConnected) afficherContact(resultatContact.contact);
-                } catch (erreur) {
+                } catch {
                     // La suppression du prêt reste acquise ; l’avertissement relira les liens avant toute suppression de contact.
                 }
             }

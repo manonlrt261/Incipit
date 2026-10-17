@@ -103,7 +103,7 @@ final class SessionLectureController extends AbstractController
             );
             $lecture->setAvis($avis === '' ? null : $avis);
 
-            // Statut obligatoire dans la base de données
+            // Une session ajoutée depuis cette fiche représente une lecture terminée.
             $lecture->setStatut('Terminé');
 
             $maintenant = new \DateTime();

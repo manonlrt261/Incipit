@@ -22,7 +22,7 @@ use Symfony\Component\Routing\Attribute\Route;
 class PretController extends AbstractController
 {
     #[Route('', name: 'index', methods: ['GET'])]
-    // Prépare les prêts affichés et les livres possédés proposés dans le formulaire d’ajout.
+    // Prépare les prêts, les contacts enregistrés et les livres possédés proposés dans le formulaire d’ajout.
     public function index(PretRepository $pretRepository, EntityManagerInterface $entityManager): Response
     {
         $prets = $pretRepository->findBy(
@@ -153,6 +153,7 @@ class PretController extends AbstractController
                 if (!is_string($idContact) || !ctype_digit($idContact)) {
                     throw new \InvalidArgumentException('Contact invalide.');
                 }
+                // Le même verrou que la suppression empêche de rattacher un prêt à un contact supprimé simultanément.
                 $contact = $entityManager->find(Contact::class, (int) $idContact, LockMode::PESSIMISTIC_WRITE);
                 if (!$contact) {
                     throw new \InvalidArgumentException('Ce contact n’existe plus. Sélectionnez un autre contact.');
@@ -164,6 +165,7 @@ class PretController extends AbstractController
                         $correspondances[] = $candidat;
                     }
                 }
+                // Une saisie ambiguë doit être résolue dans les suggestions plutôt que choisir un homonyme au hasard.
                 if (count($correspondances) > 1) {
                     throw new \InvalidArgumentException('Plusieurs contacts portent ce nom. Choisissez la personne dans les suggestions.');
                 }
@@ -186,7 +188,7 @@ class PretController extends AbstractController
         } catch (\InvalidArgumentException $erreur) {
             if ($connexion->isTransactionActive()) $connexion->rollBack();
             return $this->json(['success' => false, 'message' => $erreur->getMessage()], 422);
-        } catch (\Throwable $erreur) {
+        } catch (\Throwable) {
             if ($connexion->isTransactionActive()) {
                 $connexion->rollBack();
             }
@@ -229,7 +231,7 @@ class PretController extends AbstractController
                 'success' => true,
                 'message' => 'Le prêt a été supprimé.',
             ]);
-        } catch (\Throwable $erreur) {
+        } catch (\Throwable) {
             return $this->json([
                 'success' => false,
                 'message' => 'Impossible de supprimer ce prêt.',
@@ -259,7 +261,7 @@ class PretController extends AbstractController
             $em->persist($contact);
             $em->flush();
             return $this->json(['success' => true, 'contact' => $this->donneesContact($contact, $em)], $id === null ? 201 : 200);
-        } catch (\Throwable $erreur) {
+        } catch (\Throwable) {
             return $this->json(['success' => false, 'message' => 'Impossible d’enregistrer ce contact. Réessayez.'], 500);
         }
     }
@@ -288,6 +290,7 @@ class PretController extends AbstractController
                 return $this->json(['success' => false, 'message' => 'Contact introuvable.'], 404);
             }
             $donnees = $this->donneesContact($contact, $em);
+            // Conserve le contact tant qu’un prêt en cours ou historique le référence.
             if ($donnees['total'] > 0) {
                 $connexion->rollBack();
                 return $this->json(['success' => false, 'message' => $donnees['encours'] > 0
@@ -299,7 +302,7 @@ class PretController extends AbstractController
             $em->flush();
             $connexion->commit();
             return $this->json(['success' => true]);
-        } catch (\Throwable $erreur) {
+        } catch (\Throwable) {
             if ($connexion->isTransactionActive()) $connexion->rollBack();
             return $this->json(['success' => false, 'message' => 'Impossible de supprimer ce contact. Réessayez.'], 500);
         }
@@ -308,6 +311,7 @@ class PretController extends AbstractController
     // Partage les informations nécessaires à la liste, aux suggestions et aux avertissements.
     private function donneesContact(Contact $contact, EntityManagerInterface $em): array
     {
+        // Distingue les prêts sans retour et tous les prêts liés pour adapter les avertissements.
         $repository = $em->getRepository(Pret::class);
         return [
             'id' => $contact->getId(), 'prenom' => $contact->getPrenom(), 'nom' => $contact->getNom() ?? '',

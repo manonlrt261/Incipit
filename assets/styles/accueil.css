@@ -8,7 +8,7 @@
     min-height: 100vh;
 }
 
-/* Bannière et identité du site*/
+/* Bannière et identité du site */
 .accueil-header {
     min-height: 245px;
     background-image: url('../images/image_header.png');
@@ -41,7 +41,7 @@
     margin: 12px 0 0;
 }
 
-/* Lien de connexion*/
+/* Lien de connexion */
 .accueil-connexion {
     display: inline-flex;
     align-items: center;
@@ -62,7 +62,7 @@
     object-fit: contain;
 }
 
-/* Contenu principal et fond arrondi*/
+/* Contenu principal et fond arrondi */
 .accueil-main {
     position: relative;
     max-width: 1200px;
@@ -81,7 +81,7 @@
     z-index: -1;
 }
 
-/* Présentation de la bibliothèque*/
+/* Présentation de la bibliothèque */
 .accueil-introduction {
     text-align: center;
     padding: 0 0 24px;
@@ -116,7 +116,7 @@
     background: var(--color-primary);
 }
 
-/* Encadrés des sections publiques*/
+/* Encadrés des sections publiques */
 .accueil-section {
     background: var(--color-white);
     border-radius: 12px;
@@ -132,6 +132,7 @@
     margin-bottom: 16px;
 }
 
+/* Icônes des sections publiques */
 .accueil-section-icone {
     width: 48px;
     height: 48px;
@@ -173,6 +174,7 @@
     background: var(--color-encadre);
 }
 
+/* Grille des livres et couvertures */
 .accueil-grille-livres {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -246,7 +248,7 @@
     grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
-/* Classement des auteurs*/
+/* Classement des auteurs */
 .accueil-auteur {
     padding: 12px 18px;
     border-right: 1px solid var(--color-encadre);
@@ -269,7 +271,7 @@
     margin: 0;
 }
 
-/* Message lorsque la section est vide*/
+/* Message lorsque la section est vide */
 .accueil-vide {
     padding: 28px 15px;
     text-align: center;
@@ -279,10 +281,10 @@
     font-size: 14px;
 }
 
-
-/* Adaptation aux écrans : (max-width: 900px)*/
+/* =======================================
+   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 900PX)
+   ======================================= */
 @media (max-width: 900px) {
-    
     .accueil-grille-livres {
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
@@ -293,10 +295,10 @@
     }
 }
 
-
-/* Adaptation aux écrans : (max-width: 600px)*/
+/* =======================================
+   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 600PX)
+   ======================================= */
 @media (max-width: 600px) {
-    
     .accueil-header {
         min-height: 240px;
     }

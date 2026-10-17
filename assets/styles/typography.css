@@ -1,9 +1,13 @@
-
+/* =======================================
+   TYPOGRAPHIES
+   ======================================= */
 /* Importation des typographies */
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600&display=swap');
 
 /* Titres */
-h1, h2, h3 {
+h1,
+h2,
+h3 {
     font-family: 'Cormorant Garamond', serif;
     font-weight: 600;
 }
@@ -26,6 +30,7 @@ body {
     font-size: 16px;
 }
 
+/* Taille des textes secondaires */
 .text-secondary {
     font-size: 14px;
 }
@@ -43,6 +48,7 @@ button,
     font-size: 16px;
 }
 
+/* Taille des boutons compacts */
 .btn-sm {
     font-size: 14px;
 }

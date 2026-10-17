@@ -2,7 +2,7 @@
    LECTURES
    ======================================= */
 
-/* Mise en page des lectures*/
+/* Mise en page des lectures */
 .page-lectures {
     padding: 0 36px 50px;
     background: var(--color-fond);
@@ -14,7 +14,7 @@
     padding-top: 20px;
 }
 
-/* Barre de recherche*/
+/* Barre de recherche */
 .lectures-recherche {
     box-sizing: border-box;
     min-width: 0;
@@ -45,7 +45,7 @@
     color: var(--color-bgdark);
 }
 
-/* Présentation de la page*/
+/* Présentation de la page */
 .lectures-introduction {
     display: flex;
     justify-content: space-between;
@@ -67,7 +67,7 @@
     font-size: 17px;
 }
 
-/* Bouton d’ajout d’une lecture*/
+/* Bouton d’ajout d’une lecture */
 .lectures-bouton-ajouter {
     padding: 13px 22px;
     border: none;
@@ -83,7 +83,7 @@
     opacity: 0.9;
 }
 
-/* Compteurs et filtres par statut*/
+/* Compteurs et filtres par statut */
 .lectures-statistiques {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -103,7 +103,9 @@
     text-align: left;
     cursor: pointer;
     font: inherit;
-    transition: background 0.2s, border-color 0.2s;
+    transition:
+        background 0.2s,
+        border-color 0.2s;
 }
 
 .lectures-statistique:hover {
@@ -153,20 +155,21 @@
     color: #87776c;
 }
 
+/* Nombre de livres correspondant aux filtres */
 .lectures-resultats-compteur {
     margin: 0 0 15px;
     color: var(--color-secondary);
     font-size: 14px;
 }
 
-/* Liste des livres et sessions de lecture*/
+/* Liste des livres et sessions de lecture */
 .lectures-livres {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 18px;
 }
 
-/* Carte d’un livre*/
+/* Carte d’un livre */
 .lectures-carte {
     display: flex;
     flex-direction: column;
@@ -177,7 +180,9 @@
     border-radius: 12px;
     background: var(--color-white);
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition:
+        transform 0.2s,
+        box-shadow 0.2s;
 }
 
 .lectures-carte:hover {
@@ -249,6 +254,7 @@
     display: none;
 }
 
+/* Choix d’un livre pour ajouter une session de lecture */
 .lectures-modal-selection {
     width: min(450px, calc(100% - 32px));
     box-sizing: border-box;
@@ -311,19 +317,19 @@
     color: var(--color-fond);
 }
 
-
-/* Adaptation aux écrans : (max-width: 1250px)*/
+/* =======================================
+   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 1250PX)
+   ======================================= */
 @media (max-width: 1250px) {
-    
     .lectures-livres {
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 }
 
-
-/* Adaptation aux écrans : (max-width: 950px)*/
+/* =======================================
+   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 950PX)
+   ======================================= */
 @media (max-width: 950px) {
-    
     .lectures-statistiques {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -333,10 +339,10 @@
     }
 }
 
-
-/* Adaptation aux écrans : (max-width: 650px)*/
+/* =======================================
+   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 650PX)
+   ======================================= */
 @media (max-width: 650px) {
-    
     .page-lectures {
         padding: 0 16px 30px;
     }
@@ -382,6 +388,10 @@
         line-height: 1.3;
     }
 }
+
+/* =======================================
+   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 350PX)
+   ======================================= */
 
 @media (max-width: 350px) {
     .lectures-statistique-informations > span {

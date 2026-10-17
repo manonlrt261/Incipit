@@ -26,8 +26,8 @@
                 <input
                     type="search"
                     id="prets-recherche"
-                    placeholder="Rechercher un livre prêté..."
-                    aria-label="Rechercher un prêt"
+                    placeholder="Rechercher un livre, un auteur ou un contact..."
+                    aria-label="Rechercher un prêt par livre, auteur ou contact"
                 >
                 <button type="submit" aria-label="Lancer la recherche" class="bouton-rechercher">Rechercher</button>
             </form>
@@ -78,7 +78,7 @@
                 aria-label="Liste de mes prêts"
             >
 
-                {# Expose les données utilisées pour rechercher un prêt et identifier sa carte lors de la suppression. #}
+                {# Le texte de recherche réunit titre, auteur et nom complet du contact ; son identifiant relie le prêt à la bonne personne. #}
                 {% for pret in prets %}
 
                     <article
@@ -185,6 +185,8 @@
                             <p>{{ contact.encours }} prêt{{ contact.encours > 1 ? 's' : '' }} en cours</p>
                         </div>
                         <div class="prets-contact-actions">
+                            {# Ouvre la liste des prêts de ce contact dans une fenêtre, sans quitter l’onglet Contacts. #}
+                            <button type="button" class="prets-contact-voir" data-action-contact="voir" aria-label="Voir les prêts de {{ contact.prenom }} {{ contact.nom }}">Voir les prêts</button>
                             <button type="button" data-action-contact="modifier" aria-label="Modifier {{ contact.prenom }} {{ contact.nom }}"><img src="{{ asset('images/modifier.png') }}" alt=""></button>
                             <button type="button" data-action-contact="supprimer" aria-label="Supprimer {{ contact.prenom }} {{ contact.nom }}"><img src="{{ asset('images/poubelle.png') }}" alt=""></button>
                         </div>
@@ -307,6 +309,7 @@
             <label for="pret-auteur">Auteur <span>(facultatif)</span></label>
             <input id="pret-auteur" name="auteur" type="text" maxlength="255">
         </div>
+        {# La saisie reste libre ; l’identifiant masqué distingue les contacts homonymes proposés par JavaScript. #}
         <div class="prets-champ">
             <label for="pret-emprunteur">Personne à qui vous l’avez prêté</label>
             <input id="pret-emprunteur" name="emprunteur" type="text" maxlength="255" required autocomplete="off" aria-controls="pret-contacts-suggestions" aria-describedby="pret-contact-aide">
@@ -358,6 +361,17 @@
         <button type="button" id="annuler-suppression-contact" class="prets-bouton-annuler">Annuler</button>
         <button type="button" id="confirmer-suppression-contact" class="prets-bouton-supprimer" disabled>Supprimer définitivement</button>
     </div>
+</dialog>
+
+{# Consulte les prêts du contact sélectionné, indépendamment des filtres de l’onglet Mes prêts. #}
+<dialog id="modal-prets-contact" class="prets-modale" aria-labelledby="contact-prets-titre">
+    <header class="prets-modale-entete">
+        <h2 id="contact-prets-titre">Prêts du contact</h2>
+        {% include 'components/_bouton_fermer.html.twig' with {id: 'fermer-prets-contact'} only %}
+    </header>
+    {# Le JavaScript remplit la liste à chaque ouverture et ne propose aucune action de modification du prêt. #}
+    <div id="contact-liste-prets" class="prets-liste"></div>
+    <p id="contact-prets-vide" class="prets-message-vide" hidden>Aucun prêt enregistré pour ce contact.</p>
 </dialog>
 
 {% endblock %}

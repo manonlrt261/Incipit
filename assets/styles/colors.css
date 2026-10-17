@@ -1,11 +1,14 @@
-
+/* =======================================
+   PALETTE DE COULEURS
+   ======================================= */
+/* Palette commune aux pages et aux composants */
 :root {
-    --color-fond: #FAF7F2;
-    --color-encadre: #EDE2D3;
-    --color-primary: #B89A7A;
-    --color-secondary: #76543F;
-    --color-terra: #8C4E30;
+    --color-fond: #faf7f2;
+    --color-encadre: #ede2d3;
+    --color-primary: #b89a7a;
+    --color-secondary: #76543f;
+    --color-terra: #8c4e30;
     --color-bgdark: #342820;
     --color-black: #000000;
-    --color-white: #FFFFFF;
+    --color-white: #ffffff;
 }

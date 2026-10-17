@@ -2,7 +2,7 @@
    TABLEAU DE BORD
    ======================================= */
 
-/* Mise en page du tableau de bord*/
+/* Mise en page du tableau de bord */
 .dashboard {
     min-width: 0;
     padding: 32px;
@@ -10,7 +10,7 @@
     color: #3e2c23;
 }
 
-/* En-tête du tableau de bord*/
+/* En-tête du tableau de bord */
 .dashboard-header {
     display: flex;
     align-items: center;
@@ -19,7 +19,7 @@
     margin-bottom: 36px;
 }
 
-/* Barre de recherche*/
+/* Barre de recherche */
 .dashboard-recherche {
     display: flex;
     align-items: center;
@@ -62,7 +62,7 @@
     object-fit: contain;
 }
 
-/* Présentation du tableau de bord*/
+/* Présentation du tableau de bord */
 .dashboard-introduction {
     margin-bottom: 26px;
 }
@@ -77,7 +77,7 @@
     color: #8b7c72;
 }
 
-/* Indicateurs de la bibliothèque*/
+/* Indicateurs de la bibliothèque */
 .dashboard-statistiques {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -121,6 +121,7 @@
     line-height: 1;
 }
 
+/* Disposition des sections du tableau de bord */
 .dashboard-colonnes {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -128,6 +129,7 @@
     margin-bottom: 24px;
 }
 
+/* Encadrés des lectures et des derniers ajouts */
 .dashboard-carte {
     display: flex;
     flex-direction: column;
@@ -135,6 +137,7 @@
     padding: 25px;
 }
 
+/* Icônes et titres des sections */
 .dashboard-titre-section {
     display: flex;
     align-items: center;
@@ -161,6 +164,7 @@
     flex: 1;
 }
 
+/* Cartes des lectures en cours et des derniers ajouts */
 .dashboard-livre {
     display: flex;
     align-items: center;
@@ -219,6 +223,7 @@
     object-fit: contain;
 }
 
+/* Message en l’absence de livres */
 .dashboard-vide {
     margin: 15px 0;
     color: #8b7c72;
@@ -270,11 +275,12 @@
     font-size: 13px;
 }
 
+/* Alignement de l’encadré de note moyenne */
 .dashboard-carte-note {
     align-items: stretch;
 }
 
-/* Note moyenne des lectures*/
+/* Note moyenne des lectures */
 .dashboard-note {
     display: flex;
     justify-content: center;
@@ -301,19 +307,19 @@
     font-size: 13px;
 }
 
-
-/* Adaptation aux écrans : (max-width: 1200px)*/
+/* =======================================
+   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 1200PX)
+   ======================================= */
 @media (max-width: 1200px) {
-    
     .dashboard-statistiques {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
-
-/* Adaptation aux écrans : (max-width: 850px)*/
+/* =======================================
+   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 850PX)
+   ======================================= */
 @media (max-width: 850px) {
-    
     .dashboard {
         padding: 20px;
     }
@@ -327,15 +333,16 @@
     }
 }
 
-
-/* Adaptation aux écrans : (max-width: 550px)*/
+/* =======================================
+   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 550PX)
+   ======================================= */
 @media (max-width: 550px) {
-    
     .dashboard-statistiques {
         grid-template-columns: 1fr;
     }
 }
 
+/* Accès au compte et logo de l’en-tête */
 .dashboard-header-actions {
     display: flex;
     align-items: center;
@@ -343,15 +350,17 @@
     flex-shrink: 0;
 }
 
+/* En-tête et accès au profil réservés au téléphone */
 .dashboard-mobile-entete {
     display: none;
 }
 
+/* Disposition des sections du tableau de bord */
 .dashboard-colonnes {
     align-items: start;
 }
 
-/* Commande pour afficher ou masquer une section*/
+/* Commande pour afficher ou masquer une section */
 .dashboard-basculer {
     display: flex;
     align-items: center;
@@ -381,7 +390,7 @@
     transform: rotate(45deg);
 }
 
-.dashboard-basculer[aria-expanded="false"] .dashboard-fleche-repli {
+.dashboard-basculer[aria-expanded='false'] .dashboard-fleche-repli {
     transform: rotate(225deg);
 }
 
@@ -396,10 +405,10 @@
     display: none;
 }
 
-
-/* Adaptation aux écrans : (max-width: 700px)*/
+/* =======================================
+   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 700PX)
+   ======================================= */
 @media (max-width: 700px) {
-    
     .dashboard {
         box-sizing: border-box;
         width: 100%;
@@ -557,10 +566,10 @@
     }
 }
 
-
-/* Adaptation aux écrans : (max-width: 350px)*/
+/* =======================================
+   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 350PX)
+   ======================================= */
 @media (max-width: 350px) {
-    
     .dashboard-stat {
         padding: 12px 8px;
         gap: 6px;
@@ -574,7 +583,6 @@
     .dashboard-stat p {
         font-size: 11px;
     }
-
 }
 
 /* Reprend la taille des titres des statistiques sur les petits écrans. */

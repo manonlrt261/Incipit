@@ -155,8 +155,7 @@ initialiserPage((ecouter) => {
         affichageObjectif.hidden = false;
         if (modal.open) modal.close();
     };
-    // Nettoie l’état de la page avant son remplacement ou sa mise en cache par Turbo.
+    // Annule les chargements et remet la fenêtre à zéro avant la mise en cache ou le remplacement de la page.
     ecouter(document, 'turbo:before-cache', nettoyer);
-    // Nettoie l’état de la page avant son remplacement ou sa mise en cache par Turbo.
     ecouter(document, 'turbo:before-render', nettoyer);
 });

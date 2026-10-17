@@ -2,7 +2,7 @@
    AJOUT D’UN LIVRE
    ======================================= */
 
-/* Fenêtre d’ajout d’un livre*/
+/* Fenêtre d’ajout d’un livre */
 .bibliotheque-modal {
     width: min(980px, calc(100% - 48px));
     max-width: 980px;
@@ -45,7 +45,7 @@
     padding: 0 36px 30px;
 }
 
-/* Sections du formulaire*/
+/* Sections du formulaire */
 .modal-section {
     padding: 25px 0;
     border-bottom: 1px solid #eee7e1;
@@ -66,7 +66,7 @@
     object-fit: contain;
 }
 
-/* Champs du formulaire*/
+/* Champs du formulaire */
 .modal-champ {
     display: flex;
     flex-direction: column;
@@ -250,12 +250,12 @@
     margin-top: 10px;
 }
 
-/* Sélection des genres littéraires*/
+/* Sélection des genres littéraires */
 #modal-genres {
     min-height: 110px;
 }
 
-/* Validation et annulation de l’ajout*/
+/* Validation et annulation de l’ajout */
 .modal-actions {
     display: flex;
     justify-content: flex-end;
@@ -299,10 +299,10 @@
     font-size: 13px;
 }
 
-
-/* Adaptation aux écrans : (max-width: 700px)*/
+/* =======================================
+   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 700PX)
+   ======================================= */
 @media (max-width: 700px) {
-    
     .bibliotheque-modal {
         width: calc(100% - 20px);
         max-height: 95vh;
@@ -334,6 +334,7 @@
     }
 }
 
+/* Dimensions et espacements du formulaire partagé */
 dialog#modal-ajout-livre.bibliotheque-modal {
     box-sizing: border-box;
     width: min(980px, calc(100vw - 64px));
@@ -362,6 +363,7 @@ dialog#modal-ajout-livre .modal-section h3 {
     margin-bottom: 16px;
 }
 
+/* Palette propre à la fenêtre d’ajout */
 dialog#modal-ajout-livre {
     --modal-marron-fonce: #392317;
     --modal-marron: var(--color-terra);
@@ -371,6 +373,7 @@ dialog#modal-ajout-livre {
     color: var(--modal-marron-fonce);
 }
 
+/* Typographie des titres et libellés du formulaire */
 #modal-ajout-livre .bibliotheque-modal-entete h2 {
     color: var(--modal-marron-fonce);
     font-family: Georgia, serif;
@@ -424,6 +427,7 @@ dialog#modal-ajout-livre {
     border-bottom-color: var(--modal-bordure);
 }
 
+/* Menu de sélection des genres */
 #modal-ajout-livre .modal-genres-dropdown {
     position: relative;
     width: 100%;
@@ -513,7 +517,7 @@ dialog#modal-ajout-livre {
     transform: scaleX(-1);
 }
 
-/* Lecture du code ISBN avec la caméra*/
+/* Lecture du code ISBN avec la caméra */
 #modal-zone-scanner {
     margin-top: 16px;
 }
@@ -559,7 +563,7 @@ dialog#modal-ajout-livre {
     max-width: 100%;
 }
 
-/* Photographie de la couverture*/
+/* Photographie de la couverture */
 .modal-camera-zone:not([hidden]) {
     display: flex;
     flex-direction: column;
@@ -599,7 +603,7 @@ dialog#modal-ajout-livre {
     font-size: 13px;
 }
 
-/* Recherche de couvertures en ligne*/
+/* Recherche de couvertures en ligne */
 .modal-recherche-couverture-zone:not([hidden]) {
     display: flex;
     flex-direction: column;

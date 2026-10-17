@@ -1,5 +1,4 @@
 // Initialise chaque page sans cumuler les écouteurs lors des navigations Turbo.
-// Un jeu d'écouteurs par page, y compris après navigation/restauration Turbo.
 export function initialiserPage(initialiser) {
     let controleur;
 

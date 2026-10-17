@@ -17,6 +17,7 @@ final class LivreController extends AbstractController
     // Prépare la bibliothèque et les livres retirés, avec les informations nécessaires aux filtres.
     public function index(Connection $connection): Response
     {
+        // Partage les informations bibliographiques et la dernière session entre les livres actifs et retirés.
         $sql = "
             SELECT
                 l.id,
@@ -90,7 +91,8 @@ final class LivreController extends AbstractController
             "
         );
 
-                $genres = $connection->fetchAllAssociative(
+        // Charge les genres proposés dans les filtres et le formulaire d’ajout.
+        $genres = $connection->fetchAllAssociative(
             'SELECT id, nom FROM genre ORDER BY id ASC'
         );
 
@@ -134,12 +136,12 @@ final class LivreController extends AbstractController
     }
 
 
-#[Route('/livre/{id}/details', name: 'app_livre_details', requirements: ['id' => '\d+'], methods: ['GET'])]
-// Renvoie les informations et l’historique de lecture d’un livre encore présent dans la collection.
-public function details(int $id, Connection $connection): Response
-{
-    $livre = $connection->fetchAssociative(
-        '
+    #[Route('/livre/{id}/details', name: 'app_livre_details', requirements: ['id' => '\d+'], methods: ['GET'])]
+    // Renvoie les informations et l’historique de lecture d’un livre encore présent dans la collection.
+    public function details(int $id, Connection $connection): Response
+    {
+        $livre = $connection->fetchAssociative(
+            '
         SELECT
             l.id,
             l.titre,
@@ -184,19 +186,19 @@ public function details(int $id, Connection $connection): Response
             AND e.date_retrait IS NULL
         )
         ',
-        ['id' => $id]
-    );
+            ['id' => $id]
+        );
 
-    if (!$livre) {
-        return $this->json([
-            'success' => false,
-            'message' => 'Livre introuvable dans votre collection.'
-        ], 404);
-    }
+        if (!$livre) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Livre introuvable dans votre collection.'
+            ], 404);
+        }
 
-    // Charge les sessions de ce livre de la plus récente à la plus ancienne.
-    $lectures = $connection->fetchAllAssociative(
-        '
+        // Charge les sessions de ce livre de la plus récente à la plus ancienne.
+        $lectures = $connection->fetchAllAssociative(
+            '
         SELECT
             id,
             statut,
@@ -208,14 +210,14 @@ public function details(int $id, Connection $connection): Response
         WHERE livre_id = :id
         ORDER BY date_creation DESC, id DESC
         ',
-        ['id' => $id]
-    );
+            ['id' => $id]
+        );
 
-    return $this->json([
-        'success' => true,
-        'livre' => $livre,
-        'lectures' => $lectures
-    ]);
-}
+        return $this->json([
+            'success' => true,
+            'livre' => $livre,
+            'lectures' => $lectures
+        ]);
+    }
 
 }

@@ -1,4 +1,5 @@
 {# Réutilise la présentation de la fiche des lectures ; les actions dépendent de la page d’origine. #}
+{# Chaque souhait possède son propre identifiant de fiche ; la croix reste disponible dans les deux modes. #}
 {% set publique = publique|default(false) %}
 <dialog id="fiche-souhait-{{ souhait.id }}" class="modal-details-livre wishlist-details" data-souhait-id="{{ souhait.id }}" aria-labelledby="fiche-souhait-titre-{{ souhait.id }}">
     <div class="details-livre-contenu">
@@ -23,6 +24,7 @@
         <section class="details-livre-principal">
             <div class="details-livre-couverture-zone">
                 <div class="details-livre-couverture">
+                    {# Garde le même emplacement de couverture lorsqu’aucune image n’est renseignée. #}
                     {% if livre.imageCouverture %}
                         <img src="{{ livre.imageCouverture starts with 'http' or livre.imageCouverture starts with '/' ? livre.imageCouverture : '/' ~ livre.imageCouverture }}" alt="Couverture de {{ livre.titre }}">
                     {% else %}
@@ -54,6 +56,7 @@
                     <div><strong>Langue</strong><span>{{ livre.langue ?: '—' }}</span></div>
                     <div><strong>Prix</strong><span>{{ souhait.prixEstime is not null ? souhait.prixEstime|number_format(2, ',', ' ') ~ ' €' : '—' }}</span></div>
                     <div><strong>Lien</strong><span>
+                        {# Rend cliquables uniquement les liens HTTP ou HTTPS et ouvre la boutique dans un autre onglet. #}
                         {% if souhait.lienAchat and (souhait.lienAchat starts with 'https://' or souhait.lienAchat starts with 'http://') %}
                             <a href="{{ souhait.lienAchat }}" target="_blank" rel="noopener noreferrer">{{ souhait.lienAchat }}</a>
                         {% else %}—{% endif %}

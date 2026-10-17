@@ -6,7 +6,7 @@
     min-width: 0;
 }
 
-/* Présentation de la page des prêts*/
+/* Présentation de la page des prêts */
 .prets-introduction {
     display: flex;
     align-items: center;
@@ -23,20 +23,20 @@
     margin: 0;
 }
 
-/* Bouton d’ajout d’un prêt*/
+/* Bouton d’ajout d’un prêt */
 .prets-bouton-ajouter {
     flex-shrink: 0;
     cursor: pointer;
 }
 
-/* Liste des prêts*/
+/* Liste des prêts */
 .prets-liste {
     display: flex;
     flex-direction: column;
     gap: 16px;
 }
 
-/* Informations et actions d’un prêt*/
+/* Informations et actions d’un prêt */
 .prets-carte {
     display: flex;
     align-items: center;
@@ -48,6 +48,7 @@
     background: #fff;
 }
 
+/* Retour à la ligne des informations longues */
 .prets-informations {
     flex: 1;
     min-width: 0;
@@ -66,7 +67,7 @@
     margin: 0;
 }
 
-/* Suppression d’un prêt*/
+/* Suppression d’un prêt */
 .prets-supprimer {
     display: flex;
     align-items: center;
@@ -96,6 +97,7 @@
     display: none;
 }
 
+/* Messages de liste vide et erreurs */
 .prets-message-vide {
     padding: 32px 0;
     text-align: center;
@@ -106,7 +108,7 @@
     color: #b91c1c;
 }
 
-/* Fenêtres d’ajout et de confirmation*/
+/* Fenêtres d’ajout et de confirmation */
 .prets-modale {
     width: min(450px, calc(100% - 32px));
     padding: 28px;
@@ -162,10 +164,10 @@
     cursor: pointer;
 }
 
-
-/* Adaptation aux écrans : (max-width: 700px)*/
+/* =======================================
+   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 700PX)
+   ======================================= */
 @media (max-width: 700px) {
-    
     .prets-introduction {
         align-items: flex-start;
         flex-direction: column;
@@ -176,6 +178,7 @@
     }
 }
 
+/* Apparence commune des boutons d’ajout et d’enregistrement */
 .prets-bouton-ajouter {
     background: var(--color-secondary);
     color: var(--color-white);
@@ -185,6 +188,7 @@
     font: inherit;
 }
 
+/* Retour à la ligne des informations longues */
 .prets-informations {
     overflow-wrap: anywhere;
 }
@@ -197,10 +201,11 @@
 }
 
 .prets-modale button:disabled {
-    opacity: .6;
+    opacity: 0.6;
     cursor: wait;
 }
 
+/* Champs des formulaires de prêt et de contact */
 .prets-champ {
     display: grid;
     gap: 8px;
@@ -231,6 +236,7 @@
     outline-offset: 2px;
 }
 
+/* Dimensions et défilement des fenêtres de prêt */
 .prets-modale {
     box-sizing: border-box;
     max-height: calc(100dvh - 32px);
@@ -238,16 +244,16 @@
     color: var(--color-bgdark);
 }
 
-
-/* Adaptation aux écrans : (max-width: 480px)*/
+/* =======================================
+   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 480PX)
+   ======================================= */
 @media (max-width: 480px) {
-    
     .prets-modale-actions {
         flex-wrap: wrap;
     }
 }
 
-/* Recherche parmi les livres possédés*/
+/* Recherche parmi les livres possédés */
 .prets-suggestions {
     max-height: 190px;
     overflow-y: auto;
@@ -312,7 +318,7 @@
     cursor: pointer;
 }
 
-.prets-onglets button[aria-selected="true"] {
+.prets-onglets button[aria-selected='true'] {
     border-bottom-color: var(--color-secondary);
     color: var(--color-secondary);
     font-weight: 600;
@@ -370,6 +376,16 @@
     cursor: pointer;
 }
 
+/* Reprend le cadre des commandes du contact avec une largeur adaptée au libellé. */
+.prets-contact-actions .prets-contact-voir {
+    width: auto;
+    padding: 0 12px;
+    font: inherit;
+    font-size: 14px;
+    color: var(--color-secondary);
+    white-space: nowrap;
+}
+
 .prets-contact-actions img {
     width: 21px;
     height: 21px;
@@ -380,11 +396,6 @@
 .prets-contact-actions button:focus-visible {
     outline: 2px solid var(--color-secondary);
     outline-offset: 3px;
-}
-
-.prets-modale button:disabled {
-    opacity: 0.6;
-    cursor: wait;
 }
 
 .prets-suggestions-message {

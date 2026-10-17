@@ -8,7 +8,6 @@ initialiserPage((ecouter) => {
 
     if (!page) return;
 
-    // Éléments de la page
     const grille = document.getElementById('bibliotheque-livres');
     const boutonsFiltres = document.querySelectorAll('.lectures-statistique');
     const recherche = document.getElementById('lectures-recherche');
@@ -25,7 +24,7 @@ initialiserPage((ecouter) => {
         'abandonne': 'Abandonné', 'pas-commence': 'Pas commencé', 'tous': ''
     };
 
-    // 1. OUVERTURE DES DÉTAILS D'UN LIVRE
+    // Demande à la fenêtre commune d’ouvrir le livre sélectionné dans la liste.
 
     ecouter(grille, 'click', (event) => {
         const carte = event.target.closest('.lectures-carte');
@@ -43,7 +42,7 @@ initialiserPage((ecouter) => {
         );
     });
 
-    // 2. FILTRAGE DES LIVRES
+    // Actualise le nombre de résultats et les compteurs actifs avec les filtres partagés.
 
     const filtres = creerFiltresLivres({
         page, conteneur: grille, selecteur: '.lectures-carte', recherche, ecouter,
@@ -59,7 +58,7 @@ initialiserPage((ecouter) => {
     });
     const filtrerLivres = filtres.appliquer;
 
-    // 3. BOUTONS DE FILTRAGE
+    // Permet de filtrer les lectures en cliquant sur un compteur de statut.
 
     boutonsFiltres.forEach((bouton) => {
         ecouter(bouton, 'click', () => {
@@ -67,7 +66,7 @@ initialiserPage((ecouter) => {
         });
     });
 
-    // 4. RECHERCHE
+    // Actualise la liste à mesure que la recherche est saisie.
 
     ecouter(recherche, 'input', filtrerLivres);
     // Le bouton et la touche Entrée appliquent la recherche sans rechargement.
@@ -76,7 +75,7 @@ initialiserPage((ecouter) => {
         filtrerLivres();
     });
 
-    // 5. ACCESSIBILITÉ DES CARTES
+    // Permet d’ouvrir les cartes avec Entrée ou Espace, comme avec un clic.
 
     ecouter(grille, 'keydown', (event) => {
         const carte = event.target.closest('.lectures-carte');
@@ -91,7 +90,7 @@ initialiserPage((ecouter) => {
         carte.click();
     });
 
-    // 6. ACTUALISATION APRÈS L'AJOUT D'UNE LECTURE
+    // Recharge les cartes et compteurs après une nouvelle lecture sans perdre les filtres.
 
     ecouter(document, 'lecture:ajoutee', async () => {
         try {
@@ -117,10 +116,10 @@ initialiserPage((ecouter) => {
                 throw new Error('Liste des livres introuvable.');
             }
 
-            // Actualiser les cartes
+            // Remplace seulement les cartes ; les écouteurs placés sur la grille restent actifs.
             grille.innerHTML = nouvelleGrille.innerHTML;
 
-            // Actualiser les compteurs
+            // Reprend les totaux calculés par le serveur pour chaque statut.
             document.querySelectorAll('[data-compteur]').forEach((element) => {
                 const nouveau = documentActualise.querySelector(
                     `[data-compteur="${element.dataset.compteur}"]`
@@ -131,7 +130,7 @@ initialiserPage((ecouter) => {
                 }
             });
 
-            // Réinitialiser le formulaire de lecture
+            // Referme et vide le formulaire une fois la nouvelle lecture enregistrée.
             const formulaireZone = document.getElementById(
                 'details-formulaire-lecture'
             );
@@ -164,7 +163,7 @@ initialiserPage((ecouter) => {
         }
     });
 
-    // 7. INITIALISATION
+    // Applique les critères initiaux dès l’affichage de la page.
 
     filtrerLivres();
 });

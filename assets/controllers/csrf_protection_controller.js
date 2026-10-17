@@ -2,23 +2,21 @@
 const nameCheck = /^[-_a-zA-Z0-9]{4,22}$/;
 const tokenCheck = /^[-_/+a-zA-Z0-9]{24,}$/;
 
-// Generate and double-submit a CSRF token in a form field and a cookie, as defined by Symfony's SameOriginCsrfTokenManager
-// Use `form.requestSubmit()` to ensure that the submit event is triggered. Using `form.submit()` will not trigger the event
-// and thus this event-listener will not be executed.
+// Prépare le jeton et son cookie avant chaque soumission.
+// Les envois programmatiques doivent utiliser requestSubmit() pour déclencher cette protection.
 document.addEventListener('submit', function (event) {
     generateCsrfToken(event.target);
 }, true);
 
-// When @hotwired/turbo handles form submissions, send the CSRF token in a header in addition to a cookie
-// The `framework.csrf_protection.check_header` config option needs to be enabled for the header to be checked
+// Ajoute aussi le jeton aux en-têtes des requêtes Turbo si la vérification des en-têtes est activée côté Symfony.
 document.addEventListener('turbo:submit-start', function (event) {
     const h = generateCsrfHeaders(event.detail.formSubmission.formElement);
-    Object.keys(h).map(function (k) {
+    Object.keys(h).forEach(function (k) {
         event.detail.formSubmission.fetchRequest.headers[k] = h[k];
     });
 });
 
-// When @hotwired/turbo handles form submissions, remove the CSRF cookie once a form has been submitted
+// Supprime le cookie temporaire une fois la soumission Turbo terminée.
 document.addEventListener('turbo:submit-end', function (event) {
     removeCsrfToken(event.detail.formSubmission.formElement);
 });

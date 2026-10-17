@@ -192,6 +192,7 @@
                 {% if genresFavoris is not empty %}
                     <div class="dashboard-genres">
                         {% for genre in genresFavoris %}
+                            {# Le rang choisit la colonne, la hauteur et la couleur de la marche du podium. #}
                             <div class="dashboard-genre dashboard-genre--{{ loop.index }}">
                                 <div class="dashboard-genre-marche">
                                     <strong>{{ loop.index }}</strong>

@@ -11,11 +11,11 @@ use Symfony\Component\Routing\Attribute\Route;
 final class NavigationController extends AbstractController
 {
     #[Route('/mes-lectures', name: 'lectures', methods: ['GET'])]
-// Prépare les livres possédés et leurs compteurs à partir du statut de leur dernière session.
-public function lectures(Connection $connection): Response
-{
-    // Retient les livres possédés avec le statut et la note de leur session la plus récente.
-    $livres = $connection->fetchAllAssociative("
+    // Prépare les livres possédés et leurs compteurs à partir du statut de leur dernière session.
+    public function lectures(Connection $connection): Response
+    {
+        // Retient les livres possédés avec le statut et la note de leur session la plus récente.
+        $livres = $connection->fetchAllAssociative("
         SELECT
             l.id,
             l.titre,
@@ -66,36 +66,36 @@ public function lectures(Connection $connection): Response
         ORDER BY l.titre ASC, l.id ASC
     ");
 
-    $statistiques = [
-        'tous' => count($livres),
-        'en-cours' => 0,
-        'termine' => 0,
-        'en-pause' => 0,
-        'abandonne' => 0,
-        'pas-commence' => 0,
-    ];
+        $statistiques = [
+            'tous' => count($livres),
+            'en-cours' => 0,
+            'termine' => 0,
+            'en-pause' => 0,
+            'abandonne' => 0,
+            'pas-commence' => 0,
+        ];
 
-    // Répartit les livres par statut pour alimenter les compteurs et filtres de la page.
-    foreach ($livres as $livre) {
-        $cle = match ($livre['statut']) {
-            'En cours' => 'en-cours',
-            'Terminé' => 'termine',
-            'En pause' => 'en-pause',
-            'Abandonné' => 'abandonne',
-            default => 'pas-commence',
-        };
+        // Répartit les livres par statut pour alimenter les compteurs et filtres de la page.
+        foreach ($livres as $livre) {
+            $cle = match ($livre['statut']) {
+                'En cours' => 'en-cours',
+                'Terminé' => 'termine',
+                'En pause' => 'en-pause',
+                'Abandonné' => 'abandonne',
+                default => 'pas-commence',
+            };
 
-        $statistiques[$cle]++;
+            $statistiques[$cle]++;
+        }
+
+        return $this->render('lecture/index.html.twig', [
+            'livres' => $livres,
+            'statistiques' => $statistiques,
+            'genres' => $connection->fetchAllAssociative(
+                'SELECT id, nom FROM genre ORDER BY id ASC'
+            ),
+        ]);
     }
-
-    return $this->render('lecture/index.html.twig', [
-        'livres' => $livres,
-        'statistiques' => $statistiques,
-        'genres' => $connection->fetchAllAssociative(
-            'SELECT id, nom FROM genre ORDER BY id ASC'
-        ),
-    ]);
-}
 
     #[Route('/mes-prets', name: 'prets', methods: ['GET'])]
     // Redirige l’ancienne adresse des prêts vers leur page actuelle.

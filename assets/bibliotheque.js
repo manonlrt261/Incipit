@@ -212,8 +212,7 @@ function initialiserBibliotheque(ecouter) {
         recherche.value = rechercheURL;
     }
 
-    // Permet d'actualiser les filtres lorsqu'un livre est ajouté
-    // dynamiquement à la bibliothèque.
+    // Intègre le livre ajouté dans les filtres, le tri et le compteur actuels.
     ecouter(document, 
         'bibliotheque:livre-ajoute',
         appliquerFiltres

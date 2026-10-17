@@ -2,7 +2,7 @@
    DÉTAILS D’UN LIVRE
    ======================================= */
 
-/* Fenêtre des détails du livre*/
+/* Fenêtre des détails du livre */
 .modal-details-livre {
     width: min(1100px, calc(100vw - 48px));
     max-width: none;
@@ -29,7 +29,7 @@
     padding: 32px 38px 40px;
 }
 
-/* Titre et actions du livre*/
+/* Titre et actions du livre */
 .details-livre-entete {
     display: flex;
     align-items: center;
@@ -91,7 +91,7 @@
     background: #ffeded;
 }
 
-/* Couverture et informations principales*/
+/* Couverture et informations principales */
 .details-livre-principal {
     display: grid;
     grid-template-columns: 220px minmax(0, 1fr);
@@ -101,6 +101,7 @@
     border-bottom: 1px solid #eaeaea;
 }
 
+/* Zone de couverture et positionnement de son menu */
 .details-livre-couverture-zone {
     display: flex;
     flex-direction: column;
@@ -155,7 +156,7 @@
     font-size: 15px;
 }
 
-/* Saga, tome et genres littéraires*/
+/* Saga, tome et genres littéraires */
 .details-livre-metadonnees {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -182,7 +183,7 @@
     line-height: 1.5;
 }
 
-/* Résumé du livre*/
+/* Résumé du livre */
 .details-livre-resume {
     margin-top: 28px;
 }
@@ -201,7 +202,7 @@
     white-space: pre-line;
 }
 
-/* Historique des lectures*/
+/* Historique des lectures */
 .details-livre-lectures {
     padding-top: 30px;
 }
@@ -259,7 +260,7 @@
     font-size: 14px;
 }
 
-/* Carte d’une session de lecture*/
+/* Carte d’une session de lecture */
 .details-lecture-carte {
     padding: 20px;
     margin-bottom: 14px;
@@ -280,6 +281,7 @@
     font-weight: 700;
 }
 
+/* Actions des formulaires de lecture */
 .details-lecture-actions {
     display: flex;
     align-items: center;
@@ -313,10 +315,10 @@
     white-space: pre-line;
 }
 
-
-/* Adaptation aux écrans : (max-width: 750px)*/
+/* =======================================
+   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 750PX)
+   ======================================= */
 @media (max-width: 750px) {
-    
     .modal-details-livre {
         width: calc(100vw - 20px);
         max-height: calc(100vh - 20px);
@@ -346,11 +348,12 @@
     }
 }
 
+/* Zone de couverture et positionnement de son menu */
 .details-livre-couverture-zone {
     position: relative;
 }
 
-/* Menu de modification de la couverture*/
+/* Menu de modification de la couverture */
 #details-options-couverture {
     position: absolute;
     top: calc(100% - 10px);
@@ -387,7 +390,7 @@
     background: #f5f0eb;
 }
 
-/* Recherche d’une couverture en ligne*/
+/* Recherche d’une couverture en ligne */
 #details-recherche-couverture-zone {
     display: flex;
     flex-direction: column;
@@ -458,7 +461,7 @@
     margin-top: 20px;
 }
 
-/* Ajout d’une session de lecture*/
+/* Ajout d’une session de lecture */
 .details-formulaire-lecture {
     margin: 24px 0;
     padding: 28px;
@@ -524,6 +527,7 @@
     grid-column: 1 / -1;
 }
 
+/* Actions des formulaires de lecture */
 .details-lecture-actions {
     display: flex;
     justify-content: flex-end;
@@ -565,10 +569,10 @@
     cursor: not-allowed;
 }
 
-
-/* Adaptation aux écrans : (max-width: 650px)*/
+/* =======================================
+   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 650PX)
+   ======================================= */
 @media (max-width: 650px) {
-    
     .details-formulaire-lecture {
         padding: 18px;
     }

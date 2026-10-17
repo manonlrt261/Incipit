@@ -1,4 +1,5 @@
-{# Partage les mêmes filtres, tailles et boutons entre les pages de la collection. #}
+{# Partage les filtres de genre et de statut et les tris ; les prêts remplacent le statut par le tri des contacts. #}
+{# Préserve les identifiants de chaque page et indique au JavaScript quelle date utiliser pour le tri. #}
 {% set prefixe = prefixe|default('') %}
 {% set mode_prets = mode_prets|default(false) %}
 <form id="{{ prefixe ? prefixe ~ 'filtres' : 'bibliotheque-filtres' }}" data-filtres-livres data-champ-date="{{ mode_prets ? 'datePret' : 'dateAjout' }}" class="bibliotheque-filtres">
@@ -62,6 +63,7 @@
         </button>
     </div>
 
+    {# Le JavaScript efface la recherche et les critères sans soumettre à nouveau la page. #}
     <button type="button" id="{{ prefixe }}reinitialiser-filtres" data-reinitialiser-filtres class="bibliotheque-reinitialiser">
         <span aria-hidden="true">↻</span>
         Réinitialiser les filtres

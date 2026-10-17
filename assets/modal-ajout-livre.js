@@ -4,15 +4,13 @@ import { initialiserPage } from './components/initialisation-page.js';
 import { Html5Qrcode } from 'html5-qrcode';
 import { creerGestionnaireCouverture } from './components/couverture.js';
 
-initialiserPage((ecouter) => {
+initialiserPage(ecouter => {
     const modal = document.getElementById('modal-ajout-livre');
     const form = document.getElementById('form-ajout-livre');
 
     if (!modal || !form) return;
 
     const modeWishlist = form.dataset.wishlist === '1';
-
-        // MODE MODIFICATION DU LIVRE
 
     const titreFenetre = document.getElementById('modal-titre-fenetre');
     const descriptionFenetre = document.getElementById('modal-description-fenetre');
@@ -26,10 +24,12 @@ initialiserPage((ecouter) => {
 
         try {
             const reponse = await fetch(
-                modeWishlist ? `/wishlist/${encodeURIComponent(id)}/details` : `/livre/${encodeURIComponent(id)}/details`,
+                modeWishlist
+                    ? `/wishlist/${encodeURIComponent(id)}/details`
+                    : `/livre/${encodeURIComponent(id)}/details`,
                 {
                     headers: {
-                        'Accept': 'application/json'
+                        Accept: 'application/json'
                     }
                 }
             );
@@ -37,14 +37,12 @@ initialiserPage((ecouter) => {
             const resultat = await reponse.json();
 
             if (!reponse.ok || !resultat.success) {
-                throw new Error(
-                    resultat.message || 'Impossible de charger le livre.'
-                );
+                throw new Error(resultat.message || 'Impossible de charger le livre.');
             }
 
             const livre = resultat.livre;
 
-            // Réinitialiser le formulaire avant de le remplir
+            // Efface la saisie précédente avant de préremplir les données du livre sélectionné.
             form.reset();
 
             if (champLivreId) {
@@ -60,8 +58,7 @@ initialiserPage((ecouter) => {
             }
 
             if (descriptionFenetre) {
-                descriptionFenetre.textContent =
-                    'Modifiez les informations de votre livre.';
+                descriptionFenetre.textContent = 'Modifiez les informations de votre livre.';
             }
 
             const valeurs = {
@@ -110,7 +107,8 @@ initialiserPage((ecouter) => {
                 fermerGenres();
                 if (livre.image_couverture) {
                     const cheminCouverture = /^(https?:\/\/|\/)/i.test(livre.image_couverture)
-                        ? livre.image_couverture : `/${livre.image_couverture}`;
+                        ? livre.image_couverture
+                        : `/${livre.image_couverture}`;
                     gestionnaireCouverture.afficherURL(cheminCouverture, livre.titre);
                     champImageCouverture.value = livre.image_couverture;
                 } else {
@@ -131,7 +129,6 @@ initialiserPage((ecouter) => {
             if (!modal.open) {
                 modal.showModal();
             }
-
         } catch (erreur) {
             console.error('Erreur ouverture modification :', erreur);
             alert(erreur.message);
@@ -153,13 +150,11 @@ initialiserPage((ecouter) => {
     function actualiserGenres() {
         if (!optionsGenres || !texteGenres) return;
 
-        const selection = [
-            ...optionsGenres.querySelectorAll('input:checked')
-        ].map(input => {
-            return input.closest('label')
-                ?.querySelector('span')
-                ?.textContent.trim() || '';
-        }).filter(Boolean);
+        const selection = [...optionsGenres.querySelectorAll('input:checked')]
+            .map(input => {
+                return input.closest('label')?.querySelector('span')?.textContent.trim() || '';
+            })
+            .filter(Boolean);
 
         texteGenres.textContent = selection.length
             ? selection.join(', ')
@@ -179,8 +174,7 @@ initialiserPage((ecouter) => {
     ecouter(optionsGenres, 'change', actualiserGenres);
 
     ecouter(document, 'click', event => {
-        if (event.target instanceof Element &&
-            !event.target.closest('.modal-genres-dropdown')) {
+        if (event.target instanceof Element && !event.target.closest('.modal-genres-dropdown')) {
             fermerGenres();
         }
     });
@@ -195,14 +189,11 @@ initialiserPage((ecouter) => {
 
     // RECHERCHE AUTOMATIQUE PAR ISBN
 
-    const champRechercheISBN =
-        document.getElementById('modal-isbn-recherche');
+    const champRechercheISBN = document.getElementById('modal-isbn-recherche');
 
-    const boutonRechercheISBN =
-        document.getElementById('modal-bouton-recherche-isbn');
+    const boutonRechercheISBN = document.getElementById('modal-bouton-recherche-isbn');
 
-    const messageISBN =
-        document.getElementById('modal-message-isbn');
+    const messageISBN = document.getElementById('modal-message-isbn');
 
     // Complète un champ du formulaire lorsque l’information correspondante est disponible.
     function renseignerChamp(nom, valeur) {
@@ -223,13 +214,10 @@ initialiserPage((ecouter) => {
             return;
         }
 
-        const isbn = champRechercheISBN.value
-            .replace(/[\s-]/g, '')
-            .toUpperCase();
+        const isbn = champRechercheISBN.value.replace(/[\s-]/g, '').toUpperCase();
 
         if (!/^(?:\d{13}|\d{9}[\dX])$/.test(isbn)) {
-            messageISBN.textContent =
-                'Saisis un ISBN de 10 ou 13 caractères.';
+            messageISBN.textContent = 'Saisis un ISBN de 10 ou 13 caractères.';
             return;
         }
 
@@ -246,17 +234,14 @@ initialiserPage((ecouter) => {
             const reponse = await fetch(url.toString());
 
             if (!reponse.ok) {
-                throw new Error(
-                    'Le service de recherche est momentanément indisponible.'
-                );
+                throw new Error('Le service de recherche est momentanément indisponible.');
             }
 
             const donnees = await reponse.json();
             const livre = donnees[`ISBN:${isbn}`];
 
             if (!livre) {
-                messageISBN.textContent =
-                    'Aucun livre trouvé pour cet ISBN.';
+                messageISBN.textContent = 'Aucun livre trouvé pour cet ISBN.';
                 return;
             }
 
@@ -292,125 +277,103 @@ initialiserPage((ecouter) => {
             const isbn13 = livre.identifiers?.isbn_13?.[0];
             const isbn10 = livre.identifiers?.isbn_10?.[0];
 
-            renseignerChamp(
-                'isbn13',
-                isbn13 || (/^\d{13}$/.test(isbn) ? isbn : '')
-            );
+            renseignerChamp('isbn13', isbn13 || (/^\d{13}$/.test(isbn) ? isbn : ''));
 
-            renseignerChamp(
-                'isbn10',
-                isbn10 || (/^\d{9}[\dX]$/.test(isbn) ? isbn : '')
-            );
+            renseignerChamp('isbn10', isbn10 || (/^\d{9}[\dX]$/.test(isbn) ? isbn : ''));
 
             // Éditeur
             renseignerChamp('edition', livre.publishers?.[0]?.name);
 
             // Nombre de pages
-            if (Number.isInteger(livre.number_of_pages) &&
-                livre.number_of_pages > 0) {
+            if (Number.isInteger(livre.number_of_pages) && livre.number_of_pages > 0) {
                 renseignerChamp('nombrePages', livre.number_of_pages);
             }
 
-            // Date de publication, si format AAAA-MM-JJ
+            // Complète les dates partielles avec un mois et un jour pour remplir le champ de date.
             const date = livre.publish_date;
 
-            if (typeof date === 'string' &&
-                /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+            if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
                 const dateObjet = new Date(`${date}T12:00:00Z`);
 
-                if (!Number.isNaN(dateObjet.getTime()) &&
-                    dateObjet.toISOString().slice(0, 10) === date) {
+                if (
+                    !Number.isNaN(dateObjet.getTime()) &&
+                    dateObjet.toISOString().slice(0, 10) === date
+                ) {
                     renseignerChamp('datePublication', date);
                 }
             }
 
             // Couverture
-            const couverture = livre.cover?.large ||
-                livre.cover?.medium ||
-                livre.cover?.small;
+            const couverture = livre.cover?.large || livre.cover?.medium || livre.cover?.small;
 
-            if (typeof couverture === 'string' &&
-                couverture.startsWith('https://')) {
+            if (typeof couverture === 'string' && couverture.startsWith('https://')) {
                 renseignerChamp('imageCouverture', couverture);
 
                 gestionnaireCouverture.afficherURL(couverture, livre.title);
             }
 
-            messageISBN.textContent =
-                'Livre trouvé ! Vérifie les informations avant de l’ajouter.';
-
+            messageISBN.textContent = 'Livre trouvé ! Vérifie les informations avant de l’ajouter.';
         } catch (erreur) {
             console.error('Erreur recherche ISBN :', erreur);
 
-            messageISBN.textContent =
-                'Impossible de rechercher ce livre pour le moment.';
+            messageISBN.textContent = 'Impossible de rechercher ce livre pour le moment.';
         } finally {
             boutonRechercheISBN.disabled = false;
         }
     }
 
-    // Ce bouton existe déjà dans ton formulaire Twig.
-    ecouter(boutonRechercheISBN, 
-        'click',
-        rechercherLivreParISBN
-    );
-
+    // Lance la recherche ISBN depuis le bouton du formulaire.
+    ecouter(boutonRechercheISBN, 'click', rechercherLivreParISBN);
 
     // SCANNER ISBN AVEC LA CAMÉRA
 
-    const boutonScannerISBN =
-        document.getElementById('modal-bouton-scanner-isbn');
+    const boutonScannerISBN = document.getElementById('modal-bouton-scanner-isbn');
 
-    const zoneScanner =
-        document.getElementById('modal-zone-scanner');
+    const zoneScanner = document.getElementById('modal-zone-scanner');
 
-    const boutonArreterScanner =
-        document.getElementById('modal-arreter-scanner');
+    const boutonArreterScanner = document.getElementById('modal-arreter-scanner');
 
     let scannerISBN = null;
     let scanEnCours = false;
     let isbnDetecte = false;
 
-    
-// Arrête la lecture des codes et libère la caméra même si son démarrage était encore en cours.
-async function arreterScannerISBN() {
-    // Empêcher la prise en compte de nouveaux scans
-    scanEnCours = false;
-    isbnDetecte = true;
+    // Arrête la lecture des codes et libère la caméra même si son démarrage était encore en cours.
+    async function arreterScannerISBN() {
+        // Empêcher la prise en compte de nouveaux scans
+        scanEnCours = false;
+        isbnDetecte = true;
 
-    // Masquer immédiatement la zone du scanner
-    if (zoneScanner) {
-        zoneScanner.hidden = true;
-    }
-
-    const scanner = scannerISBN;
-
-    if (!scanner) {
-        return;
-    }
-
-    // Ne pas perdre la référence avant l'arrêt réel
-    try {
-        // Si le démarrage est terminé, couper la caméra
-        if (scanner.isScanning) {
-            await scanner.stop();
+        // Masquer immédiatement la zone du scanner
+        if (zoneScanner) {
+            zoneScanner.hidden = true;
         }
-    } catch (erreur) {
-        console.error('Erreur arrêt caméra ISBN :', erreur);
-    } finally {
+
+        const scanner = scannerISBN;
+
+        if (!scanner) {
+            return;
+        }
+
+        // Ne pas perdre la référence avant l'arrêt réel
         try {
-            scanner.clear();
+            // Si le démarrage est terminé, couper la caméra
+            if (scanner.isScanning) {
+                await scanner.stop();
+            }
         } catch (erreur) {
-            console.error('Erreur nettoyage scanner :', erreur);
-        }
+            console.error('Erreur arrêt caméra ISBN :', erreur);
+        } finally {
+            try {
+                scanner.clear();
+            } catch (erreur) {
+                console.error('Erreur nettoyage scanner :', erreur);
+            }
 
-        if (scannerISBN === scanner) {
-            scannerISBN = null;
+            if (scannerISBN === scanner) {
+                scannerISBN = null;
+            }
         }
-
     }
-}
-
 
     // Active la caméra pour lire un ISBN puis lancer la recherche du livre reconnu.
     async function demarrerScannerISBN() {
@@ -421,8 +384,7 @@ async function arreterScannerISBN() {
         zoneScanner.hidden = false;
 
         if (messageISBN) {
-            messageISBN.textContent =
-                'Autorise la caméra, puis place le code-barres devant elle.';
+            messageISBN.textContent = 'Autorise la caméra, puis place le code-barres devant elle.';
         }
 
         try {
@@ -434,14 +396,12 @@ async function arreterScannerISBN() {
                     fps: 10,
                     qrbox: { width: 280, height: 160 }
                 },
-                async (texteDecode) => {
-
+                async texteDecode => {
                     if (messageISBN) {
-                        messageISBN.textContent =
-                            `Code détecté : ${texteDecode}`;
-    }
+                        messageISBN.textContent = `Code détecté : ${texteDecode}`;
+                    }
 
-    const isbn = texteDecode.replace(/[\s-]/g, '');
+                    const isbn = texteDecode.replace(/[\s-]/g, '');
 
                     if (!/^\d{13}$/.test(isbn)) return;
                     if (isbnDetecte) return;
@@ -454,7 +414,6 @@ async function arreterScannerISBN() {
                 },
                 () => {}
             );
-
         } catch (erreur) {
             console.error('Erreur caméra ISBN :', erreur);
 
@@ -470,20 +429,10 @@ async function arreterScannerISBN() {
     }
 
     // Démarre la lecture d’un ISBN avec la caméra.
-    ecouter(boutonScannerISBN, 
-        'click',
-        demarrerScannerISBN
-    );
+    ecouter(boutonScannerISBN, 'click', demarrerScannerISBN);
 
     // Arrête la caméra et la recherche de codes ISBN.
-    ecouter(boutonArreterScanner, 
-        'click',
-        arreterScannerISBN
-    );
-
-
-    // AJOUT DYNAMIQUE DANS LA BIBLIOTHÈQUE
-
+    ecouter(boutonArreterScanner, 'click', arreterScannerISBN);
 
     // GESTION DU MENU DE COUVERTURE
 
@@ -534,7 +483,7 @@ async function arreterScannerISBN() {
         }
     });
 
-    // Actualise l’aperçu après sélection d’un fichier de couverture.
+    // Referme le menu si la sélection d’un fichier est annulée.
     ecouter(fichierCouverture, 'cancel', () => {
         fermerOptionsCouverture();
     });
@@ -552,7 +501,7 @@ async function arreterScannerISBN() {
         afficherCouverture(fichier);
     });
 
-        // APPAREIL PHOTO POUR LA COUVERTURE
+    // APPAREIL PHOTO POUR LA COUVERTURE
 
     const cameraZone = document.getElementById('modal-camera-zone');
     const cameraVideo = document.getElementById('modal-camera-video');
@@ -585,8 +534,7 @@ async function arreterScannerISBN() {
         if (!navigator.mediaDevices?.getUserMedia) {
             if (cameraErreur) {
                 cameraErreur.hidden = false;
-                cameraErreur.textContent =
-                    'La caméra n’est pas disponible dans ce navigateur.';
+                cameraErreur.textContent = 'La caméra n’est pas disponible dans ce navigateur.';
             }
 
             if (cameraZone) cameraZone.hidden = false;
@@ -608,7 +556,6 @@ async function arreterScannerISBN() {
 
             cameraVideo.srcObject = fluxCamera;
             await cameraVideo.play();
-
         } catch (erreur) {
             console.error('Erreur caméra couverture :', erreur);
 
@@ -639,24 +586,23 @@ async function arreterScannerISBN() {
 
         contexte.drawImage(cameraVideo, 0, 0);
 
-        canvas.toBlob(blob => {
-            if (!blob || !fichierCouverture) return;
+        canvas.toBlob(
+            blob => {
+                if (!blob || !fichierCouverture) return;
 
-            const fichier = new File(
-                [blob],
-                'couverture-photo.jpg',
-                { type: 'image/jpeg' }
-            );
+                const fichier = new File([blob], 'couverture-photo.jpg', { type: 'image/jpeg' });
 
-            const transfert = new DataTransfer();
-            transfert.items.add(fichier);
+                const transfert = new DataTransfer();
+                transfert.items.add(fichier);
 
-            fichierCouverture.files = transfert.files;
+                fichierCouverture.files = transfert.files;
 
-            afficherCouverture(fichier);
-            arreterCameraCouverture();
-
-        }, 'image/jpeg', 0.9);
+                afficherCouverture(fichier);
+                arreterCameraCouverture();
+            },
+            'image/jpeg',
+            0.9
+        );
     });
 
     // Annule la prise de photo et libère la caméra.
@@ -679,26 +625,25 @@ async function arreterScannerISBN() {
         afficherCouverture(fichier);
     });
 
-    
     // RECHERCHE DE COUVERTURES EN LIGNE
 
-    const zoneRechercheCouverture =
-        document.getElementById('modal-recherche-couverture-zone');
+    const zoneRechercheCouverture = document.getElementById('modal-recherche-couverture-zone');
 
-    const inputRechercheCouverture =
-        document.getElementById('modal-recherche-couverture-input');
+    const inputRechercheCouverture = document.getElementById('modal-recherche-couverture-input');
 
-    const boutonLancerRechercheCouverture =
-        document.getElementById('modal-lancer-recherche-couverture');
+    const boutonLancerRechercheCouverture = document.getElementById(
+        'modal-lancer-recherche-couverture'
+    );
 
-    const boutonFermerRechercheCouverture =
-        document.getElementById('modal-fermer-recherche-couverture');
+    const boutonFermerRechercheCouverture = document.getElementById(
+        'modal-fermer-recherche-couverture'
+    );
 
-    const messageRechercheCouverture =
-        document.getElementById('modal-recherche-couverture-message');
+    const messageRechercheCouverture = document.getElementById(
+        'modal-recherche-couverture-message'
+    );
 
-    const resultatsCouvertures =
-        document.getElementById('modal-resultats-couvertures');
+    const resultatsCouvertures = document.getElementById('modal-resultats-couvertures');
 
     let rechercheCouvertureEnCours = false;
 
@@ -728,18 +673,14 @@ async function arreterScannerISBN() {
 
     // Recherche des couvertures dans Open Library et permet d’en choisir une pour le livre.
     async function rechercherCouverturesEnLigne() {
-        if (
-            !inputRechercheCouverture ||
-            !resultatsCouvertures ||
-            rechercheCouvertureEnCours
-        ) return;
+        if (!inputRechercheCouverture || !resultatsCouvertures || rechercheCouvertureEnCours)
+            return;
 
         const recherche = inputRechercheCouverture.value.trim();
 
         if (!recherche) {
             if (messageRechercheCouverture) {
-                messageRechercheCouverture.textContent =
-                    'Saisis un titre ou un auteur.';
+                messageRechercheCouverture.textContent = 'Saisis un titre ou un auteur.';
             }
             return;
         }
@@ -767,9 +708,7 @@ async function arreterScannerISBN() {
 
             const donnees = await reponse.json();
 
-            const livres = (donnees.docs || []).filter(
-                livre => Number.isInteger(livre.cover_i)
-            );
+            const livres = (donnees.docs || []).filter(livre => Number.isInteger(livre.cover_i));
 
             if (!livres.length) {
                 if (messageRechercheCouverture) {
@@ -786,8 +725,7 @@ async function arreterScannerISBN() {
 
                 const image = document.createElement('img');
 
-                image.src =
-                    `https://covers.openlibrary.org/b/id/${livre.cover_i}-M.jpg`;
+                image.src = `https://covers.openlibrary.org/b/id/${livre.cover_i}-M.jpg`;
 
                 image.alt = `Couverture de ${livre.title}`;
                 image.loading = 'lazy';
@@ -798,8 +736,7 @@ async function arreterScannerISBN() {
                 bouton.append(image, titre);
 
                 ecouter(bouton, 'click', () => {
-                    const urlCouverture =
-                        `https://covers.openlibrary.org/b/id/${livre.cover_i}-L.jpg`;
+                    const urlCouverture = `https://covers.openlibrary.org/b/id/${livre.cover_i}-L.jpg`;
 
                     if (champImageCouverture) {
                         champImageCouverture.value = urlCouverture;
@@ -823,10 +760,8 @@ async function arreterScannerISBN() {
             });
 
             if (messageRechercheCouverture) {
-                messageRechercheCouverture.textContent =
-                    `${livres.length} couverture(s) trouvée(s). Sélectionne une image.`;
+                messageRechercheCouverture.textContent = `${livres.length} couverture(s) trouvée(s). Sélectionne une image.`;
             }
-
         } catch (erreur) {
             console.error('Erreur recherche de couverture :', erreur);
 
@@ -834,7 +769,6 @@ async function arreterScannerISBN() {
                 messageRechercheCouverture.textContent =
                     'Impossible de rechercher des couvertures pour le moment.';
             }
-
         } finally {
             rechercheCouvertureEnCours = false;
             boutonLancerRechercheCouverture.disabled = false;
@@ -842,10 +776,7 @@ async function arreterScannerISBN() {
     }
 
     // Lance la recherche de couvertures avec le texte saisi.
-    ecouter(boutonLancerRechercheCouverture, 
-        'click',
-        rechercherCouverturesEnLigne
-    );
+    ecouter(boutonLancerRechercheCouverture, 'click', rechercherCouverturesEnLigne);
 
     // Permet de lancer la recherche de couverture avec la touche Entrée.
     ecouter(inputRechercheCouverture, 'keydown', event => {
@@ -855,12 +786,8 @@ async function arreterScannerISBN() {
         }
     });
 
-
     ecouter(document, 'click', event => {
-        if (
-            event.target instanceof Element &&
-            !event.target.closest('.modal-couverture-zone')
-        ) {
+        if (event.target instanceof Element && !event.target.closest('.modal-couverture-zone')) {
             fermerOptionsCouverture();
         }
     });
@@ -875,13 +802,9 @@ async function arreterScannerISBN() {
         article.className = 'bibliotheque-livre';
         article.dataset.livreId = String(livre.id);
 
-        const auteurs = Array.isArray(livre.auteurs)
-            ? livre.auteurs.join(', ')
-            : '';
+        const auteurs = Array.isArray(livre.auteurs) ? livre.auteurs.join(', ') : '';
 
-        const genres = Array.isArray(livre.genres)
-            ? livre.genres
-            : [];
+        const genres = Array.isArray(livre.genres) ? livre.genres : [];
 
         const statut = livre.statut || 'Pas commencé';
 
@@ -891,7 +814,10 @@ async function arreterScannerISBN() {
             auteurs,
             livre.isbn13,
             livre.isbn10
-        ].filter(Boolean).join(' ').toLowerCase();
+        ]
+            .filter(Boolean)
+            .join(' ')
+            .toLowerCase();
 
         // Conserve les données de tri pour intégrer le nouveau livre dans l’ordre actuellement choisi.
         article.dataset.auteurs = auteurs;
@@ -907,13 +833,9 @@ async function arreterScannerISBN() {
             article.appendChild(image);
         } else {
             const couvertureVide = document.createElement('div');
-            couvertureVide.className =
-                'bibliotheque-couverture bibliotheque-sans-couverture';
+            couvertureVide.className = 'bibliotheque-couverture bibliotheque-sans-couverture';
 
-            couvertureVide.setAttribute(
-                'aria-label',
-                'Couverture non renseignée'
-            );
+            couvertureVide.setAttribute('aria-label', 'Couverture non renseignée');
 
             article.appendChild(couvertureVide);
         }
@@ -934,12 +856,11 @@ async function arreterScannerISBN() {
             'Pas commencé': 'pas-commence',
             'En cours': 'en-cours',
             'En pause': 'en-pause',
-            'Terminé': 'termine',
+            Terminé: 'termine',
             'À lire': 'a-lire'
         };
 
-        badge.className =
-            `bibliotheque-badge badge-${classesStatuts[statut] || 'pas-commence'}`;
+        badge.className = `bibliotheque-badge badge-${classesStatuts[statut] || 'pas-commence'}`;
 
         badge.textContent = statut;
 
@@ -948,9 +869,7 @@ async function arreterScannerISBN() {
 
         conteneur.prepend(article);
 
-        document.dispatchEvent(
-            new CustomEvent('bibliotheque:livre-ajoute')
-        );
+        document.dispatchEvent(new CustomEvent('bibliotheque:livre-ajoute'));
     }
 
     // OUVERTURE ET FERMETURE DE LA FENÊTRE
@@ -1024,12 +943,11 @@ async function arreterScannerISBN() {
 
     // AJOUT ET SUPPRESSION D'AUTEURS
 
+    // Ajoute un champ d’auteur facultatif, dans la limite acceptée par le serveur.
     ecouter(boutonAjouterAuteur, 'click', () => {
         if (!listeAuteurs) return;
 
-        const nombre = listeAuteurs.querySelectorAll(
-            'input[name="auteurs[]"]'
-        ).length;
+        const nombre = listeAuteurs.querySelectorAll('input[name="auteurs[]"]').length;
 
         if (nombre >= 50) return;
 
@@ -1046,11 +964,9 @@ async function arreterScannerISBN() {
         supprimer.type = 'button';
         supprimer.textContent = '×';
 
-        supprimer.setAttribute(
-            'aria-label',
-            'Supprimer cet auteur'
-        );
+        supprimer.setAttribute('aria-label', 'Supprimer cet auteur');
 
+        // Retire uniquement la ligne de cet auteur avant l’envoi du formulaire.
         ecouter(supprimer, 'click', () => ligne.remove());
 
         ligne.append(input, supprimer);
@@ -1058,12 +974,12 @@ async function arreterScannerISBN() {
         input.focus();
     });
 
-    // ENREGISTREMENT DU LIVRE
+    // Envoie le formulaire vers la bibliothèque ou la wishlist, en ajout ou en modification.
 
     ecouter(form, 'submit', async event => {
         event.preventDefault();
         if (boutonValider?.disabled) return;
-    
+
         if (messageErreur) {
             messageErreur.hidden = true;
             messageErreur.textContent = '';
@@ -1072,13 +988,14 @@ async function arreterScannerISBN() {
         if (boutonValider) boutonValider.disabled = true;
 
         try {
-            const idLivreEnModification =
-                document.getElementById('modal-livre-id')?.value;
+            const idLivreEnModification = document.getElementById('modal-livre-id')?.value;
 
             const modeModification = Boolean(idLivreEnModification);
 
             const urlEnregistrement = modeModification
-                ? (modeWishlist ? `/wishlist/${encodeURIComponent(idLivreEnModification)}/modifier` : `/livre/${encodeURIComponent(idLivreEnModification)}/modifier`)
+                ? modeWishlist
+                    ? `/wishlist/${encodeURIComponent(idLivreEnModification)}/modifier`
+                    : `/livre/${encodeURIComponent(idLivreEnModification)}/modifier`
                 : form.action;
 
             const reponse = await fetch(urlEnregistrement, {
@@ -1092,9 +1009,7 @@ async function arreterScannerISBN() {
             const resultat = await reponse.json();
 
             if (!reponse.ok || !resultat.success) {
-                throw new Error(
-                    resultat.message || "L'enregistrement a échoué."
-                );
+                throw new Error(resultat.message || "L'enregistrement a échoué.");
             }
 
             fermer();
@@ -1104,7 +1019,6 @@ async function arreterScannerISBN() {
             } else {
                 ajouterLivreDansBibliotheque(resultat.livre);
             }
-
         } catch (erreur) {
             if (messageErreur) {
                 messageErreur.textContent = erreur.message;

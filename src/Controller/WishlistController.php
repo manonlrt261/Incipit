@@ -24,7 +24,7 @@ final class WishlistController extends AbstractController
     }
 
     #[Route('/wishlist/{id}/details', name: 'app_wishlist_details', requirements: ['id' => '\d+'], methods: ['GET'])]
-    // Renvoie les informations du souhait pour préremplir le formulaire de modification.
+    // Préremplit la modification avec le livre, la visibilité et les informations d’achat propres au souhait.
     public function details(Souhait $souhait): JsonResponse
     {
         if ($souhait->getStatut() !== 'souhaité') {
@@ -54,7 +54,7 @@ final class WishlistController extends AbstractController
         $db = $em->getConnection();
         $db->beginTransaction();
         try {
-            // Verrouiller le souhait : deux clics ne doivent pas créer deux achats.
+            // Verrouille le souhait pour empêcher deux requêtes simultanées de créer deux achats.
             $souhait = $em->find(Souhait::class, $id, LockMode::PESSIMISTIC_WRITE);
             if (!$souhait || $souhait->getStatut() !== 'souhaité') {
                 $db->rollBack();
@@ -68,6 +68,7 @@ final class WishlistController extends AbstractController
                 $em->persist((new Exemplaire())->setLivre($livre)->setDateCreation(new \DateTime())->setDateAcquisition(new \DateTime()));
                 $em->persist((new SessionLecture())->setLivre($livre)->setStatut('Pas commencé')
                     ->setDateCreation(new \DateTime())->setDateModification(new \DateTime()));
+                // Retire aussi l’achat des sélections publiques en désactivant sa visibilité.
                 $souhait->setStatut('acquis')->setDateAcquisition(new \DateTime())->setPublique(false);
             }
             $em->flush();

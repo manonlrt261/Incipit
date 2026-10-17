@@ -1,4 +1,4 @@
-// Gère les filtres, le tri, l’achat et la suppression des livres de la wishlist.
+// Gère les fiches privées et publiques, les filtres et les actions de la wishlist.
 import { initialiserPage } from './components/initialisation-page.js';
 import { creerFiltresLivres } from './components/filtres-livres.js';
 
@@ -16,6 +16,7 @@ initialiserPage((ecouter) => {
         const carte = event.target.closest('[data-fiche-souhait]');
         if (carte) document.getElementById(carte.dataset.ficheSouhait)?.showModal();
     });
+    // Ouvre aussi une fiche avec Entrée ou Espace depuis une carte sélectionnée au clavier.
     ecouter(document, 'keydown', event => {
         if (!(event.target instanceof Element) || !event.target.matches('[data-fiche-souhait]')) return;
         if (event.key !== 'Enter' && event.key !== ' ') return;
@@ -43,7 +44,7 @@ initialiserPage((ecouter) => {
         event.preventDefault();
         filtrer();
     });
-    // Gère les actions des cartes, y compris celles ajoutées après le chargement.
+    // Partage les actions d’achat, de modification et de suppression entre cartes et fiches privées.
     ecouter(grille, 'click', async event => {
         if (!(event.target instanceof Element)) return;
         const bouton = event.target.closest('button[data-action]');
@@ -71,6 +72,7 @@ initialiserPage((ecouter) => {
             });
             const resultat = await reponse.json();
             if (!reponse.ok || !resultat.success) throw new Error(resultat.message || 'Impossible d’enregistrer cette action.');
+            // Retire aussi la fiche associée pour ne pas conserver les détails d’un souhait supprimé ou acheté.
             const ficheLiee = document.getElementById(carte.dataset.ficheSouhait);
             if (ficheLiee?.open) ficheLiee.close();
             ficheLiee?.remove();

@@ -51,12 +51,14 @@ export function creerFiltresLivres({ page, conteneur, selecteur, recherche, ecou
         actualiser({ total: cartes.length, visibles, statut: statut?.value || '' });
     }
 
+    // Valide les filtres de genre et de statut sans recharger la liste.
     ecouter(formulaire, 'submit', event => { event.preventDefault(); appliquer(); });
     // Le dernier tri sélectionné prend la main sans effacer les filtres de genre et de statut.
     ecouter(auteurs, 'change', () => { date.value = ''; if (contact) contact.value = ''; appliquer(); });
     ecouter(date, 'change', () => { auteurs.value = ''; if (contact) contact.value = ''; appliquer(); });
     // Sur les prêts, le contact remplace le filtre de statut et devient un tri alphabétique par prénom.
     ecouter(contact, 'change', () => { auteurs.value = ''; date.value = ''; appliquer(); });
+    // Efface la recherche, les filtres et les tris pour retrouver la liste complète.
     ecouter(formulaire.querySelector('[data-reinitialiser-filtres]'), 'click', () => {
         if (recherche) recherche.value = '';
         genre.value = '';
@@ -65,5 +67,6 @@ export function creerFiltresLivres({ page, conteneur, selecteur, recherche, ecou
         auteurs.value = ''; date.value = '';
         appliquer();
     });
+    // Synchronise les compteurs cliquables de Mes lectures avec le filtre de statut.
     return { appliquer, choisirStatut(valeur) { if (statut) statut.value = valeur; appliquer(); } };
 }

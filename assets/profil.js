@@ -28,6 +28,7 @@ initialiserPage((ecouter) => {
             event.preventDefault(); choisirOnglet(onglets[cible]); onglets[cible].focus();
         });
     });
+    // Efface le résultat précédent avant une nouvelle saisie ou une nouvelle soumission.
     const masquerMessages = type => {
         document.getElementById(`profil-erreur-${type}`).hidden = true;
         document.getElementById(`profil-succes-${type}`).hidden = true;
@@ -117,8 +118,7 @@ initialiserPage((ecouter) => {
         page.querySelectorAll('button:disabled, input:disabled').forEach(champ => { champ.disabled = false; });
         ['email', 'password'].forEach(fermerFormulaire);
     };
-    // Nettoie l’état de la page avant son remplacement ou sa mise en cache par Turbo.
+    // Nettoie les formulaires avant leur mise en cache ou le remplacement de la page par Turbo.
     ecouter(document, 'turbo:before-cache', nettoyer);
-    // Nettoie l’état de la page avant son remplacement ou sa mise en cache par Turbo.
     ecouter(document, 'turbo:before-render', nettoyer);
 });

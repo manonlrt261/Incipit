@@ -2,7 +2,7 @@
    PROFIL
    ======================================= */
 
-/* Présentation du profil*/
+/* Présentation du profil */
 .profil-entete {
     display: flex;
     align-items: center;
@@ -25,7 +25,7 @@
     min-width: 0;
 }
 
-/* Navigation entre compte et visibilité*/
+/* Navigation entre compte et visibilité */
 .profil-onglets {
     display: flex;
     gap: 8px;
@@ -43,13 +43,13 @@
     cursor: pointer;
 }
 
-.profil-onglets button[aria-selected="true"] {
+.profil-onglets button[aria-selected='true'] {
     border-bottom-color: var(--color-secondary);
     color: var(--color-secondary);
     font-weight: 600;
 }
 
-/* Encadrés et formulaires du compte*/
+/* Encadrés et formulaires du compte */
 .profil-carte {
     background: #fffdfa;
     border: 1px solid #eee5dc;
@@ -104,7 +104,7 @@
     font-weight: 500;
 }
 
-.profil-carte input:not([type="checkbox"]):not([type="hidden"]) {
+.profil-carte input:not([type='checkbox']):not([type='hidden']) {
     box-sizing: border-box;
     width: 100%;
     border: 1px solid var(--color-encadre);
@@ -115,7 +115,7 @@
     font: inherit;
 }
 
-/* Validation et annulation des modifications*/
+/* Validation et annulation des modifications */
 .profil-actions {
     display: flex;
     justify-content: flex-end;
@@ -143,10 +143,10 @@
 .profil button:disabled,
 .profil input:disabled {
     cursor: wait;
-    opacity: .6;
+    opacity: 0.6;
 }
 
-/* Messages de résultat des modifications*/
+/* Messages de résultat des modifications */
 .profil-erreur {
     color: #a42828;
 }
@@ -155,7 +155,7 @@
     color: #476646;
 }
 
-/* Réglages de visibilité des sections publiques*/
+/* Réglages de visibilité des sections publiques */
 .profil-visibilite-ligne {
     display: flex;
     align-items: center;
@@ -181,7 +181,7 @@
     font-size: 14px;
 }
 
-/* Interrupteurs de visibilité*/
+/* Interrupteurs de visibilité */
 .profil-interrupteur {
     display: flex;
     align-items: center;
@@ -198,7 +198,7 @@
     border-radius: 20px;
     background: var(--color-terra);
     cursor: pointer;
-    transition: background .15s;
+    transition: background 0.15s;
 }
 
 .profil-interrupteur input::before {
@@ -208,7 +208,7 @@
     width: 21px;
     background: white;
     border-radius: 50%;
-    transition: transform .15s;
+    transition: transform 0.15s;
 }
 
 .profil-interrupteur input:checked::before {
@@ -221,10 +221,10 @@
     color: #74675d;
 }
 
-
-/* Adaptation aux écrans : @media(max-width: 650px)*/
-@media(max-width: 650px) {
-    
+/* =======================================
+   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 650PX)
+   ======================================= */
+@media (max-width: 650px) {
     .profil-carte {
         padding: 20px;
     }
@@ -245,7 +245,7 @@
     flex-direction: column;
 }
 
-/* Déconnexion en bas de page*/
+/* Déconnexion en bas de page */
 .profil-deconnexion {
     display: flex;
     justify-content: center;

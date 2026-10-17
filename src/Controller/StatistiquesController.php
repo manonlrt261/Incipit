@@ -58,7 +58,7 @@ final class StatistiquesController extends AbstractController
             $html = $this->renderView('statistiques/_graphiques.html.twig', $donnees);
             $connexion->commit();
             return $this->json(['success' => true, 'objectif' => (int) $nombre, 'annee' => (int) $annee, 'html' => $html]);
-        } catch (\Throwable $exception) {
+        } catch (\Throwable) {
             if ($connexion->isTransactionActive()) $connexion->rollBack();
             return $this->json(['success' => false, 'message' => 'Impossible d’enregistrer votre objectif. Réessayez.'], 500);
         }

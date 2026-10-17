@@ -84,7 +84,7 @@ final class LivreModalController extends AbstractController
         };
 
         try {
-            // Les informations d’achat restent propres au souhait et sont facultatives.
+            // Valide le prix facultatif et limite le lien d’achat aux adresses HTTP ou HTTPS avant toute écriture.
             $prixEstime = null;
             $lienAchat = null;
             if ($modeWishlist) {
@@ -293,6 +293,7 @@ final class LivreModalController extends AbstractController
 
         try {
             $livre = $souhait?->getLivre() ?? new Livre();
+            // Remplace les associations du souhait modifié pour ne pas cumuler anciens auteurs et genres.
             if ($souhait) {
                 $livre->getAuteurs()->clear();
                 $livre->getGenres()->clear();
@@ -306,6 +307,7 @@ final class LivreModalController extends AbstractController
             $livre->setIsbn13($isbn13 ?: null);
             $livre->setIsbn10($isbn10 ?: null);
             $livre->setResume($resume);
+            // Enregistre la couverture sous un nom aléatoire ; son chemin est conservé pour le nettoyage en cas d’échec.
             if ($fichierCouverture) {
                 $dossier = $this->getParameter('kernel.project_dir').'/public/uploads/couvertures';
                 if (!is_dir($dossier)) mkdir($dossier, 0775, true);
@@ -324,6 +326,7 @@ final class LivreModalController extends AbstractController
                 $livre->addGenre($genre);
             }
 
+            // Réutilise les auteurs existants par leur nom d’affichage avant de créer les fiches manquantes.
             foreach ($auteursNettoyes as $nomAffichage) {
                 $auteur = $entityManager
                     ->getRepository(Auteur::class)
@@ -341,7 +344,7 @@ final class LivreModalController extends AbstractController
 
             $entityManager->persist($livre);
 
-            // Enregistre la visibilité du souhait ; le parcours bibliothèque crée plutôt un exemplaire et une session.
+            // Enregistre visibilité, prix et lien sur le souhait ; un ajout en bibliothèque crée un exemplaire et une session.
             if ($modeWishlist) {
                 if (!$souhait) {
                     $souhait = (new Souhait())->setLivre($livre)->setDateAjout(new \DateTime())->setStatut('souhaité');
@@ -350,18 +353,18 @@ final class LivreModalController extends AbstractController
                 $souhait->setPublique($request->request->getBoolean('publique'))
                     ->setPrixEstime($prixEstime)->setLienAchat($lienAchat);
             } else {
-            $exemplaire = new Exemplaire();
-            $exemplaire->setLivre($livre);
-            $exemplaire->setDateCreation(new \DateTime());
-            $entityManager->persist($exemplaire);
+                $exemplaire = new Exemplaire();
+                $exemplaire->setLivre($livre);
+                $exemplaire->setDateCreation(new \DateTime());
+                $entityManager->persist($exemplaire);
 
-            $session = new SessionLecture();
-            $session->setLivre($livre);
-            $session->setStatut($statut);
-            $session->setNote($note === '' ? null : $note);
-            $session->setDateCreation(new \DateTime());
-            $session->setDateModification(new \DateTime());
-            $entityManager->persist($session);
+                $session = new SessionLecture();
+                $session->setLivre($livre);
+                $session->setStatut($statut);
+                $session->setNote($note === '' ? null : $note);
+                $session->setDateCreation(new \DateTime());
+                $session->setDateModification(new \DateTime());
+                $entityManager->persist($session);
 
             }
 

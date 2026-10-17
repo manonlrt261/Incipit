@@ -45,7 +45,7 @@
             {% for souhait in souhaits %}
                 {% set livre = souhait.livre %}
 
-                {# Prépare les auteurs pour l’affichage et les identifiants des genres pour les filtres. #}
+                {# Prépare les noms d’auteurs pour l’affichage et les noms de genres utilisés par les filtres. #}
                 {% set auteurs = [] %}
                 {% for auteur in livre.auteurs %}
                     {% set auteurs = auteurs|merge([
@@ -104,6 +104,7 @@
                         </button>
                     </div>
                 </article>
+                {# Associe à chaque carte sa fiche et ses actions, accessibles au clic et au clavier. #}
                 {% include 'wishlist/_fiche.html.twig' with {souhait: souhait, livre: livre, auteurs: auteurs} only %}
             {% endfor %}
         </div>

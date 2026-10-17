@@ -24,6 +24,7 @@
                 un lien pour réinitialiser votre mot de passe.
             </p>
 
+            {# Symfony génère le formulaire, son jeton CSRF et les erreurs de validation de l’adresse. #}
             {{ form_start(requestForm) }}
 
                 <div class="login-field">
@@ -44,6 +45,7 @@
 
             {{ form_end(requestForm) }}
 
+            {# Permet de revenir à la connexion sans terminer la demande. #}
             <a href="{{ path('app_login') }}"
                class="forgot-password-back">
                 ← Retour à la connexion

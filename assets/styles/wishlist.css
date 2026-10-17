@@ -2,51 +2,14 @@
    WISHLIST
    ======================================= */
 
-/* Filtres, tri et ajout d’un livre*/
-.wishlist-outils {
-    display: flex;
-    gap: 14px;
-    align-items: center;
-    flex-wrap: wrap;
-    margin: 25px 0;
-}
-
-.wishlist-outils button,
-.wishlist-outils select {
-    box-sizing: border-box;
-    height: 46px;
-    line-height: 20px;
-    padding: 12px 16px;
-    border: 1px solid var(--color-encadre);
-    border-radius: 9px;
-    background: #fff;
-    color: var(--color-secondary);
-    font: inherit;
-    cursor: pointer;
-}
-
-.wishlist-outils .bibliotheque-ajouter {
-    margin-left: auto;
-    background: var(--color-secondary);
-    color: #fff;
-}
-
-.wishlist-label {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-}
-
-/* Disposition des livres souhaités*/
+/* Disposition des livres souhaités */
 .wishlist-grille {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 18px;
 }
 
-/* Carte d’un livre de la wishlist*/
+/* Carte d’un livre de la wishlist */
 .wishlist-carte {
     min-width: 0;
     display: flex;
@@ -101,7 +64,7 @@
     object-fit: contain;
 }
 
-/* Achat, modification et suppression d’un livre*/
+/* Achat, modification et suppression d’un livre */
 .wishlist-actions {
     display: flex;
     gap: 7px;
@@ -136,7 +99,7 @@
 }
 
 .wishlist button:disabled {
-    opacity: .5;
+    opacity: 0.5;
     cursor: wait;
 }
 
@@ -151,7 +114,7 @@
     color: #a42828;
 }
 
-/* Visibilité publique du livre*/
+/* Visibilité publique du livre */
 .wishlist-visibilite {
     display: flex;
     gap: 10px;
@@ -164,40 +127,36 @@
     accent-color: var(--color-secondary);
 }
 
-/* Page publique de la wishlist*/
+/* Page publique de la wishlist */
 .wishlist-publique {
     min-height: 100vh;
     box-sizing: border-box;
 }
 
-
-/* Adaptation aux écrans : @media(max-width: 1250px)*/
-@media(max-width: 1250px) {
-    
+/* =======================================
+   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 1250PX)
+   ======================================= */
+@media (max-width: 1250px) {
     .wishlist-grille {
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 }
 
-
-/* Adaptation aux écrans : @media(max-width: 1050px)*/
-@media(max-width: 1050px) {
-    
+/* =======================================
+   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 1050PX)
+   ======================================= */
+@media (max-width: 1050px) {
     .wishlist-grille {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
-
-/* Adaptation aux écrans : @media(max-width: 650px)*/
-@media(max-width: 650px) {
-    
+/* =======================================
+   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 650PX)
+   ======================================= */
+@media (max-width: 650px) {
     .wishlist-grille {
         grid-template-columns: minmax(0, 1fr);
-    }
-
-    .wishlist-outils .bibliotheque-ajouter {
-        margin-left: 0;
     }
 }
 
@@ -211,6 +170,7 @@
     justify-content: center;
 }
 
+/* Ouverture des fiches au clic et repère au clavier */
 .wishlist-carte[data-fiche-souhait] {
     cursor: pointer;
 }

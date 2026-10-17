@@ -40,7 +40,7 @@ final class AccueilController extends AbstractController
             ]
         );
 
-        // Les 5 derniers livres encore présents dans la wishlist.
+        // Retient les cinq souhaits publics les plus récents, en excluant les achats et les souhaits privés.
         $wishlist = $connection->fetchAllAssociative(
             "SELECT l.id, l.titre, l.image_couverture,
                     GROUP_CONCAT(
@@ -67,17 +67,17 @@ final class AccueilController extends AbstractController
         ]);
     }
 
-#[Route('/mes-livres-mieux-notes', name: 'app_livres_mieux_notes', methods: ['GET'])]
-// Affiche les livres favoris lorsque leur section publique est visible.
-public function livresMieuxNotes(Connection $connection, \App\Service\VisibiliteAccueil $reglages): Response
-{
-    if (!$reglages->publique()['favoris']) throw $this->createNotFoundException();
-    $livres = $this->chargerLivresFavoris($connection);
+    #[Route('/mes-livres-mieux-notes', name: 'app_livres_mieux_notes', methods: ['GET'])]
+    // Affiche les livres favoris lorsque leur section publique est visible.
+    public function livresMieuxNotes(Connection $connection, \App\Service\VisibiliteAccueil $reglages): Response
+    {
+        if (!$reglages->publique()['favoris']) throw $this->createNotFoundException();
+        $livres = $this->chargerLivresFavoris($connection);
 
-    return $this->render('accueil/livres-mieux-notes.html.twig', [
-        'livres' => $livres,
-    ]);
-}
+        return $this->render('accueil/livres-mieux-notes.html.twig', [
+            'livres' => $livres,
+        ]);
+    }
 
     #[Route('/ma-wishlist', name: 'app_wishlist', methods: ['GET'])]
     // Affiche la wishlist publique en respectant la visibilité de la section et de chaque souhait.
@@ -92,6 +92,7 @@ public function livresMieuxNotes(Connection $connection, \App\Service\Visibilite
     // Partage la sélection des livres notés cinq étoiles entre l’accueil et la liste complète.
     private function chargerLivresFavoris(Connection $connection, ?int $limite = null): array
     {
+        // La sous-requête choisit la dernière lecture terminée et notée avant de retenir la note maximale.
         $sql = "SELECT l.id, l.titre, l.image_couverture, s.note,
                 GROUP_CONCAT(
                     DISTINCT a.nom_affichage
