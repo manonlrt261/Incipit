@@ -285,6 +285,11 @@
    ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 900PX)
    ======================================= */
 @media (max-width: 900px) {
+    /* Garde le fond arrondi dans la largeur de l’écran. */
+    .accueil-main::before {
+        inset-inline: 0;
+    }
+
     .accueil-grille-livres {
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
@@ -299,8 +304,20 @@
    ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 600PX)
    ======================================= */
 @media (max-width: 600px) {
+    /* Répartit la marque et la connexion sans élargir la bannière. */
     .accueil-header {
-        min-height: 240px;
+        min-height: 220px;
+    }
+
+    .accueil-header-contenu {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 44px;
+        gap: 16px;
+        padding: 20px 16px;
+    }
+
+    .accueil-identite {
+        min-width: 0;
     }
 
     .accueil-identite h1 {
@@ -309,9 +326,13 @@
 
     .accueil-identite p {
         font-size: 14px;
+        line-height: 1.5;
     }
 
     .accueil-connexion {
+        box-sizing: border-box;
+        width: 44px;
+        height: 44px;
         padding: 10px;
     }
 
@@ -319,26 +340,82 @@
         display: none;
     }
 
+    /* Garde le fond arrondi et les sections dans la largeur du téléphone. */
+    .accueil-main {
+        box-sizing: border-box;
+        width: 100%;
+        padding: 0 16px 28px;
+    }
+
+    .accueil-main::before {
+        inset-inline: 0;
+    }
+
+    .accueil-section {
+        padding: 20px 16px;
+    }
+
+    /* Place les liens sous les titres plutôt que de comprimer ceux-ci entre l’icône et le bouton. */
     .accueil-section-entete {
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: 36px minmax(0, 1fr);
+        align-items: start;
         gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .accueil-section-icone {
+        width: 36px;
+        height: 36px;
+    }
+
+    .accueil-section-titres h2 {
+        font-size: 26px;
+        line-height: 1.15;
+        overflow-wrap: break-word;
+    }
+
+    .accueil-section-titres p {
+        line-height: 1.5;
     }
 
     .accueil-lien {
-        margin-left: 0;
+        box-sizing: border-box;
+        grid-column: 1 / -1;
+        width: 100%;
+        min-width: 0;
+        text-align: center;
+        white-space: normal;
     }
 
+    /* Centre un livre isolé et répartit les listes sans laisser une grande zone vide à droite. */
     .accueil-grille-livres {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
+    .accueil-carte-livre:only-child {
+        box-sizing: border-box;
+        grid-column: 1 / -1;
+        justify-self: center;
+        width: min(100%, 280px);
+    }
+
     .accueil-grille-auteurs {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
     }
 
     .accueil-auteur {
+        min-width: 0;
+        padding: 12px 8px;
         border-right: none;
         border-bottom: 1px solid var(--color-encadre);
+        overflow-wrap: anywhere;
+    }
+
+    .accueil-vide {
+        padding: 22px 12px;
+        line-height: 1.5;
     }
 }
 

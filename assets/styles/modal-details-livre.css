@@ -575,20 +575,67 @@
    ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 650PX)
    ======================================= */
 @media (max-width: 650px) {
+    /* Garde la session et ses champs dans la largeur de la fiche. */
     .details-formulaire-lecture {
+        min-width: 0;
+        max-width: 100%;
         padding: 18px;
     }
 
     .details-lecture-grille {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
     }
 
     .details-lecture-champ-large {
         grid-column: auto;
     }
 
+    :root .modal-details-livre input,
+    :root .modal-details-livre select,
+    :root .modal-details-livre textarea {
+        min-width: 0;
+        max-width: 100%;
+        font-size: 16px;
+    }
+
+    .details-lecture-champ input,
+    .details-lecture-champ select {
+        min-height: 44px;
+        height: 44px;
+        padding: 10px 12px;
+    }
+
+    /* Maintient les dates Safari à la même dimension que le statut et la note. */
+    .modal-details-livre input[type='date'] {
+        box-sizing: border-box;
+        display: block;
+        width: 100%;
+        min-inline-size: 0;
+        max-inline-size: 100%;
+        appearance: none;
+        -webkit-appearance: none;
+        text-align: left;
+    }
+
+    .modal-details-livre input[type='date']::-webkit-date-and-time-value {
+        min-height: 1em;
+        text-align: left;
+    }
+
+    .modal-details-livre input[type='date']::-webkit-datetime-edit {
+        min-width: 0;
+        padding: 0;
+    }
+
+    /* Empile les actions longues sans réduire la place disponible pour les champs. */
     .details-lecture-actions {
-        flex-wrap: wrap;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .details-lecture-actions button {
+        max-width: 100%;
+        white-space: normal;
     }
 }
 

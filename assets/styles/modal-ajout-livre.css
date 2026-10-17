@@ -307,38 +307,6 @@
 /* =======================================
    ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 700PX)
    ======================================= */
-@media (max-width: 700px) {
-    .bibliotheque-modal {
-        width: calc(100% - 20px);
-        max-height: 95vh;
-    }
-
-    .bibliotheque-modal-entete {
-        padding: 22px 20px;
-    }
-
-    #form-ajout-livre {
-        padding: 0 20px 24px;
-    }
-
-    .modal-livre-disposition,
-    .modal-deux-colonnes {
-        grid-template-columns: 1fr;
-    }
-
-    .modal-couverture-zone {
-        max-width: 210px;
-    }
-
-    .modal-recherche-ligne {
-        flex-wrap: wrap;
-    }
-
-    .modal-recherche-ligne input {
-        flex-basis: 100%;
-    }
-}
-
 /* Dimensions et espacements du formulaire partagé */
 dialog#modal-ajout-livre.bibliotheque-modal {
     box-sizing: border-box;
@@ -704,4 +672,95 @@ dialog#modal-ajout-livre {
     font-size: 11px;
     text-align: center;
     overflow-wrap: anywhere;
+}
+
+/* =======================================
+   FORMULAIRE SUR TÉLÉPHONE
+   ======================================= */
+@media (max-width: 700px) {
+    /* Adapte la fenêtre et ses espacements à la zone réellement visible. */
+    dialog#modal-ajout-livre.bibliotheque-modal {
+        width: calc(100vw - 24px);
+        max-width: calc(100vw - 24px);
+        max-height: calc(100vh - 24px);
+        max-height: calc(100dvh - 24px);
+    }
+
+    dialog#modal-ajout-livre .bibliotheque-modal-entete {
+        padding: 20px 18px 16px;
+        gap: 12px;
+    }
+
+    dialog#modal-ajout-livre .bibliotheque-modal-entete h2 {
+        font-size: 26px;
+    }
+
+    dialog#modal-ajout-livre #form-ajout-livre {
+        padding: 0 18px 24px;
+    }
+
+    .modal-livre-disposition,
+    .modal-deux-colonnes {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .modal-couverture-zone {
+        max-width: 210px;
+    }
+
+    /* Une police d’au moins 16 px évite le zoom automatique d’iOS à la saisie. */
+    :root #modal-ajout-livre input,
+    :root #modal-ajout-livre select,
+    :root #modal-ajout-livre textarea {
+        min-width: 0;
+        max-width: 100%;
+        font-size: 16px;
+    }
+
+    #modal-ajout-livre .modal-champ input,
+    #modal-ajout-livre .modal-champ select,
+    #modal-ajout-livre .modal-recherche-ligne input {
+        min-height: 44px;
+        height: 44px;
+    }
+
+    /* Neutralise la largeur intrinsèque des dates Safari, qu’elles soient remplies ou vides. */
+    #modal-ajout-livre input[type='date'] {
+        box-sizing: border-box;
+        display: block;
+        width: 100%;
+        min-inline-size: 0;
+        max-inline-size: 100%;
+        appearance: none;
+        -webkit-appearance: none;
+        text-align: left;
+    }
+
+    #modal-ajout-livre input[type='date']::-webkit-date-and-time-value {
+        min-height: 1em;
+        text-align: left;
+    }
+
+    #modal-ajout-livre input[type='date']::-webkit-datetime-edit {
+        min-width: 0;
+        padding: 0;
+    }
+
+    /* Laisse les champs se réduire à côté des boutons d’auteur et de recherche. */
+    #modal-ajout-livre .modal-auteur-ligne input {
+        width: 0;
+        flex: 1 1 0;
+    }
+
+    .modal-auteur-ligne button {
+        flex-shrink: 0;
+    }
+
+    .modal-recherche-ligne {
+        flex-wrap: wrap;
+    }
+
+    .modal-recherche-ligne input {
+        flex-basis: 100%;
+    }
 }
