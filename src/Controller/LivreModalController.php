@@ -3,6 +3,8 @@
 namespace App\Controller;
 
 use App\Entity\Auteur;
+use App\Service\DonneesLecture;
+use App\Service\CouvertureLivre;
 use App\Entity\Exemplaire;
 use App\Entity\Genre;
 use App\Entity\Livre;
@@ -27,6 +29,8 @@ final class LivreModalController extends AbstractController
     public function ajouter(
         Request $request,
         EntityManagerInterface $entityManager,
+        DonneesLecture $donneesLecture,
+        CouvertureLivre $couvertures,
         ?int $id = null
     ): JsonResponse {
         // Identifie le parcours wishlist pour éviter de créer un exemplaire possédé lors d’un simple souhait.
@@ -183,34 +187,8 @@ final class LivreModalController extends AbstractController
                 }
             }
 
-            $statuts = [
-                'Pas commencé',
-                'En cours',
-                'En pause',
-                'Terminé',
-                'À lire',
-            ];
-
-            $statut = trim((string) $request->request->get(
-                'statut',
-                'Pas commencé'
-            ));
-
-            if (!in_array($statut, $statuts, true)) {
-                throw new \InvalidArgumentException(
-                    'Statut de lecture invalide.'
-                );
-            }
-
-            $note = trim((string) $request->request->get('note', ''));
-
-            if ($note !== '' && (
-                !preg_match('/^(?:[0-4](?:\.[0-9])?|5(?:\.0)?)$/', $note)
-            )) {
-                throw new \InvalidArgumentException(
-                    'La note doit être comprise entre 0 et 5.'
-                );
-            }
+            $lecture = $donneesLecture->lire($request);
+            $statut = $lecture['statut'];
 
             $auteurs = $request->request->all('auteurs');
             $genres = $request->request->all('genres');
@@ -280,11 +258,12 @@ final class LivreModalController extends AbstractController
             ], 422);
         }
 
-        // Contrôle le format et la taille de l’image envoyée depuis le formulaire de wishlist.
-        $fichierCouverture = $modeWishlist ? $request->files->get('fichierCouverture') : null;
-        if ($fichierCouverture && (!$fichierCouverture->isValid() || $fichierCouverture->getSize() > 5 * 1024 * 1024
-            || !in_array($fichierCouverture->getMimeType(), ['image/jpeg', 'image/png', 'image/webp', 'image/gif'], true))) {
-            return $this->json(['success' => false, 'message' => 'Choisissez une image JPG, PNG, WebP ou GIF de 5 Mo maximum.'], 422);
+        // Les fichiers de couverture sont acceptés pour les livres possédés comme pour les souhaits.
+        $fichierCouverture = $request->files->get('fichierCouverture');
+        try {
+            $couvertures->valider($fichierCouverture);
+        } catch (\InvalidArgumentException $exception) {
+            return $this->json(['success' => false, 'message' => $exception->getMessage()], 422);
         }
         $nouvelleCouverture = null;
         $connexion = $entityManager->getConnection();
@@ -309,12 +288,8 @@ final class LivreModalController extends AbstractController
             $livre->setResume($resume);
             // Enregistre la couverture sous un nom aléatoire ; son chemin est conservé pour le nettoyage en cas d’échec.
             if ($fichierCouverture) {
-                $dossier = $this->getParameter('kernel.project_dir').'/public/uploads/couvertures';
-                if (!is_dir($dossier)) mkdir($dossier, 0775, true);
-                $nomFichier = bin2hex(random_bytes(16)).'.'.$fichierCouverture->guessExtension();
-                $fichierCouverture->move($dossier, $nomFichier);
-                $nouvelleCouverture = $dossier.'/'.$nomFichier;
-                $imageCouverture = 'uploads/couvertures/'.$nomFichier;
+                $nouvelleCouverture = $couvertures->enregistrer($fichierCouverture);
+                $imageCouverture = $nouvelleCouverture;
             }
             $livre->setImageCouverture($imageCouverture);
             $livre->setDatePublication($datePublication);
@@ -360,8 +335,7 @@ final class LivreModalController extends AbstractController
 
                 $session = new SessionLecture();
                 $session->setLivre($livre);
-                $session->setStatut($statut);
-                $session->setNote($note === '' ? null : $note);
+                $donneesLecture->appliquer($session, $lecture);
                 $session->setDateCreation(new \DateTime());
                 $session->setDateModification(new \DateTime());
                 $entityManager->persist($session);
@@ -393,7 +367,7 @@ final class LivreModalController extends AbstractController
 
          } catch (\Throwable $exception) {
             // Supprime le fichier nouvellement envoyé si l’enregistrement du livre échoue.
-            if ($nouvelleCouverture && is_file($nouvelleCouverture)) unlink($nouvelleCouverture);
+            $couvertures->annuler($nouvelleCouverture);
             if ($connexion->isTransactionActive()) {
                 $connexion->rollBack();
             }

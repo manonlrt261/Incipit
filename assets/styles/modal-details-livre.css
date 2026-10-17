@@ -500,6 +500,7 @@
     color: var(--secondary);
 }
 
+.details-lecture-champ select,
 .details-lecture-champ input,
 .details-lecture-champ textarea {
     box-sizing: border-box;
@@ -513,6 +514,7 @@
     outline: none;
 }
 
+.details-lecture-champ select:focus,
 .details-lecture-champ input:focus,
 .details-lecture-champ textarea:focus {
     border-color: var(--secondary);
@@ -588,4 +590,39 @@
     .details-lecture-actions {
         flex-wrap: wrap;
     }
+}
+
+/* =======================================
+   ACTIONS SUR LES SESSIONS DE LECTURE
+   ======================================= */
+
+/* Modification et suppression de la session sélectionnée */
+.details-session-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.details-session-actions button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    padding: 8px;
+    border: 1px solid var(--color-secondary);
+    border-radius: 8px;
+    background: transparent;
+    cursor: pointer;
+}
+
+.details-session-actions img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
+
+.details-session-actions button:disabled {
+    opacity: 0.5;
+    cursor: wait;
 }

@@ -23,6 +23,7 @@
     <form
         id="form-ajout-livre"
         action="{{ path(wishlist_mode ? 'app_wishlist_ajouter' : 'app_livre_modal_ajouter') }}"
+        data-recherche-couvertures="{{ path('app_livre_recherche_couvertures') }}"
         data-recherche-isbn="{{ path('app_livre_recherche_isbn') }}"
         data-wishlist="{{ wishlist_mode ? '1' : '0' }}"
         method="post"
@@ -135,7 +136,7 @@
                     <input
                         type="file"
                         id="modal-photo-couverture"
-                        accept="image/*"
+                        accept="image/jpeg,image/png"
                         capture="environment"
                         hidden
                     >
@@ -166,7 +167,7 @@
 {# Affiche les résultats de recherche de couvertures et permet d’en sélectionner une. #}
 <div id="modal-recherche-couverture-zone" class="modal-recherche-couverture-zone" hidden>
     <label for="modal-recherche-couverture-input">
-        Rechercher une couverture
+        Rechercher une couverture sur Google Images
     </label>
 
     <div class="modal-recherche-couverture-formulaire">
@@ -378,6 +379,7 @@
                         <option value="Pas commencé">Pas commencé</option>
                         <option value="En cours">En cours</option>
                         <option value="En pause">En pause</option>
+                        <option value="Abandonné">Abandonné</option>
                         <option value="Terminé">Terminé</option>
                         <option value="À lire">À lire</option>
                     </select>
@@ -394,6 +396,18 @@
                         step="0.5"
                         placeholder="Ex. : 4,5"
                     >
+                </div>
+            </div>
+
+            {# Les dates facultatives sont proposées selon le statut et enregistrées dans la session de lecture. #}
+            <div class="modal-deux-colonnes">
+                <div class="modal-champ" id="modal-date-debut-zone" hidden>
+                    <label for="modal-date-debut">Date de début de lecture (facultative)</label>
+                    <input type="date" id="modal-date-debut" name="dateDebut" disabled>
+                </div>
+                <div class="modal-champ" id="modal-date-fin-zone" hidden>
+                    <label for="modal-date-fin">Date de fin de lecture (facultative)</label>
+                    <input type="date" id="modal-date-fin" name="dateFin" disabled>
                 </div>
             </div>
         </section>

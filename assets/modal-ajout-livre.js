@@ -12,6 +12,28 @@ initialiserPage(ecouter => {
 
     const modeWishlist = form.dataset.wishlist === '1';
 
+    const champStatut = form.elements.namedItem('statut');
+
+    // Conserve les dates saisies quand le statut change, mais n’envoie que celles qui s’appliquent.
+    function actualiserDatesLecture() {
+        const statut = champStatut?.value;
+        const debutVisible = ['En cours', 'En pause', 'Abandonné', 'Terminé'].includes(statut);
+        const finVisible = statut === 'Terminé';
+        const dateFin = document.getElementById('modal-date-fin');
+        if (finVisible && dateFin && !dateFin.value) {
+            const jour = new Date();
+            dateFin.value = `${jour.getFullYear()}-${String(jour.getMonth() + 1).padStart(2, '0')}-${String(jour.getDate()).padStart(2, '0')}`;
+        }
+        for (const [nom, visible] of [['debut', debutVisible], ['fin', finVisible]]) {
+            const zone = document.getElementById(`modal-date-${nom}-zone`);
+            const champ = document.getElementById(`modal-date-${nom}`);
+            if (zone) zone.hidden = !visible;
+            if (champ) champ.disabled = !visible;
+        }
+    }
+    ecouter(champStatut, 'change', actualiserDatesLecture);
+    actualiserDatesLecture();
+
     const titreFenetre = document.getElementById('modal-titre-fenetre');
     const descriptionFenetre = document.getElementById('modal-description-fenetre');
     const champLivreId = document.getElementById('modal-livre-id');
@@ -41,6 +63,8 @@ initialiserPage(ecouter => {
             }
 
             const livre = resultat.livre;
+            const lecture = resultat.lectures?.[0];
+            couvertureSelectionnee = null;
 
             // Efface la saisie précédente avant de préremplir les données du livre sélectionné.
             form.reset();
@@ -62,6 +86,10 @@ initialiserPage(ecouter => {
             }
 
             const valeurs = {
+                statut: lecture?.statut || 'Pas commencé',
+                note: lecture?.note,
+                dateDebut: lecture?.date_debut,
+                dateFin: lecture?.date_fin,
                 prixEstime: resultat.prixEstime,
                 lienAchat: resultat.lienAchat,
                 titre: livre.titre,
@@ -86,6 +114,7 @@ initialiserPage(ecouter => {
                 }
             });
 
+            actualiserDatesLecture();
             if (modeWishlist) {
                 document.getElementById('modal-publique').checked = Boolean(resultat.publique);
                 listeAuteurs.replaceChildren();
@@ -105,17 +134,20 @@ initialiserPage(ecouter => {
                 });
                 actualiserGenres();
                 fermerGenres();
-                if (livre.image_couverture) {
-                    const cheminCouverture = /^(https?:\/\/|\/)/i.test(livre.image_couverture)
-                        ? livre.image_couverture
-                        : `/${livre.image_couverture}`;
-                    gestionnaireCouverture.afficherURL(cheminCouverture, livre.titre);
-                    champImageCouverture.value = livre.image_couverture;
-                } else {
-                    const texte = document.createElement('span');
-                    texte.textContent = 'Aucune couverture';
-                    apercuCouverture.replaceChildren(texte);
-                }
+            }
+            if (livre.image_couverture) {
+                const cheminCouverture = /^(https?:\/\/|\/)/i.test(livre.image_couverture)
+                    ? livre.image_couverture
+                    : `/${livre.image_couverture}`;
+                gestionnaireCouverture.afficherURL(cheminCouverture, livre.titre);
+                champImageCouverture.value = livre.image_couverture;
+            } else {
+                const texte = document.createElement('span');
+                texte.textContent = 'Aucune couverture';
+                apercuCouverture.replaceChildren(texte);
+            }
+            if (boutonCouverture?.lastChild?.nodeType === 3) {
+                boutonCouverture.lastChild.textContent = ' Modifier la couverture';
             }
 
             // Fermer la fiche détaillée
@@ -593,6 +625,7 @@ initialiserPage(ecouter => {
     const boutonEnLigne = document.getElementById('modal-couverture-en-ligne');
 
     const fichierCouverture = document.getElementById('modal-fichier-couverture');
+    let couvertureSelectionnee = null;
     const photoCouverture = document.getElementById('modal-photo-couverture');
     const apercuCouverture = document.getElementById('modal-apercu-couverture');
     const champImageCouverture = document.getElementById('modal-image-couverture');
@@ -613,6 +646,7 @@ initialiserPage(ecouter => {
     function afficherCouverture(fichier) {
         if (!fichier || !fichier.type.startsWith('image/')) return;
 
+        couvertureSelectionnee = fichier;
         gestionnaireCouverture.afficherFichier(fichier);
         fermerOptionsCouverture();
     }
@@ -679,6 +713,11 @@ initialiserPage(ecouter => {
     // Demande l’accès à la caméra pour photographier la couverture.
     ecouter(boutonPhoto, 'click', async () => {
         fermerOptionsCouverture();
+        if (photoCouverture && (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '')
+            || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1))) {
+            photoCouverture.click();
+            return;
+        }
 
         if (!navigator.mediaDevices?.getUserMedia) {
             if (cameraErreur) {
@@ -741,11 +780,6 @@ initialiserPage(ecouter => {
 
                 const fichier = new File([blob], 'couverture-photo.jpg', { type: 'image/jpeg' });
 
-                const transfert = new DataTransfer();
-                transfert.items.add(fichier);
-
-                fichierCouverture.files = transfert.files;
-
                 afficherCouverture(fichier);
                 arreterCameraCouverture();
             },
@@ -764,12 +798,6 @@ initialiserPage(ecouter => {
         const fichier = photoCouverture.files?.[0];
 
         if (!fichier) return;
-
-        if (fichierCouverture) {
-            const transfert = new DataTransfer();
-            transfert.items.add(fichier);
-            fichierCouverture.files = transfert.files;
-        }
 
         afficherCouverture(fichier);
     });
@@ -820,7 +848,7 @@ initialiserPage(ecouter => {
         }
     });
 
-    // Recherche des couvertures dans Open Library et permet d’en choisir une pour le livre.
+    // Recherche dans Google Images via le serveur, qui conserve la clé SerpApi privée.
     async function rechercherCouverturesEnLigne() {
         if (!inputRechercheCouverture || !resultatsCouvertures || rechercheCouvertureEnCours)
             return;
@@ -843,21 +871,17 @@ initialiserPage(ecouter => {
         }
 
         try {
-            const url = new URL('https://openlibrary.org/search.json');
+            const url = new URL(form.dataset.rechercheCouvertures, window.location.origin);
 
             url.searchParams.set('q', recherche);
-            url.searchParams.set('fields', 'key,title,author_name,cover_i');
-            url.searchParams.set('limit', '30');
 
             const reponse = await fetch(url.toString());
 
-            if (!reponse.ok) {
-                throw new Error('La recherche est momentanément indisponible.');
-            }
-
             const donnees = await reponse.json();
-
-            const livres = (donnees.docs || []).filter(livre => Number.isInteger(livre.cover_i));
+            if (!reponse.ok || !donnees.success) {
+                throw new Error(donnees.message || 'La recherche est momentanément indisponible.');
+            }
+            const livres = donnees.images || [];
 
             if (!livres.length) {
                 if (messageRechercheCouverture) {
@@ -874,24 +898,26 @@ initialiserPage(ecouter => {
 
                 const image = document.createElement('img');
 
-                image.src = `https://covers.openlibrary.org/b/id/${livre.cover_i}-M.jpg`;
+                image.src = livre.miniature;
+                image.referrerPolicy = 'no-referrer';
 
-                image.alt = `Couverture de ${livre.title}`;
+                image.alt = `Couverture de ${livre.titre}`;
                 image.loading = 'lazy';
 
                 const titre = document.createElement('span');
-                titre.textContent = livre.title;
+                titre.textContent = livre.titre;
 
                 bouton.append(image, titre);
 
                 ecouter(bouton, 'click', () => {
-                    const urlCouverture = `https://covers.openlibrary.org/b/id/${livre.cover_i}-L.jpg`;
+                    const urlCouverture = livre.url;
 
                     if (champImageCouverture) {
                         champImageCouverture.value = urlCouverture;
                     }
 
-                    gestionnaireCouverture.afficherURL(urlCouverture, livre.title);
+                    couvertureSelectionnee = null;
+                    gestionnaireCouverture.afficherURL(urlCouverture, livre.titre);
 
                     // Une couverture en ligne remplace le fichier local.
                     if (fichierCouverture) {
@@ -915,8 +941,7 @@ initialiserPage(ecouter => {
             console.error('Erreur recherche de couverture :', erreur);
 
             if (messageRechercheCouverture) {
-                messageRechercheCouverture.textContent =
-                    'Impossible de rechercher des couvertures pour le moment.';
+                messageRechercheCouverture.textContent = erreur.message || 'Impossible de rechercher des couvertures pour le moment.';
             }
         } finally {
             rechercheCouvertureEnCours = false;
@@ -1026,6 +1051,11 @@ initialiserPage(ecouter => {
     // Partage la remise à zéro entre l’ouverture d’un ajout et la fermeture du formulaire.
     function reinitialiserFormulaire() {
         form.reset();
+        couvertureSelectionnee = null;
+        if (boutonCouverture?.lastChild?.nodeType === 3) {
+            boutonCouverture.lastChild.textContent = ' Ajouter une couverture';
+        }
+        actualiserDatesLecture();
 
         if (champLivreId) champLivreId.value = '';
         if (titreFenetre) titreFenetre.textContent = 'Ajouter un livre';
@@ -1123,6 +1153,32 @@ initialiserPage(ecouter => {
         input.focus();
     });
 
+    // Réduit les photos du téléphone avant l’envoi pour éviter les limites de taille du serveur.
+    async function preparerCouverture(fichier) {
+        const url = URL.createObjectURL(fichier);
+        try {
+            const image = new Image();
+            await new Promise((resolve, reject) => {
+                image.onload = resolve;
+                image.onerror = () => reject(new Error('Cette image ne peut pas être lue. Choisis une photo au format JPG ou PNG.'));
+                image.src = url;
+            });
+            const ratio = Math.min(1, 1600 / Math.max(image.naturalWidth, image.naturalHeight));
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.max(1, Math.round(image.naturalWidth * ratio));
+            canvas.height = Math.max(1, Math.round(image.naturalHeight * ratio));
+            const contexte = canvas.getContext('2d');
+            contexte.fillStyle = '#ffffff';
+            contexte.fillRect(0, 0, canvas.width, canvas.height);
+            contexte.drawImage(image, 0, 0, canvas.width, canvas.height);
+            const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.85));
+            if (!blob) throw new Error('Impossible de préparer cette photo. Choisis une autre image.');
+            return new File([blob], 'couverture.jpg', { type: 'image/jpeg' });
+        } finally {
+            URL.revokeObjectURL(url);
+        }
+    }
+
     // Envoie le formulaire vers la bibliothèque ou la wishlist, en ajout ou en modification.
 
     ecouter(form, 'submit', async event => {
@@ -1147,9 +1203,14 @@ initialiserPage(ecouter => {
                     : `/livre/${encodeURIComponent(idLivreEnModification)}/modifier`
                 : form.action;
 
+            const donnees = new FormData(form);
+            const couverture = couvertureSelectionnee || fichierCouverture?.files?.[0];
+            if (couverture && !champImageCouverture?.value) {
+                donnees.set('fichierCouverture', await preparerCouverture(couverture));
+            }
             const reponse = await fetch(urlEnregistrement, {
                 method: 'POST',
-                body: new FormData(form),
+                body: donnees,
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
                 }

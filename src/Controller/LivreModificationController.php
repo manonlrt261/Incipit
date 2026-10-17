@@ -3,6 +3,9 @@
 namespace App\Controller;
 
 use App\Entity\Livre;
+use App\Entity\SessionLecture;
+use App\Service\DonneesLecture;
+use App\Service\CouvertureLivre;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -21,7 +24,9 @@ final class LivreModificationController extends AbstractController
     public function modifier(
         int $id,
         Request $request,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        DonneesLecture $donneesLecture,
+        CouvertureLivre $couvertures
     ): JsonResponse {
         if (!$this->getUser()) {
             return $this->json([
@@ -71,7 +76,16 @@ final class LivreModificationController extends AbstractController
             return $valeur === '' ? null : $valeur;
         };
 
+        $nouvelleCouverture = null;
         try {
+            $lecture = $donneesLecture->lire($request);
+            $fichierCouverture = $request->files->get('fichierCouverture');
+            $couvertures->valider($fichierCouverture);
+            $imageCouverture = $texte($request, 'imageCouverture', 2048);
+            if ($imageCouverture !== null && !(str_starts_with($imageCouverture, 'uploads/couvertures/') && !str_contains($imageCouverture, '..'))
+                && !(filter_var($imageCouverture, FILTER_VALIDATE_URL) && parse_url($imageCouverture, PHP_URL_SCHEME) === 'https')) {
+                throw new \InvalidArgumentException('La couverture doit être une URL HTTPS valide.');
+            }
             $sousTitre = $texte($request, 'sousTitre', 255);
             $saga = $texte($request, 'saga', 255);
             $edition = $texte($request, 'edition', 255);
@@ -143,6 +157,16 @@ final class LivreModificationController extends AbstractController
             );
             $livre->setDateModification(new \DateTime());
 
+            // Réutilise la dernière session afin de préserver l’historique des lectures précédentes.
+            $session = $entityManager->getRepository(SessionLecture::class)->findOneBy(['livre' => $livre], ['dateCreation' => 'DESC', 'id' => 'DESC']);
+            if ($session) {
+                $donneesLecture->appliquer($session, $lecture);
+            }
+            if ($fichierCouverture) {
+                $nouvelleCouverture = $couvertures->enregistrer($fichierCouverture);
+                $imageCouverture = $nouvelleCouverture;
+            }
+            if ($imageCouverture !== null) $livre->setImageCouverture($imageCouverture);
             $entityManager->flush();
 
             return $this->json([
@@ -155,10 +179,15 @@ final class LivreModificationController extends AbstractController
             ]);
 
         } catch (\InvalidArgumentException $exception) {
+            $couvertures->annuler($nouvelleCouverture);
             return $this->json([
                 'success' => false,
                 'message' => $exception->getMessage()
             ], 422);
+        } catch (\Throwable $exception) {
+            $couvertures->annuler($nouvelleCouverture);
+            error_log('[INCIPIT - MODIFICATION LIVRE] '.$exception->getMessage());
+            return $this->json(['success' => false, 'message' => 'Impossible d’enregistrer les modifications.'], 500);
         }
     }
 }

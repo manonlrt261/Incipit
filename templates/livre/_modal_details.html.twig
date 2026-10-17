@@ -37,100 +37,6 @@
                     <span>Aucune couverture</span>
                 </div>
 
-                {% include 'components/_bouton_couverture.html.twig' with {
-                    id: 'modifier-couverture-details',
-                    texte: 'Modifier la couverture'
-                } only %}
-
-            {# Propose une couverture depuis un fichier, une photo ou une recherche en ligne. #}
-            <div id="details-options-couverture" class="menu-options-couverture" hidden>
-                <button type="button" id="details-couverture-fichier">
-                    Importer une image depuis la galerie
-                </button>
-
-                <button type="button" id="details-couverture-photo">
-                    Prendre une photo
-                </button>
-
-                <button type="button" id="details-couverture-en-ligne">
-                    Rechercher une image en ligne
-                </button>
-            </div>
-
-            {# Ce champ masqué reçoit le fichier choisi depuis la galerie. #}
-            <input
-                type="file"
-                id="details-fichier-couverture"
-                accept="image/jpeg,image/png,image/webp"
-                hidden
-            >
-
-            {# Zone vidéo et commandes affichées pendant la prise de photo de la couverture. #}
-            <div id="details-camera-zone" class="modal-camera-zone" hidden>
-                <video
-                    id="details-camera-video"
-                    autoplay
-                    playsinline
-                    muted
-                ></video>
-
-                <div class="modal-camera-actions">
-                    <button type="button" id="details-camera-capturer">
-                        Prendre la photo
-                    </button>
-
-                    <button type="button" id="details-camera-annuler">
-                        Annuler
-                    </button>
-                </div>
-
-                <p id="details-camera-erreur" role="alert" hidden></p>
-            </div>
-
-            {# Conserve l’URL choisie lorsque la couverture provient de la recherche en ligne. #}
-            <input
-                type="hidden"
-                id="details-image-couverture"
-            >
-
-            {# Le JavaScript remplit cette zone avec les couvertures correspondant au titre ou à l’auteur. #}
-            <div
-                id="details-recherche-couverture-zone"
-                class="modal-recherche-couverture-zone"
-                hidden
-            >
-                <label for="details-recherche-couverture-input">
-                    Rechercher une couverture
-                </label>
-
-                <div class="modal-recherche-couverture-formulaire">
-                    <input
-                        type="search"
-                        id="details-recherche-couverture-input"
-                        placeholder="Titre du livre ou auteur..."
-                    >
-
-                    <button type="button" id="details-lancer-recherche-couverture" class="bouton-rechercher">
-                        Rechercher
-                    </button>
-                </div>
-
-                <p
-                    id="details-recherche-couverture-message"
-                    role="status"
-                    aria-live="polite"
-                ></p>
-
-                <div
-                    id="details-resultats-couvertures"
-                    class="modal-resultats-couvertures"
-                ></div>
-
-                <button type="button" id="details-fermer-recherche-couverture">
-                    Fermer la recherche
-                </button>
-            </div>
-
             </div>
 
             <div class="details-livre-informations">
@@ -214,11 +120,13 @@
             {# Formulaire masqué jusqu’à l’ajout d’une session ; les erreurs restent affichées dans cette zone. #}
             <div id="details-formulaire-lecture" class="details-formulaire-lecture" hidden>
 
-                <h4 class="details-formulaire-lecture-titre">
+                <h4 id="details-titre-formulaire-lecture" class="details-formulaire-lecture-titre">
                     Ajouter une session de lecture
                 </h4>
 
                 <form id="form-ajouter-lecture">
+                    {# Identifie la session modifiée ; vide pour créer une nouvelle lecture. #}
+                    <input type="hidden" name="lectureId" value="">
 
                     <input
                         type="hidden"
@@ -227,6 +135,17 @@
                     >
 
                     <div class="details-lecture-grille">
+                        <div class="details-lecture-champ">
+                            <label for="lecture-statut">Statut de lecture</label>
+                            <select id="lecture-statut" name="statut">
+                                <option>Pas commencé</option>
+                                <option>En cours</option>
+                                <option>En pause</option>
+                                <option>Abandonné</option>
+                                <option selected>Terminé</option>
+                                <option>À lire</option>
+                            </select>
+                        </div>
 
                         <div class="details-lecture-champ">
                             <label for="lecture-date-debut">Date de début</label>
@@ -295,7 +214,10 @@
             </div>
 
             {# Le JavaScript remplace ce contenu par les sessions enregistrées et leurs notes. #}
-            <div id="details-livre-liste-lectures">
+            <p id="details-erreur-session" role="alert" hidden></p>
+            <div id="details-livre-liste-lectures"
+                data-modifier="{{ asset('images/modifier.png') }}"
+                data-poubelle="{{ asset('images/poubelle.png') }}">
                 <p class="details-livre-aucune-lecture">
                     Aucune lecture enregistrée pour ce livre.
                 </p>

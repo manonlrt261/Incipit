@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Livre;
 use App\Entity\SessionLecture;
+use App\Service\DonneesLecture;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -12,105 +13,46 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class SessionLectureController extends AbstractController
 {
-    #[Route(
-        '/livre/{id}/lecture/ajouter',
-        name: 'app_lecture_ajouter',
-        requirements: ['id' => '\d+'],
-        methods: ['POST']
-    )]
-    // Valide les dates, la note et l’avis avant d’ajouter une session de lecture terminée au livre.
+    #[Route('/livre/{id}/lecture/ajouter', name: 'app_lecture_ajouter', requirements: ['id' => '\d+'], methods: ['POST'])]
+    #[Route('/livre/{id}/lecture/{lectureId}/modifier', name: 'app_lecture_modifier', requirements: ['id' => '\d+', 'lectureId' => '\d+'], methods: ['POST'])]
+    // Réutilise les validations pour créer une session ou modifier précisément celle sélectionnée.
     public function ajouter(
         int $id,
         Request $request,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        DonneesLecture $donneesLecture,
+        ?int $lectureId = null
     ): JsonResponse {
         if (!$this->getUser()) {
-            return $this->json([
-                'success' => false,
-                'message' => 'Connexion requise.'
-            ], 401);
+            return $this->json(['success' => false, 'message' => 'Connexion requise.'], 401);
         }
-
-        if (!$this->isCsrfTokenValid(
-            'ajouter_lecture',
-            (string) $request->request->get('_token', '')
-        )) {
-            return $this->json([
-                'success' => false,
-                'message' => 'Session expirée. Actualise la page.'
-            ], 403);
+        if (!$this->isCsrfTokenValid('ajouter_lecture', $request->request->getString('_token'))) {
+            return $this->json(['success' => false, 'message' => 'Session expirée. Actualise la page.'], 403);
         }
-
         $livre = $entityManager->find(Livre::class, $id);
-
         if (!$livre) {
-            return $this->json([
-                'success' => false,
-                'message' => 'Livre introuvable.'
-            ], 404);
+            return $this->json(['success' => false, 'message' => 'Livre introuvable.'], 404);
         }
 
-        $dateDebutTexte = trim((string) $request->request->get('dateDebut', ''));
-        $dateFinTexte = trim((string) $request->request->get('dateFin', ''));
-        $noteTexte = trim((string) $request->request->get('note', ''));
-        $avis = trim((string) $request->request->get('avis', ''));
-
-        // Refuse les dates impossibles au lieu de laisser PHP les corriger automatiquement.
-        $convertirDate = static function (string $valeur): ?\DateTime {
-            if ($valeur === '') {
-                return null;
-            }
-
-            $date = \DateTime::createFromFormat('!Y-m-d', $valeur);
-
-            if (!$date || $date->format('Y-m-d') !== $valeur) {
-                throw new \InvalidArgumentException('Date invalide.');
-            }
-
-            return $date;
-        };
-
+        // Le livre de l’URL doit correspondre à celui de la session, même si un identifiant est modifié dans la requête.
+        $lecture = $lectureId === null ? new SessionLecture() : $entityManager->getRepository(SessionLecture::class)
+            ->findOneBy(['id' => $lectureId, 'livre' => $livre]);
+        if (!$lecture) {
+            return $this->json(['success' => false, 'message' => 'Session de lecture introuvable.'], 404);
+        }
         try {
-            $dateDebut = $convertirDate($dateDebutTexte);
-            $dateFin = $convertirDate($dateFinTexte);
-
-            // Vérifie la cohérence chronologique de la session.
-            if ($dateDebut && $dateFin && $dateFin < $dateDebut) {
-                throw new \InvalidArgumentException(
-                    'La date de fin ne peut pas précéder la date de début.'
-                );
+            $donnees = $donneesLecture->lire($request, 'Terminé');
+            $avis = trim($request->request->getString('avis'));
+            if (mb_strlen($avis) > 100000) {
+                throw new \InvalidArgumentException('Le commentaire est trop long.');
             }
-
-            // Accepte une note facultative de 0 à 5 par demi-étoile.
-            if ($noteTexte !== '' && (
-                !is_numeric($noteTexte)
-                || (float) $noteTexte < 0
-                || (float) $noteTexte > 5
-                || (float) $noteTexte * 2 != floor((float) $noteTexte * 2)
-            )) {
-                throw new \InvalidArgumentException(
-                    'La note doit être comprise entre 0 et 5, par pas de 0,5.'
-                );
-            }
-
-            $lecture = new SessionLecture();
-
+            $donneesLecture->appliquer($lecture, $donnees);
             $lecture->setLivre($livre);
-            $lecture->setDateDebut($dateDebut);
-            $lecture->setDateFin($dateFin);
-            $lecture->setNote(
-                $noteTexte === '' ? null : number_format((float) $noteTexte, 1, '.', '')
-            );
             $lecture->setAvis($avis === '' ? null : $avis);
-
-            // Une session ajoutée depuis cette fiche représente une lecture terminée.
-            $lecture->setStatut('Terminé');
-
-            $maintenant = new \DateTime();
-            $lecture->setDateCreation($maintenant);
-            $lecture->setDateModification($maintenant);
-
-            $entityManager->persist($lecture);
+            if ($lectureId === null) {
+                $lecture->setDateCreation(new \DateTime());
+                $entityManager->persist($lecture);
+            }
             $entityManager->flush();
 
             return $this->json([
@@ -118,18 +60,35 @@ final class SessionLectureController extends AbstractController
                 'message' => 'La session de lecture a été enregistrée.',
                 'lecture' => [
                     'id' => $lecture->getId(),
-                    'date_debut' => $dateDebut?->format('Y-m-d'),
-                    'date_fin' => $dateFin?->format('Y-m-d'),
+                    'statut' => $lecture->getStatut(),
+                    'date_debut' => $lecture->getDateDebut()?->format('Y-m-d'),
+                    'date_fin' => $lecture->getDateFin()?->format('Y-m-d'),
                     'note' => $lecture->getNote(),
-                    'avis' => $lecture->getAvis()
-                ]
+                    'avis' => $lecture->getAvis(),
+                ],
             ]);
-
         } catch (\InvalidArgumentException $exception) {
-            return $this->json([
-                'success' => false,
-                'message' => $exception->getMessage()
-            ], 422);
+            return $this->json(['success' => false, 'message' => $exception->getMessage()], 422);
         }
+    }
+
+    #[Route('/livre/{id}/lecture/{lectureId}/supprimer', name: 'app_lecture_supprimer', requirements: ['id' => '\d+', 'lectureId' => '\d+'], methods: ['POST'])]
+    // Retire uniquement la session choisie ; le livre et les autres lectures restent conservés.
+    public function supprimer(int $id, int $lectureId, Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        if (!$this->getUser()) {
+            return $this->json(['success' => false, 'message' => 'Connexion requise.'], 401);
+        }
+        if (!$this->isCsrfTokenValid('ajouter_lecture', $request->request->getString('_token'))) {
+            return $this->json(['success' => false, 'message' => 'Session expirée. Actualise la page.'], 403);
+        }
+        $lecture = $entityManager->getRepository(SessionLecture::class)->findOneBy(['id' => $lectureId, 'livre' => $id]);
+        if (!$lecture) {
+            return $this->json(['success' => false, 'message' => 'Session de lecture introuvable.'], 404);
+        }
+        $entityManager->remove($lecture);
+        $entityManager->flush();
+
+        return $this->json(['success' => true, 'message' => 'La session de lecture a été supprimée.']);
     }
 }

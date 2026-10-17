@@ -75,6 +75,11 @@
     margin-bottom: 16px;
 }
 
+/* Masque les dates sans objet pour le statut sélectionné. */
+.modal-champ[hidden] {
+    display: none;
+}
+
 .modal-champ label,
 .modal-recherche-isbn label {
     font-size: 13px;
