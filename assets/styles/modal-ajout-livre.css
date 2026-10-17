@@ -513,10 +513,6 @@ dialog#modal-ajout-livre {
     font-size: 14px;
 }
 
-#modal-lecteur-isbn video {
-    transform: scaleX(-1);
-}
-
 /* Lecture du code ISBN avec la caméra */
 #modal-zone-scanner {
     margin-top: 16px;

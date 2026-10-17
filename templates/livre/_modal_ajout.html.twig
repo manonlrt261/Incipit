@@ -23,6 +23,7 @@
     <form
         id="form-ajout-livre"
         action="{{ path(wishlist_mode ? 'app_wishlist_ajouter' : 'app_livre_modal_ajouter') }}"
+        data-recherche-isbn="{{ path('app_livre_recherche_isbn') }}"
         data-wishlist="{{ wishlist_mode ? '1' : '0' }}"
         method="post"
         enctype="multipart/form-data"

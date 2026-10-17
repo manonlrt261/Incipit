@@ -1,7 +1,7 @@
 // Gère l’ajout et la modification des livres, la recherche ISBN et le choix de leur couverture.
 import { initialiserPage } from './components/initialisation-page.js';
 
-import { Html5Qrcode } from 'html5-qrcode';
+import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 import { creerGestionnaireCouverture } from './components/couverture.js';
 
 initialiserPage(ecouter => {
@@ -208,7 +208,7 @@ initialiserPage(ecouter => {
         }
     }
 
-    // Interroge Open Library pour préremplir les informations du livre à partir de son ISBN.
+    // Recherche dans les catalogues successifs côté serveur pour préremplir le livre à partir de son ISBN.
     async function rechercherLivreParISBN() {
         if (!champRechercheISBN || !boutonRechercheISBN || !messageISBN) {
             return;
@@ -225,11 +225,9 @@ initialiserPage(ecouter => {
         messageISBN.textContent = 'Recherche du livre en cours...';
 
         try {
-            const url = new URL('https://openlibrary.org/api/books');
+            const url = new URL(form.dataset.rechercheIsbn, window.location.origin);
 
-            url.searchParams.set('bibkeys', `ISBN:${isbn}`);
-            url.searchParams.set('jscmd', 'data');
-            url.searchParams.set('format', 'json');
+            url.searchParams.set('isbn', isbn);
 
             const reponse = await fetch(url.toString());
 
@@ -238,10 +236,12 @@ initialiserPage(ecouter => {
             }
 
             const donnees = await reponse.json();
-            const livre = donnees[`ISBN:${isbn}`];
+            const livre = donnees.livre;
 
             if (!livre) {
-                messageISBN.textContent = 'Aucun livre trouvé pour cet ISBN.';
+                messageISBN.textContent = donnees.indisponible
+                    ? 'Certains catalogues sont indisponibles. Réessaie ou remplis le formulaire manuellement.'
+                    : 'Aucun livre trouvé pour cet ISBN. Tu peux remplir le formulaire manuellement.';
                 return;
             }
 
@@ -377,7 +377,7 @@ initialiserPage(ecouter => {
 
     // Active la caméra pour lire un ISBN puis lancer la recherche du livre reconnu.
     async function demarrerScannerISBN() {
-        if (!zoneScanner || !champRechercheISBN || scanEnCours) return;
+        if (!zoneScanner || !champRechercheISBN || scanEnCours || scannerISBN?.isScanning) return;
 
         scanEnCours = true;
         isbnDetecte = false;
@@ -388,22 +388,36 @@ initialiserPage(ecouter => {
         }
 
         try {
-            scannerISBN = new Html5Qrcode('modal-lecteur-isbn');
+            // Évite de chercher des QR codes et autres formats pendant la lecture d’un ISBN.
+            const scanner = new Html5Qrcode('modal-lecteur-isbn', {
+                formatsToSupport: [Html5QrcodeSupportedFormats.EAN_13]
+            });
+            scannerISBN = scanner;
 
-            await scannerISBN.start(
+            await scanner.start(
                 { facingMode: 'environment' },
                 {
-                    fps: 10,
-                    qrbox: { width: 280, height: 160 }
+                    fps: 12,
+                    // La caméra arrière et une résolution élevée facilitent la lecture des barres fines.
+                    videoConstraints: {
+                        facingMode: { ideal: 'environment' },
+                        width: { ideal: 1920 },
+                        height: { ideal: 1080 }
+                    },
+                    // Adapte le cadre à la largeur réelle, y compris sur les petits téléphones.
+                    qrbox: (largeur, hauteur) => ({
+                        width: Math.floor(largeur * 0.92),
+                        height: Math.floor(Math.min(hauteur * 0.6, largeur * 0.5, 220))
+                    })
                 },
                 async texteDecode => {
-                    if (messageISBN) {
-                        messageISBN.textContent = `Code détecté : ${texteDecode}`;
-                    }
-
                     const isbn = texteDecode.replace(/[\s-]/g, '');
 
-                    if (!/^\d{13}$/.test(isbn)) return;
+                    // Ignore les autres EAN-13 ; un ISBN commence par 978 ou 979 et possède une clé valide.
+                    if (!/^(978|979)\d{10}$/.test(isbn)) return;
+                    const somme = [...isbn.slice(0, 12)].reduce((total, chiffre, index) =>
+                        total + Number(chiffre) * (index % 2 ? 3 : 1), 0);
+                    if ((10 - somme % 10) % 10 !== Number(isbn[12])) return;
                     if (isbnDetecte) return;
 
                     isbnDetecte = true;
@@ -414,6 +428,35 @@ initialiserPage(ecouter => {
                 },
                 () => {}
             );
+
+            // Une fermeture pendant l’autorisation ou le démarrage ne doit pas laisser la caméra active.
+            if (scannerISBN !== scanner || !scanEnCours || isbnDetecte) {
+                if (scanner.isScanning) await scanner.stop();
+                scanner.clear();
+                return;
+            }
+
+            // Corrige aussi le miroir éventuellement appliqué en ligne par la bibliothèque.
+            const reglages = scanner.getRunningTrackSettings?.() || {};
+            const mobile = navigator.userAgentData?.mobile
+                || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '')
+                || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+            const miroir = !mobile && reglages.facingMode !== 'environment';
+            const video = document.querySelector('#modal-lecteur-isbn video');
+            if (video) video.style.transform = miroir ? 'scaleX(-1)' : 'none';
+
+            // Certains Safari ne permettent pas de régler la mise au point : ce réglage reste facultatif.
+            try {
+                const capacites = scanner.getRunningTrackCapabilities?.();
+                if (capacites?.focusMode?.includes('continuous')) {
+                    await scanner.applyVideoConstraints({ advanced: [{ focusMode: 'continuous' }] });
+                }
+            } catch {
+                // La détection reste active lorsque le navigateur refuse ce réglage de caméra.
+            }
+            if (messageISBN && scannerISBN === scanner && !isbnDetecte) {
+                messageISBN.textContent = 'Place le code-barres entier dans le cadre, puis éloigne légèrement le livre si l’image est floue.';
+            }
         } catch (erreur) {
             console.error('Erreur caméra ISBN :', erreur);
 

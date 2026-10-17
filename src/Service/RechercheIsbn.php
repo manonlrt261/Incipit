@@ -1,0 +1,145 @@
+<?php
+
+namespace App\Service;
+
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
+
+final class RechercheIsbn
+{
+    public function __construct(
+        private HttpClientInterface $client,
+        #[Autowire('%env(default::GOOGLE_BOOKS_API_KEY)%')]
+        private ?string $cleGoogle = null,
+    ) {
+    }
+
+    // Essaie les catalogues dans l’ordre ; une panne ne bloque pas les sources suivantes.
+    public function rechercher(string $isbn): array
+    {
+        $indisponible = false;
+        foreach (['openLibrary', 'googleBooks', 'bnf'] as $source) {
+            if ($source === 'googleBooks' && !$this->cleGoogle) {
+                continue;
+            }
+            try {
+                $livre = $this->$source($isbn);
+                if ($livre !== null) {
+                    return ['livre' => $livre, 'source' => $source];
+                }
+            } catch (\Symfony\Contracts\HttpClient\Exception\ExceptionInterface | \UnexpectedValueException $exception) {
+                $indisponible = true;
+            }
+        }
+
+        return ['livre' => null, 'indisponible' => $indisponible];
+    }
+
+    // Borne la durée des appels pour pouvoir passer rapidement au catalogue suivant.
+    private function requete(string $url, array $query, bool $json = true): array|string
+    {
+        $reponse = $this->client->request('GET', $url, [
+            'query' => $query,
+            'timeout' => 5,
+            'max_duration' => 7,
+            'headers' => ['User-Agent' => 'Incipit/1.0 (https://incipit.alwaysdata.net)'],
+        ]);
+
+        return $json ? $reponse->toArray() : $reponse->getContent();
+    }
+
+    private function openLibrary(string $isbn): ?array
+    {
+        $donnees = $this->requete('https://openlibrary.org/api/books', [
+            'bibkeys' => 'ISBN:'.$isbn, 'jscmd' => 'data', 'format' => 'json',
+        ]);
+        $livre = $donnees['ISBN:'.$isbn] ?? null;
+
+        return !empty($livre['title']) ? $livre : null;
+    }
+
+    // Ramène Google Books au format utilisé par le formulaire partagé.
+    private function googleBooks(string $isbn): ?array
+    {
+        $donnees = $this->requete('https://www.googleapis.com/books/v1/volumes', [
+            'q' => 'isbn:'.$isbn, 'key' => $this->cleGoogle, 'maxResults' => 10,
+        ]);
+        foreach ($donnees['items'] ?? [] as $item) {
+            $volume = $item['volumeInfo'] ?? [];
+            $identifiants = [];
+            foreach ($volume['industryIdentifiers'] ?? [] as $identifiant) {
+                $valeur = str_replace(['-', ' '], '', $identifiant['identifier'] ?? '');
+                $identifiants[strtolower($identifiant['type'] ?? '')][] = $valeur;
+            }
+            // Vérifie l’édition pour ne pas préremplir le formulaire avec un autre ISBN.
+            if (empty($volume['title']) || !in_array($isbn, array_merge(...array_values($identifiants)), true)) {
+                continue;
+            }
+            $couverture = $volume['imageLinks']['thumbnail'] ?? null;
+
+            return [
+                'title' => $volume['title'],
+                'subtitle' => $volume['subtitle'] ?? null,
+                'authors' => array_map(static fn (string $nom): array => ['name' => $nom], $volume['authors'] ?? []),
+                'identifiers' => $identifiants,
+                'publishers' => isset($volume['publisher']) ? [['name' => $volume['publisher']]] : [],
+                'number_of_pages' => $volume['pageCount'] ?? null,
+                'publish_date' => $volume['publishedDate'] ?? null,
+                'cover' => ['large' => is_string($couverture) ? preg_replace('~^http://~', 'https://', $couverture) : null],
+            ];
+        }
+
+        return null;
+    }
+
+    // Lit les notices Dublin Core de la BnF sans charger de ressources XML externes.
+    private function bnf(string $isbn): ?array
+    {
+        $xml = $this->requete('https://catalogue.bnf.fr/api/SRU', [
+            'version' => '1.2', 'operation' => 'searchRetrieve',
+            'query' => 'bib.isbn all "'.$isbn.'"',
+            'recordSchema' => 'dublincore', 'maximumRecords' => 1,
+        ], false);
+        $document = new \DOMDocument();
+        $ancien = libxml_use_internal_errors(true);
+        try {
+            if (!$document->loadXML($xml, LIBXML_NONET)) {
+                throw new \UnexpectedValueException('Réponse BnF invalide.');
+            }
+        } finally {
+            libxml_clear_errors();
+            libxml_use_internal_errors($ancien);
+        }
+        $xpath = new \DOMXPath($document);
+        $xpath->registerNamespace('srw', 'http://www.loc.gov/zing/srw/');
+        $xpath->registerNamespace('dc', 'http://purl.org/dc/elements/1.1/');
+        if ($xpath->evaluate('count(//srw:diagnostic | //*[local-name()="diagnostic"])') > 0) {
+            throw new \UnexpectedValueException('Recherche BnF indisponible.');
+        }
+        $valeurs = static function (string $champ) use ($xpath): array {
+            $resultats = [];
+            foreach ($xpath->query('//srw:recordData//dc:'.$champ) as $noeud) {
+                $resultats[] = trim($noeud->textContent);
+            }
+
+            return array_values(array_filter($resultats));
+        };
+        $titre = $valeurs('title')[0] ?? null;
+        if (!$titre) {
+            return null;
+        }
+
+        return [
+            'title' => trim(explode(' / ', $titre, 2)[0]),
+            'authors' => array_map(static function (string $nom): array {
+                // Retire les dates et la fonction bibliographique, puis remet le prénom avant le nom.
+                $nom = trim(preg_replace('/\s*\([^)]*\).*$/u', '', $nom));
+                $parties = explode(', ', $nom, 2);
+
+                return ['name' => count($parties) === 2 ? $parties[1].' '.$parties[0] : $nom];
+            }, $valeurs('creator')),
+            'publishers' => array_map(static fn (string $nom): array => ['name' => $nom], $valeurs('publisher')),
+            'publish_date' => $valeurs('date')[0] ?? null,
+        ];
+    }
+}
