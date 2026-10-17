@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Entity\Auteur;
+use App\Service\AuteursLivre;
 use App\Service\DonneesLecture;
 use App\Service\CouvertureLivre;
 use App\Entity\Exemplaire;
@@ -30,6 +30,7 @@ final class LivreModalController extends AbstractController
         Request $request,
         EntityManagerInterface $entityManager,
         DonneesLecture $donneesLecture,
+        AuteursLivre $gestionAuteurs,
         CouvertureLivre $couvertures,
         ?int $id = null
     ): JsonResponse {
@@ -193,32 +194,7 @@ final class LivreModalController extends AbstractController
             $auteurs = $request->request->all('auteurs');
             $genres = $request->request->all('genres');
 
-            if (count($auteurs) > 50) {
-                throw new \InvalidArgumentException(
-                    'Tu peux ajouter 50 auteurs maximum.'
-                );
-            }
-
-            // Déduplique les noms d’auteurs sans tenir compte des majuscules.
-            $auteursNettoyes = [];
-
-            foreach ($auteurs as $auteur) {
-                if (!is_string($auteur)) {
-                    throw new \InvalidArgumentException('Auteur invalide.');
-                }
-
-                $nom = trim($auteur);
-
-                if ($nom !== '') {
-                    if (mb_strlen($nom) > 255) {
-                        throw new \InvalidArgumentException(
-                            'Le nom d’un auteur est trop long.'
-                        );
-                    }
-
-                    $auteursNettoyes[mb_strtolower($nom)] = $nom;
-                }
-            }
+            $auteursNettoyes = $gestionAuteurs->nettoyer($auteurs);
 
             if (count($genres) > 50) {
                 throw new \InvalidArgumentException('Trop de genres sélectionnés.');
@@ -301,21 +277,7 @@ final class LivreModalController extends AbstractController
                 $livre->addGenre($genre);
             }
 
-            // Réutilise les auteurs existants par leur nom d’affichage avant de créer les fiches manquantes.
-            foreach ($auteursNettoyes as $nomAffichage) {
-                $auteur = $entityManager
-                    ->getRepository(Auteur::class)
-                    ->findOneBy(['nomAffichage' => $nomAffichage]);
-
-                if (!$auteur) {
-                    $auteur = new Auteur();
-                    $auteur->setNom($nomAffichage);
-                    $auteur->setNomAffichage($nomAffichage);
-                    $entityManager->persist($auteur);
-                }
-
-                $livre->addAuteur($auteur);
-            }
+            $gestionAuteurs->associer($livre, $auteursNettoyes);
 
             $entityManager->persist($livre);
 

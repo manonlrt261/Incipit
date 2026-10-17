@@ -17,22 +17,41 @@ final class RechercheIsbn
     // Essaie les catalogues dans l’ordre ; une panne ne bloque pas les sources suivantes.
     public function rechercher(string $isbn): array
     {
-        $indisponible = false;
+        $erreurs = 0;
+        $reponses = 0;
+        $livreRetenu = null;
+        $sourceRetenue = null;
         foreach (['openLibrary', 'googleBooks', 'bnf'] as $source) {
-            if ($source === 'googleBooks' && !$this->cleGoogle) {
-                continue;
-            }
+            if ($source === 'googleBooks' && !$this->cleGoogle) continue;
             try {
                 $livre = $this->$source($isbn);
-                if ($livre !== null) {
-                    return ['livre' => $livre, 'source' => $source];
+                $reponses++;
+                if ($livre === null) continue;
+                $auteurs = [];
+                foreach ($livre['authors'] ?? [] as $auteur) {
+                    $nom = is_string($auteur) ? $auteur : ($auteur['name'] ?? '');
+                    if (is_string($nom) && trim($nom) !== '') $auteurs[] = ['name' => trim($nom)];
                 }
+                if ($livreRetenu === null) {
+                    $livreRetenu = $livre;
+                    $livreRetenu['authors'] = $auteurs;
+                    $sourceRetenue = $source;
+                } elseif ($auteurs) {
+                    // Complète uniquement les auteurs manquants avec une autre notice du même ISBN.
+                    $livreRetenu['authors'] = $auteurs;
+                }
+                if ($livreRetenu['authors']) return ['livre' => $livreRetenu, 'source' => $sourceRetenue];
             } catch (\Symfony\Contracts\HttpClient\Exception\ExceptionInterface | \UnexpectedValueException $exception) {
-                $indisponible = true;
+                $erreurs++;
             }
         }
+        if ($livreRetenu !== null) return ['livre' => $livreRetenu, 'source' => $sourceRetenue];
 
-        return ['livre' => null, 'indisponible' => $indisponible];
+        return [
+            'livre' => null,
+            'indisponible' => $erreurs > 0,
+            'aucunCatalogueDisponible' => $reponses === 0 && $erreurs > 0,
+        ];
     }
 
     // Borne la durée des appels pour pouvoir passer rapidement au catalogue suivant.
@@ -129,15 +148,27 @@ final class RechercheIsbn
             return null;
         }
 
+        // Certaines notices placent l’auteur parmi les contributeurs ; exclut les rôles de traduction et d’illustration.
+        $nomsAuteurs = $valeurs('creator');
+        foreach ($valeurs('contributor') as $nom) {
+            if (preg_match('/\. (?:Auteur(?: du texte)?|Fonction indéterminée|Écrivain)\b/u', $nom)) {
+                $nomsAuteurs[] = $nom;
+            }
+        }
+        $auteurs = [];
+        foreach ($nomsAuteurs as $nom) {
+            if (preg_match('/\. (?:Traducteur|Illustrateur|Préfacier|Postfacier|Éditeur|Commentateur)\b/u', $nom)) continue;
+            // Retire les mentions bibliographiques avant de remettre le prénom devant le nom.
+            $nom = trim(preg_replace('/\s*\([^)]*\).*$/u', '', $nom));
+            $nom = trim(preg_replace('/\. (?:Auteur(?: du texte)?|Fonction indéterminée|Écrivain).*$/u', '', $nom));
+            $parties = explode(', ', $nom, 2);
+            $nom = count($parties) === 2 ? $parties[1].' '.$parties[0] : $nom;
+            if ($nom !== '') $auteurs[mb_strtolower($nom)] = ['name' => $nom];
+        }
+
         return [
             'title' => trim(explode(' / ', $titre, 2)[0]),
-            'authors' => array_map(static function (string $nom): array {
-                // Retire les dates et la fonction bibliographique, puis remet le prénom avant le nom.
-                $nom = trim(preg_replace('/\s*\([^)]*\).*$/u', '', $nom));
-                $parties = explode(', ', $nom, 2);
-
-                return ['name' => count($parties) === 2 ? $parties[1].' '.$parties[0] : $nom];
-            }, $valeurs('creator')),
+            'authors' => array_values($auteurs),
             'publishers' => array_map(static fn (string $nom): array => ['name' => $nom], $valeurs('publisher')),
             'publish_date' => $valeurs('date')[0] ?? null,
         ];

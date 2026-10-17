@@ -24,6 +24,7 @@
         id="form-ajout-livre"
         action="{{ path(wishlist_mode ? 'app_wishlist_ajouter' : 'app_livre_modal_ajouter') }}"
         data-recherche-couvertures="{{ path('app_livre_recherche_couvertures') }}"
+        data-recherche-auteurs="{{ path('app_livre_recherche_auteurs') }}"
         data-recherche-isbn="{{ path('app_livre_recherche_isbn') }}"
         data-wishlist="{{ wishlist_mode ? '1' : '0' }}"
         method="post"
@@ -222,11 +223,14 @@
                                 <input
                                     type="text"
                                     name="auteurs[]"
+                                    list="modal-suggestions-auteurs"
                                     maxlength="255"
                                     placeholder="Nom de l'auteur"
                                 >
                             </div>
                         </div>
+                        {# Suggestions partagées par les champs d’auteur, y compris ceux ajoutés dynamiquement. #}
+                        <datalist id="modal-suggestions-auteurs"></datalist>
                         <button type="button" id="modal-ajouter-auteur">
                             + Ajouter un auteur
                         </button>

@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Livre;
+use App\Service\AuteursLivre;
 use App\Entity\SessionLecture;
 use App\Service\DonneesLecture;
 use App\Service\CouvertureLivre;
@@ -26,6 +27,7 @@ final class LivreModificationController extends AbstractController
         Request $request,
         EntityManagerInterface $entityManager,
         DonneesLecture $donneesLecture,
+        AuteursLivre $gestionAuteurs,
         CouvertureLivre $couvertures
     ): JsonResponse {
         if (!$this->getUser()) {
@@ -79,6 +81,7 @@ final class LivreModificationController extends AbstractController
         $nouvelleCouverture = null;
         try {
             $lecture = $donneesLecture->lire($request);
+            $auteurs = $gestionAuteurs->nettoyer($request->request->all('auteurs'));
             $fichierCouverture = $request->files->get('fichierCouverture');
             $couvertures->valider($fichierCouverture);
             $imageCouverture = $texte($request, 'imageCouverture', 2048);
@@ -156,6 +159,8 @@ final class LivreModificationController extends AbstractController
                 $nombrePages === '' ? null : (int) $nombrePages
             );
             $livre->setDateModification(new \DateTime());
+
+            $gestionAuteurs->associer($livre, $auteurs);
 
             // Réutilise la dernière session afin de préserver l’historique des lectures précédentes.
             $session = $entityManager->getRepository(SessionLecture::class)->findOneBy(['livre' => $livre], ['dateCreation' => 'DESC', 'id' => 'DESC']);

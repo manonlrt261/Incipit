@@ -196,6 +196,12 @@ final class LivreController extends AbstractController
             ], 404);
         }
 
+        // Transmet les auteurs séparément pour modifier leurs champs sans découper les noms contenant une virgule.
+        $livre['auteurs_liste'] = $connection->fetchFirstColumn(
+            'SELECT a.nom_affichage FROM auteur a INNER JOIN livre_auteur la ON la.auteur_id = a.id WHERE la.livre_id = ? ORDER BY a.id',
+            [$id]
+        );
+
         // Charge les sessions de ce livre de la plus récente à la plus ancienne.
         $lectures = $connection->fetchAllAssociative(
             '

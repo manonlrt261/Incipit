@@ -68,6 +68,7 @@ initialiserPage(ecouter => {
 
             // Efface la saisie précédente avant de préremplir les données du livre sélectionné.
             requetePhotoISBN++;
+            annulerSuggestionsAuteurs();
             form.reset();
 
             if (champLivreId) {
@@ -115,21 +116,10 @@ initialiserPage(ecouter => {
                 }
             });
 
+            afficherChampsAuteurs(livre.auteurs_liste || []);
             actualiserDatesLecture();
             if (modeWishlist) {
                 document.getElementById('modal-publique').checked = Boolean(resultat.publique);
-                listeAuteurs.replaceChildren();
-                (livre.auteurs_liste?.length ? livre.auteurs_liste : ['']).forEach(nom => {
-                    const ligne = document.createElement('div');
-                    ligne.className = 'modal-auteur-ligne';
-                    const input = document.createElement('input');
-                    input.type = 'text';
-                    input.name = 'auteurs[]';
-                    input.maxLength = 255;
-                    input.value = nom;
-                    ligne.appendChild(input);
-                    listeAuteurs.appendChild(ligne);
-                });
                 optionsGenres?.querySelectorAll('input').forEach(input => {
                     input.checked = livre.genres_ids.map(String).includes(input.value);
                 });
@@ -220,6 +210,74 @@ initialiserPage(ecouter => {
     const listeAuteurs = document.getElementById('modal-liste-auteurs');
     const messageErreur = document.getElementById('modal-erreur-ajout');
 
+    const suggestionsAuteurs = document.getElementById('modal-suggestions-auteurs');
+    let attenteSuggestionsAuteurs = null;
+    let controleurSuggestionsAuteurs = null;
+
+    // Construit les mêmes champs avec suggestions pour la saisie, les API et la modification.
+    function creerLigneAuteur(nom = '') {
+        const ligne = document.createElement('div');
+        ligne.className = 'modal-auteur-ligne';
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.name = 'auteurs[]';
+        input.maxLength = 255;
+        input.placeholder = "Nom de l'auteur";
+        input.setAttribute('list', 'modal-suggestions-auteurs');
+        input.value = nom;
+        const supprimer = document.createElement('button');
+        supprimer.type = 'button';
+        supprimer.textContent = '×';
+        supprimer.setAttribute('aria-label', 'Supprimer cet auteur');
+        ecouter(supprimer, 'click', () => ligne.remove());
+        ligne.append(input, supprimer);
+        return ligne;
+    }
+
+    function afficherChampsAuteurs(noms) {
+        if (!listeAuteurs) return;
+        const valeurs = noms.length ? noms.slice(0, 50) : [''];
+        listeAuteurs.replaceChildren(...valeurs.map(nom => creerLigneAuteur(nom)));
+    }
+
+    // Annule les réponses tardives quand on change de livre ou ferme le formulaire.
+    function annulerSuggestionsAuteurs() {
+        clearTimeout(attenteSuggestionsAuteurs);
+        controleurSuggestionsAuteurs?.abort();
+        controleurSuggestionsAuteurs = null;
+        suggestionsAuteurs?.replaceChildren();
+    }
+    ecouter(modal, 'close', annulerSuggestionsAuteurs);
+
+    // Attend une courte pause de saisie pour proposer les auteurs déjà enregistrés sans multiplier les requêtes.
+    ecouter(listeAuteurs, 'input', event => {
+        const input = event.target;
+        if (!(input instanceof HTMLInputElement) || input.name !== 'auteurs[]' || !suggestionsAuteurs) return;
+        annulerSuggestionsAuteurs();
+        const texte = input.value.trim();
+        if (texte.length < 2) return;
+        attenteSuggestionsAuteurs = setTimeout(async () => {
+            const controleur = new AbortController();
+            controleurSuggestionsAuteurs = controleur;
+            try {
+                const url = new URL(form.dataset.rechercheAuteurs, window.location.origin);
+                url.searchParams.set('q', texte);
+                const reponse = await fetch(url, { signal: controleur.signal, headers: { Accept: 'application/json' } });
+                if (!reponse.ok) return;
+                const resultat = await reponse.json();
+                if (controleur.signal.aborted || !modal.open || input.value.trim() !== texte) return;
+                const noms = [...new Set((resultat.auteurs || []).map(auteur => auteur.nom))];
+                suggestionsAuteurs.replaceChildren(...noms.map(nom => {
+                    const option = document.createElement('option');
+                    option.value = nom;
+                    return option;
+                }));
+            } catch {
+                // La saisie libre reste disponible si les suggestions ne peuvent pas être chargées.
+            }
+        }, 250);
+    });
+
     // RECHERCHE AUTOMATIQUE PAR ISBN
 
     const champRechercheISBN = document.getElementById('modal-isbn-recherche');
@@ -272,9 +330,11 @@ initialiserPage(ecouter => {
             const livre = donnees.livre;
 
             if (!livre) {
-                messageISBN.textContent = donnees.indisponible
-                    ? 'Certains catalogues sont indisponibles. Réessaie ou remplis le formulaire manuellement.'
-                    : 'Aucun livre trouvé pour cet ISBN. Tu peux remplir le formulaire manuellement.';
+                messageISBN.textContent = donnees.aucunCatalogueDisponible
+                    ? `ISBN ${isbn} lu correctement, mais les catalogues de livres sont momentanément inaccessibles. Réessaie plus tard ou saisis le livre manuellement.`
+                    : donnees.indisponible
+                        ? `ISBN ${isbn} lu correctement, mais aucun livre trouvé dans les catalogues qui ont répondu. D’autres catalogues sont indisponibles. Tu peux réessayer ou saisir le livre manuellement.`
+                        : `ISBN ${isbn} lu correctement, mais ce livre n’a pas été trouvé dans les catalogues consultés. Saisis son titre et son auteur manuellement.`;
                 return;
             }
 
@@ -287,24 +347,7 @@ initialiserPage(ecouter => {
                 ? livre.authors.map(auteur => auteur.name).filter(Boolean)
                 : [];
 
-            if (auteurs.length && listeAuteurs) {
-                listeAuteurs.replaceChildren();
-
-                auteurs.slice(0, 50).forEach(nom => {
-                    const ligne = document.createElement('div');
-                    ligne.className = 'modal-auteur-ligne';
-
-                    const input = document.createElement('input');
-                    input.type = 'text';
-                    input.name = 'auteurs[]';
-                    input.maxLength = 255;
-                    input.placeholder = "Nom de l'auteur";
-                    input.value = nom;
-
-                    ligne.appendChild(input);
-                    listeAuteurs.appendChild(ligne);
-                });
-            }
+            if (auteurs.length) afficherChampsAuteurs(auteurs);
 
             // ISBN
             const isbn13 = livre.identifiers?.isbn_13?.[0];
@@ -345,7 +388,9 @@ initialiserPage(ecouter => {
                 gestionnaireCouverture.afficherURL(couverture, livre.title);
             }
 
-            messageISBN.textContent = 'Livre trouvé ! Vérifie les informations avant de l’ajouter.';
+            messageISBN.textContent = auteurs.length
+                ? 'Livre trouvé ! Le titre et les auteurs disponibles ont été renseignés. Vérifie les informations avant de l’ajouter.'
+                : 'Livre trouvé, mais les catalogues ne fournissent pas son auteur. Complète le champ Auteur avant de l’ajouter.';
         } catch (erreur) {
             console.error('Erreur recherche ISBN :', erreur);
 
@@ -1156,18 +1201,8 @@ initialiserPage(ecouter => {
 
         fermerGenres();
         actualiserGenres();
-        if (listeAuteurs) {
-            listeAuteurs.innerHTML = `
-                <div class="modal-auteur-ligne">
-                    <input
-                        type="text"
-                        name="auteurs[]"
-                        maxlength="255"
-                        placeholder="Nom de l'auteur"
-                    >
-                </div>
-            `;
-        }
+        annulerSuggestionsAuteurs();
+        afficherChampsAuteurs([]);
         if (messageErreur) {
             messageErreur.hidden = true;
             messageErreur.textContent = '';
@@ -1207,27 +1242,9 @@ initialiserPage(ecouter => {
 
         if (nombre >= 50) return;
 
-        const ligne = document.createElement('div');
-        ligne.className = 'modal-auteur-ligne';
-
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.name = 'auteurs[]';
-        input.maxLength = 255;
-        input.placeholder = "Nom de l'auteur";
-
-        const supprimer = document.createElement('button');
-        supprimer.type = 'button';
-        supprimer.textContent = '×';
-
-        supprimer.setAttribute('aria-label', 'Supprimer cet auteur');
-
-        // Retire uniquement la ligne de cet auteur avant l’envoi du formulaire.
-        ecouter(supprimer, 'click', () => ligne.remove());
-
-        ligne.append(input, supprimer);
-        listeAuteurs.append(ligne);
-        input.focus();
+        const ligne = creerLigneAuteur();
+        listeAuteurs.appendChild(ligne);
+        ligne.querySelector('input')?.focus();
     });
 
     // Réduit les photos du téléphone avant l’envoi pour éviter les limites de taille du serveur.
