@@ -289,3 +289,118 @@
     padding: 12px;
     font-size: 13px;
 }
+
+/* =======================================
+   ONGLETS ET CONTACTS
+   ======================================= */
+
+/* Navigation entre les prêts et les contacts, comme dans les paramètres du profil. */
+.prets-onglets {
+    display: flex;
+    gap: 8px;
+    border-bottom: 1px solid var(--color-encadre);
+    margin-bottom: 24px;
+}
+
+.prets-onglets button {
+    border: 0;
+    border-bottom: 3px solid transparent;
+    background: transparent;
+    padding: 13px 20px;
+    color: #74675d;
+    font: inherit;
+    cursor: pointer;
+}
+
+.prets-onglets button[aria-selected="true"] {
+    border-bottom-color: var(--color-secondary);
+    color: var(--color-secondary);
+    font-weight: 600;
+}
+
+.page-prets [hidden] {
+    display: none !important;
+}
+
+.page-prets .bibliotheque-logo {
+    margin-left: auto;
+}
+
+/* Liste des contacts et actions de modification ou de suppression. */
+.prets-contacts {
+    display: grid;
+    gap: 14px;
+}
+
+.prets-contact {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    border: 1px solid var(--color-encadre);
+    border-radius: 10px;
+    background: var(--color-white);
+}
+
+.prets-contact h3 {
+    margin: 0 0 6px;
+    overflow-wrap: anywhere;
+}
+
+.prets-contact p {
+    margin: 0;
+    color: var(--color-secondary);
+}
+
+.prets-contact-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.prets-contact-actions button {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--color-encadre);
+    border-radius: 8px;
+    background: transparent;
+    cursor: pointer;
+}
+
+.prets-contact-actions img {
+    width: 21px;
+    height: 21px;
+    object-fit: contain;
+}
+
+.prets-onglets button:focus-visible,
+.prets-contact-actions button:focus-visible {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 3px;
+}
+
+.prets-modale button:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+.prets-suggestions-message {
+    padding: 12px;
+    margin: 0;
+}
+
+#contact-erreur,
+#suppression-contact-erreur {
+    color: #a42828;
+}
+
+/* Les noms longs restent lisibles sur téléphone. */
+@media (max-width: 480px) {
+    .prets-contact {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+}

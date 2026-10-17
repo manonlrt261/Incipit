@@ -9,12 +9,15 @@ use App\Entity\Contact;
 use App\Entity\Exemplaire;
 use App\Repository\PretRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\DBAL\LockMode;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
+#[IsGranted('ROLE_USER')]
 #[Route('/mes-prets', name: 'app_prets_')]
 class PretController extends AbstractController
 {
@@ -40,6 +43,7 @@ class PretController extends AbstractController
 
             $listePrets[] = [
                 'id' => $pret->getId(),
+                'contactId' => $contact?->getId(),
                 'titre' => $livre?->getTitre() ?? 'Titre inconnu',
                 'auteur' => $this->obtenirAuteurs($livre),
                 'genres' => $livre ? implode('|', array_map(static fn ($genre) => $genre->getNom(), $livre->getGenres()->toArray())) : '',
@@ -54,6 +58,10 @@ class PretController extends AbstractController
 
         return $this->render('pret/index.html.twig', [
             'prets' => $listePrets,
+            'contacts' => array_map(
+                fn (Contact $contact) => $this->donneesContact($contact, $entityManager),
+                $entityManager->getRepository(Contact::class)->findBy([], ['prenom' => 'ASC', 'nom' => 'ASC', 'id' => 'ASC'])
+            ),
             'genres' => $entityManager->getRepository(\App\Entity\Genre::class)->findBy([], ['nom' => 'ASC']),
             'livresPossedes' => $entityManager->createQueryBuilder()
                 ->select('DISTINCT l')->from(Livre::class, 'l')
@@ -138,17 +146,35 @@ class PretController extends AbstractController
                 $entityManager->persist($exemplaire);
             }
 
-            // Réutilise l’emprunteur connu pour éviter de créer plusieurs contacts au même nom.
+            // L’identifiant choisi distingue les contacts portant le même prénom ou le même nom.
             $contact = null;
-            foreach ($entityManager->getRepository(Contact::class)->findAll() as $candidat) {
-                if (mb_strtolower(trim($candidat->getPrenom() . ' ' . $candidat->getNom())) === mb_strtolower($champs['emprunteur'])) {
-                    $contact = $candidat;
-                    break;
+            $idContact = $request->request->get('contact_id');
+            if ($idContact !== null && $idContact !== '') {
+                if (!is_string($idContact) || !ctype_digit($idContact)) {
+                    throw new \InvalidArgumentException('Contact invalide.');
                 }
-            }
-            if ($contact === null) {
-                $contact = (new Contact())->setPrenom($champs['emprunteur'])->setDateCreation(new \DateTime());
-                $entityManager->persist($contact);
+                $contact = $entityManager->find(Contact::class, (int) $idContact, LockMode::PESSIMISTIC_WRITE);
+                if (!$contact) {
+                    throw new \InvalidArgumentException('Ce contact n’existe plus. Sélectionnez un autre contact.');
+                }
+            } else {
+                $correspondances = [];
+                foreach ($entityManager->getRepository(Contact::class)->findAll() as $candidat) {
+                    if (mb_strtolower(trim($candidat->getPrenom().' '.$candidat->getNom())) === mb_strtolower($champs['emprunteur'])) {
+                        $correspondances[] = $candidat;
+                    }
+                }
+                if (count($correspondances) > 1) {
+                    throw new \InvalidArgumentException('Plusieurs contacts portent ce nom. Choisissez la personne dans les suggestions.');
+                }
+                $contact = $correspondances[0] ?? null;
+                if ($contact) {
+                    $entityManager->refresh($contact, LockMode::PESSIMISTIC_WRITE);
+                } else {
+                    // La saisie libre reste possible et crée un contact avec le texte saisi comme prénom.
+                    $contact = (new Contact())->setPrenom($champs['emprunteur'])->setDateCreation(new \DateTime());
+                    $entityManager->persist($contact);
+                }
             }
             $pret = (new Pret())->setExemplaire($exemplaire)->setContact($contact)
                 ->setDatePret(new \DateTime())->setDateCreation(new \DateTime())->setStatut('En cours');
@@ -157,6 +183,9 @@ class PretController extends AbstractController
             $connexion->commit();
 
             return $this->json(['success' => true], 201);
+        } catch (\InvalidArgumentException $erreur) {
+            if ($connexion->isTransactionActive()) $connexion->rollBack();
+            return $this->json(['success' => false, 'message' => $erreur->getMessage()], 422);
         } catch (\Throwable $erreur) {
             if ($connexion->isTransactionActive()) {
                 $connexion->rollBack();
@@ -206,6 +235,88 @@ class PretController extends AbstractController
                 'message' => 'Impossible de supprimer ce prêt.',
             ], 500);
         }
+    }
+
+    #[Route('/contacts/ajouter', name: 'contact_ajouter', methods: ['POST'])]
+    #[Route('/contacts/{id}/modifier', name: 'contact_modifier', requirements: ['id' => '\d+'], methods: ['POST'])]
+    // Crée ou modifie un contact ; un même prénom peut correspondre à plusieurs personnes distinctes.
+    public function enregistrerContact(Request $request, EntityManagerInterface $em, ?int $id = null): JsonResponse
+    {
+        $champs = $request->request->all();
+        if (!is_string($champs['_token'] ?? null) || !$this->isCsrfTokenValid('gerer_contacts', $champs['_token'])) {
+            return $this->json(['success' => false, 'message' => 'Session expirée. Actualisez la page.'], 403);
+        }
+        $prenom = $champs['prenom'] ?? '';
+        $nom = $champs['nom'] ?? '';
+        if (!is_string($prenom) || !is_string($nom) || trim($prenom) === '' || mb_strlen(trim($prenom)) > 255 || mb_strlen(trim($nom)) > 255) {
+            return $this->json(['success' => false, 'message' => 'Le prénom est obligatoire. Chaque champ doit contenir au maximum 255 caractères.'], 422);
+        }
+        $contact = $id === null ? new Contact() : $em->find(Contact::class, $id);
+        if (!$contact) return $this->json(['success' => false, 'message' => 'Contact introuvable.'], 404);
+        try {
+            $contact->setPrenom(trim($prenom))->setNom(trim($nom) === '' ? null : trim($nom));
+            if ($id === null) $contact->setDateCreation(new \DateTime());
+            $em->persist($contact);
+            $em->flush();
+            return $this->json(['success' => true, 'contact' => $this->donneesContact($contact, $em)], $id === null ? 201 : 200);
+        } catch (\Throwable $erreur) {
+            return $this->json(['success' => false, 'message' => 'Impossible d’enregistrer ce contact. Réessayez.'], 500);
+        }
+    }
+
+    #[Route('/contacts/{id}', name: 'contact_details', requirements: ['id' => '\d+'], methods: ['GET'])]
+    // Relit les prêts associés avant d’afficher l’avertissement de suppression.
+    public function detailsContact(Contact $contact, EntityManagerInterface $em): JsonResponse
+    {
+        return $this->json(['success' => true, 'contact' => $this->donneesContact($contact, $em)]);
+    }
+
+    #[Route('/contacts/{id}/supprimer', name: 'contact_supprimer', requirements: ['id' => '\d+'], methods: ['POST'])]
+    // Vérifie à nouveau les liens sous verrou pour empêcher la suppression d’un contact utilisé par un prêt.
+    public function supprimerContact(int $id, Request $request, EntityManagerInterface $em): JsonResponse
+    {
+        $jeton = $request->request->all()['_token'] ?? null;
+        if (!is_string($jeton) || !$this->isCsrfTokenValid('gerer_contacts', $jeton)) {
+            return $this->json(['success' => false, 'message' => 'Session expirée. Actualisez la page.'], 403);
+        }
+        $connexion = $em->getConnection();
+        $connexion->beginTransaction();
+        try {
+            $contact = $em->find(Contact::class, $id, LockMode::PESSIMISTIC_WRITE);
+            if (!$contact) {
+                $connexion->rollBack();
+                return $this->json(['success' => false, 'message' => 'Contact introuvable.'], 404);
+            }
+            $donnees = $this->donneesContact($contact, $em);
+            if ($donnees['total'] > 0) {
+                $connexion->rollBack();
+                return $this->json(['success' => false, 'message' => $donnees['encours'] > 0
+                    ? 'Ce contact a encore des prêts en cours. Supprimez les prêts concernés avant de supprimer ce contact.'
+                    : 'Ce contact est lié à l’historique de prêts. Supprimez les prêts concernés avant de supprimer ce contact.',
+                    'contact' => $donnees], 409);
+            }
+            $em->remove($contact);
+            $em->flush();
+            $connexion->commit();
+            return $this->json(['success' => true]);
+        } catch (\Throwable $erreur) {
+            if ($connexion->isTransactionActive()) $connexion->rollBack();
+            return $this->json(['success' => false, 'message' => 'Impossible de supprimer ce contact. Réessayez.'], 500);
+        }
+    }
+
+    // Partage les informations nécessaires à la liste, aux suggestions et aux avertissements.
+    private function donneesContact(Contact $contact, EntityManagerInterface $em): array
+    {
+        $repository = $em->getRepository(Pret::class);
+        return [
+            'id' => $contact->getId(), 'prenom' => $contact->getPrenom(), 'nom' => $contact->getNom() ?? '',
+            'encours' => $repository->count(['contact' => $contact, 'dateRetourEffective' => null]),
+            'total' => $repository->count(['contact' => $contact]),
+            'modifier' => $this->generateUrl('app_prets_contact_modifier', ['id' => $contact->getId()]),
+            'details' => $this->generateUrl('app_prets_contact_details', ['id' => $contact->getId()]),
+            'supprimer' => $this->generateUrl('app_prets_contact_supprimer', ['id' => $contact->getId()]),
+        ];
     }
 
     // Construit le nom des auteurs quel que soit le format disponible, avec un texte de remplacement si nécessaire.
