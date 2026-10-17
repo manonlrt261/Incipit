@@ -67,6 +67,7 @@ initialiserPage(ecouter => {
             couvertureSelectionnee = null;
 
             // Efface la saisie précédente avant de préremplir les données du livre sélectionné.
+            requetePhotoISBN++;
             form.reset();
 
             if (champLivreId) {
@@ -362,6 +363,9 @@ initialiserPage(ecouter => {
     const boutonScannerISBN = document.getElementById('modal-bouton-scanner-isbn');
 
     const zoneScanner = document.getElementById('modal-zone-scanner');
+    const photoISBN = document.getElementById('modal-photo-isbn');
+    let analysePhotoISBNEnCours = false;
+    let requetePhotoISBN = 0;
 
     const boutonArreterScanner = document.getElementById('modal-arreter-scanner');
 
@@ -468,11 +472,8 @@ initialiserPage(ecouter => {
             // Partage la validation entre la lecture vidéo et l’analyse des images haute résolution.
             const reconnaitreISBN = async texteDecode => {
                 if (scannerISBN !== scanner || isbnDetecte) return;
-                const isbn = texteDecode.replace(/[\s-]/g, '');
-                if (!/^(978|979)\d{10}$/.test(isbn)) return;
-                const somme = [...isbn.slice(0, 12)].reduce((total, chiffre, index) =>
-                    total + Number(chiffre) * (index % 2 ? 3 : 1), 0);
-                if ((10 - somme % 10) % 10 !== Number(isbn[12])) return;
+                const isbn = isbnDepuisCodeBarres(texteDecode);
+                if (!isbn) return;
                 isbnDetecte = true;
                 champRechercheISBN.value = isbn;
                 await arreterScannerISBN();
@@ -574,8 +575,83 @@ initialiserPage(ecouter => {
         }
     }
 
-    // Démarre la lecture d’un ISBN avec la caméra.
-    ecouter(boutonScannerISBN, 'click', () => demarrerScannerISBN());
+    // Reconnaît les appareils mobiles, y compris les iPad qui annoncent un navigateur de Mac.
+    function appareilMobile() {
+        return Boolean(navigator.userAgentData?.mobile
+            || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '')
+            || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
+    }
+
+    // La photo et la webcam acceptent uniquement un ISBN EAN-13 dont la clé est correcte.
+    function isbnDepuisCodeBarres(texte) {
+        const isbn = String(texte).replace(/[\s-]/g, '');
+        if (!/^(978|979)\d{10}$/.test(isbn)) return null;
+        const somme = [...isbn.slice(0, 12)].reduce((total, chiffre, index) =>
+            total + Number(chiffre) * (index % 2 ? 3 : 1), 0);
+        return (10 - somme % 10) % 10 === Number(isbn[12]) ? isbn : null;
+    }
+
+    if (appareilMobile() && boutonScannerISBN?.lastChild?.nodeType === 3) {
+        boutonScannerISBN.lastChild.textContent = ' Photographier le code-barres';
+    }
+
+    // Sur ordinateur, conserve le scan vidéo ; sur téléphone, ouvre directement la capture native.
+    ecouter(boutonScannerISBN, 'click', () => {
+        if (!appareilMobile() || !photoISBN) {
+            void demarrerScannerISBN();
+            return;
+        }
+        if (analysePhotoISBNEnCours) return;
+        photoISBN.value = '';
+        if (messageISBN) messageISBN.textContent = 'Photographie le code-barres entier au centre de l’image. Attends qu’il soit net, puis valide la photo.';
+        photoISBN.click();
+    });
+
+    // Analyse localement la photo en pleine résolution ; seule la valeur ISBN part vers la recherche de livres.
+    ecouter(photoISBN, 'change', async () => {
+        const fichier = photoISBN.files?.[0];
+        if (!fichier || analysePhotoISBNEnCours || !modal.open) return;
+        const numero = ++requetePhotoISBN;
+        analysePhotoISBNEnCours = true;
+        if (boutonScannerISBN) boutonScannerISBN.disabled = true;
+        let lecteurPhoto = null;
+        try {
+            await arreterScannerISBN();
+            arreterCameraCouverture();
+            if (numero !== requetePhotoISBN || !modal.open) return;
+            if (messageISBN) messageISBN.textContent = 'Analyse du code-barres sur la photo…';
+            lecteurPhoto = new Html5Qrcode('modal-lecteur-isbn-photo', {
+                formatsToSupport: [Html5QrcodeSupportedFormats.EAN_13],
+                // Utilise le décodeur JavaScript pour éviter les blocages de certains détecteurs natifs.
+                experimentalFeatures: { useBarCodeDetectorIfSupported: false }
+            });
+            const resultat = await lecteurPhoto.scanFileV2(fichier, false);
+            if (numero !== requetePhotoISBN || !modal.open) return;
+            const isbn = isbnDepuisCodeBarres(resultat.decodedText);
+            if (!isbn) throw new Error('ISBN non reconnu');
+            champRechercheISBN.value = isbn;
+            await rechercherLivreParISBN();
+        } catch {
+            if (numero === requetePhotoISBN && modal.open && messageISBN) {
+                messageISBN.textContent = 'Aucun ISBN lisible sur cette photo. Reprends le code-barres entier, net et bien éclairé, ou saisis son numéro manuellement.';
+            }
+        } finally {
+            try {
+                lecteurPhoto?.clear();
+            } catch {
+                // Le formulaire peut avoir été fermé pendant l’analyse.
+            }
+            photoISBN.value = '';
+            analysePhotoISBNEnCours = false;
+            if (boutonScannerISBN) boutonScannerISBN.disabled = false;
+        }
+    });
+
+    // Annuler la capture permet de réessayer sans lancer de requête ni modifier l’ISBN.
+    ecouter(photoISBN, 'cancel', () => {
+        if (messageISBN) messageISBN.textContent = '';
+    });
+    ecouter(modal, 'close', () => { requetePhotoISBN++; });
 
     // Relance l’autofocus uniquement si le navigateur expose ce réglage.
     async function reglerMiseAuPointISBN(scanner) {
@@ -1050,6 +1126,7 @@ initialiserPage(ecouter => {
 
     // Partage la remise à zéro entre l’ouverture d’un ajout et la fermeture du formulaire.
     function reinitialiserFormulaire() {
+        requetePhotoISBN++;
         form.reset();
         couvertureSelectionnee = null;
         if (boutonCouverture?.lastChild?.nodeType === 3) {

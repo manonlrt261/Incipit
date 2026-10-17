@@ -66,6 +66,10 @@
                     </button>
                 </div>
 
+                {# Sur téléphone, la capture native utilise la mise au point de l’appareil photo. #}
+                <input type="file" id="modal-photo-isbn" accept="image/jpeg,image/png" capture="environment" hidden>
+                <div id="modal-lecteur-isbn-photo" hidden></div>
+
                 <div id="modal-zone-scanner" hidden>
 
                     <p id="modal-instructions-scanner">
