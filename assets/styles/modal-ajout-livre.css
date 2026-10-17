@@ -559,6 +559,25 @@ dialog#modal-ajout-livre {
     max-width: 100%;
 }
 
+/* Choix de l’objectif et zoom du scanner */
+#modal-camera-isbn,
+#modal-zoom-isbn {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    margin-bottom: 12px;
+    accent-color: var(--color-secondary);
+}
+
+#modal-camera-isbn {
+    padding: 10px;
+    border: 1px solid var(--color-secondary);
+    border-radius: 8px;
+    font: inherit;
+    color: var(--color-secondary);
+    background: var(--color-fond);
+}
+
 /* Photographie de la couverture */
 .modal-camera-zone:not([hidden]) {
     display: flex;

@@ -79,7 +79,11 @@
                     Arrêter le scan
                 </button>
 
+                {# Permet de choisir un objectif net et de zoomer sans rapprocher le livre. #}
+                <select id="modal-camera-isbn" aria-label="Caméra utilisée pour le scan" hidden></select>
+                <input id="modal-zoom-isbn" type="range" aria-label="Zoom du scanner" hidden>
                 <div id="modal-lecteur-isbn"></div>
+                <div id="modal-lecteur-isbn-hd" hidden></div>
 
                 </div>
 

@@ -333,12 +333,28 @@ initialiserPage(ecouter => {
 
     const boutonArreterScanner = document.getElementById('modal-arreter-scanner');
 
+    const choixCameraISBN = document.getElementById('modal-camera-isbn');
+    const zoomISBN = document.getElementById('modal-zoom-isbn');
+    let minuterieHauteResolution = null;
+    let lecteurHauteResolution = null;
     let scannerISBN = null;
     let scanEnCours = false;
     let isbnDetecte = false;
 
     // Arrête la lecture des codes et libère la caméra même si son démarrage était encore en cours.
     async function arreterScannerISBN() {
+        clearTimeout(minuterieHauteResolution);
+        minuterieHauteResolution = null;
+        if (lecteurHauteResolution) {
+            try {
+                lecteurHauteResolution.clear();
+            } catch {
+                // Une image en cours d’analyse termine sans réactiver la caméra.
+            }
+            lecteurHauteResolution = null;
+        }
+        if (zoomISBN) zoomISBN.hidden = true;
+
         // Empêcher la prise en compte de nouveaux scans
         scanEnCours = false;
         isbnDetecte = true;
@@ -376,7 +392,7 @@ initialiserPage(ecouter => {
     }
 
     // Active la caméra pour lire un ISBN puis lancer la recherche du livre reconnu.
-    async function demarrerScannerISBN() {
+    async function demarrerScannerISBN(cameraId = null) {
         if (!zoneScanner || !champRechercheISBN || scanEnCours || scannerISBN?.isScanning) return;
 
         scanEnCours = true;
@@ -394,38 +410,57 @@ initialiserPage(ecouter => {
             });
             scannerISBN = scanner;
 
+            // Après l’autorisation, propose les objectifs disponibles et privilégie la caméra arrière standard.
+            let cameras = [];
+            try {
+                cameras = await Html5Qrcode.getCameras();
+            } catch {
+                // Le navigateur peut autoriser la vidéo sans exposer la liste des caméras.
+            }
+            if (scannerISBN !== scanner || !scanEnCours) return;
+            const principale = cameras.find(camera =>
+                /back|rear|arrière|environment/i.test(camera.label)
+                && !/ultra|tele|télé|wide angle|grand.angle/i.test(camera.label));
+            const cameraChoisie = cameraId || principale?.id;
+            if (choixCameraISBN) {
+                choixCameraISBN.replaceChildren();
+                cameras.forEach((camera, index) => {
+                    const option = document.createElement('option');
+                    option.value = camera.id;
+                    option.textContent = camera.label || `Caméra ${index + 1}`;
+                    choixCameraISBN.appendChild(option);
+                });
+                choixCameraISBN.hidden = cameras.length < 2;
+            }
+
+            // Partage la validation entre la lecture vidéo et l’analyse des images haute résolution.
+            const reconnaitreISBN = async texteDecode => {
+                if (scannerISBN !== scanner || isbnDetecte) return;
+                const isbn = texteDecode.replace(/[\s-]/g, '');
+                if (!/^(978|979)\d{10}$/.test(isbn)) return;
+                const somme = [...isbn.slice(0, 12)].reduce((total, chiffre, index) =>
+                    total + Number(chiffre) * (index % 2 ? 3 : 1), 0);
+                if ((10 - somme % 10) % 10 !== Number(isbn[12])) return;
+                isbnDetecte = true;
+                champRechercheISBN.value = isbn;
+                await arreterScannerISBN();
+                await rechercherLivreParISBN();
+            };
+
             await scanner.start(
-                { facingMode: 'environment' },
+                cameraChoisie || { facingMode: 'environment' },
                 {
-                    fps: 12,
-                    // La caméra arrière et une résolution élevée facilitent la lecture des barres fines.
+                    fps: 8,
+                    // Sans cadre de découpe, un code éloigné ou décentré reste dans la zone analysée.
                     videoConstraints: {
-                        facingMode: { ideal: 'environment' },
+                        ...(cameraChoisie
+                            ? { deviceId: { exact: cameraChoisie } }
+                            : { facingMode: { ideal: 'environment' } }),
                         width: { ideal: 1920 },
                         height: { ideal: 1080 }
-                    },
-                    // Adapte le cadre à la largeur réelle, y compris sur les petits téléphones.
-                    qrbox: (largeur, hauteur) => ({
-                        width: Math.floor(largeur * 0.92),
-                        height: Math.floor(Math.min(hauteur * 0.6, largeur * 0.5, 220))
-                    })
+                    }
                 },
-                async texteDecode => {
-                    const isbn = texteDecode.replace(/[\s-]/g, '');
-
-                    // Ignore les autres EAN-13 ; un ISBN commence par 978 ou 979 et possède une clé valide.
-                    if (!/^(978|979)\d{10}$/.test(isbn)) return;
-                    const somme = [...isbn.slice(0, 12)].reduce((total, chiffre, index) =>
-                        total + Number(chiffre) * (index % 2 ? 3 : 1), 0);
-                    if ((10 - somme % 10) % 10 !== Number(isbn[12])) return;
-                    if (isbnDetecte) return;
-
-                    isbnDetecte = true;
-                    champRechercheISBN.value = isbn;
-
-                    await arreterScannerISBN();
-                    await rechercherLivreParISBN();
-                },
+                reconnaitreISBN,
                 () => {}
             );
 
@@ -444,18 +479,54 @@ initialiserPage(ecouter => {
             const miroir = !mobile && reglages.facingMode !== 'environment';
             const video = document.querySelector('#modal-lecteur-isbn video');
             if (video) video.style.transform = miroir ? 'scaleX(-1)' : 'none';
+            if (choixCameraISBN && reglages.deviceId) choixCameraISBN.value = reglages.deviceId;
 
-            // Certains Safari ne permettent pas de régler la mise au point : ce réglage reste facultatif.
-            try {
-                const capacites = scanner.getRunningTrackCapabilities?.();
-                if (capacites?.focusMode?.includes('continuous')) {
-                    await scanner.applyVideoConstraints({ advanced: [{ focusMode: 'continuous' }] });
-                }
-            } catch {
-                // La détection reste active lorsque le navigateur refuse ce réglage de caméra.
+            await reglerMiseAuPointISBN(scanner);
+            if (scannerISBN !== scanner || isbnDetecte) return;
+            const capacites = scanner.getRunningTrackCapabilities?.() || {};
+            if (zoomISBN && capacites.zoom && capacites.zoom.max > capacites.zoom.min) {
+                zoomISBN.min = capacites.zoom.min;
+                zoomISBN.max = Math.min(capacites.zoom.max, 4);
+                zoomISBN.step = capacites.zoom.step || 0.1;
+                zoomISBN.value = reglages.zoom || capacites.zoom.min;
+                zoomISBN.hidden = false;
+            }
+
+            // Le lecteur vidéo réduit les images à la largeur de l’écran : cette seconde lecture garde les barres fines.
+            if (video && typeof video.videoWidth === 'number') {
+                const lecteur = new Html5Qrcode('modal-lecteur-isbn-hd', {
+                    formatsToSupport: [Html5QrcodeSupportedFormats.EAN_13]
+                });
+                lecteurHauteResolution = lecteur;
+                const canvas = document.createElement('canvas');
+                const analyserImage = async () => {
+                    if (scannerISBN !== scanner || isbnDetecte) return;
+                    try {
+                        if (video.readyState >= 2 && video.videoWidth > 0) {
+                            canvas.width = video.videoWidth;
+                            canvas.height = video.videoHeight;
+                            canvas.getContext('2d').drawImage(video, 0, 0);
+                            const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                            if (blob && scannerISBN === scanner && !isbnDetecte) {
+                                const resultat = await lecteur.scanFileV2(new File([blob], 'isbn.png', { type: 'image/png' }), false);
+                                await reconnaitreISBN(resultat.decodedText);
+                            }
+                        }
+                    } catch {
+                        // Une image sans code lisible est normale ; la prochaine est analysée sans alerte.
+                    } finally {
+                        if (scannerISBN === scanner && !isbnDetecte) {
+                            minuterieHauteResolution = setTimeout(analyserImage, 800);
+                        } else {
+                            try { lecteur.clear(); } catch { /* Le lecteur a déjà été nettoyé. */ }
+                        }
+                    }
+                };
+                minuterieHauteResolution = setTimeout(analyserImage, 500);
             }
             if (messageISBN && scannerISBN === scanner && !isbnDetecte) {
-                messageISBN.textContent = 'Place le code-barres entier dans le cadre, puis éloigne légèrement le livre si l’image est floue.';
+                messageISBN.textContent = 'Scan actif. Garde le code entier visible et éloigne le livre jusqu’à obtenir une image nette. Utilise le zoom ou une autre caméra si ces réglages sont proposés.'
+                    + (capacites.focusMode?.includes('continuous') ? ' Touche l’image pour relancer l’autofocus.' : ' La mise au point reste gérée par le téléphone.');
             }
         } catch (erreur) {
             console.error('Erreur caméra ISBN :', erreur);
@@ -472,7 +543,42 @@ initialiserPage(ecouter => {
     }
 
     // Démarre la lecture d’un ISBN avec la caméra.
-    ecouter(boutonScannerISBN, 'click', demarrerScannerISBN);
+    ecouter(boutonScannerISBN, 'click', () => demarrerScannerISBN());
+
+    // Relance l’autofocus uniquement si le navigateur expose ce réglage.
+    async function reglerMiseAuPointISBN(scanner) {
+        try {
+            const modes = scanner.getRunningTrackCapabilities?.()?.focusMode || [];
+            if (modes.includes('continuous')) {
+                await scanner.applyVideoConstraints({ advanced: [{ focusMode: 'continuous' }] });
+            }
+        } catch {
+            // La caméra continue à scanner même si Safari ne permet pas de piloter la mise au point.
+        }
+    }
+
+    ecouter(document.getElementById('modal-lecteur-isbn'), 'click', () => {
+        if (scannerISBN?.isScanning) reglerMiseAuPointISBN(scannerISBN);
+    });
+
+    // Coupe l’ancien flux avant d’ouvrir l’objectif choisi pour éviter les caméras concurrentes.
+    ecouter(choixCameraISBN, 'change', async () => {
+        const cameraId = choixCameraISBN.value;
+        await arreterScannerISBN();
+        if (modal.open) await demarrerScannerISBN(cameraId);
+    });
+
+    // Le zoom permet de rester à une distance où la caméra peut faire la mise au point.
+    ecouter(zoomISBN, 'change', async () => {
+        const scanner = scannerISBN;
+        if (!scanner?.isScanning) return;
+        try {
+            await scanner.applyVideoConstraints({ advanced: [{ zoom: Number(zoomISBN.value) }] });
+            await reglerMiseAuPointISBN(scanner);
+        } catch {
+            if (messageISBN) messageISBN.textContent = 'Le zoom n’est pas disponible sur cette caméra. Le scan reste actif.';
+        }
+    });
 
     // Arrête la caméra et la recherche de codes ISBN.
     ecouter(boutonArreterScanner, 'click', arreterScannerISBN);
