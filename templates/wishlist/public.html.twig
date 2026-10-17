@@ -3,48 +3,63 @@
 {% block title %}Wishlist publique | Incipit{% endblock %}
 
 {% block body %}
-<main class="bibliotheque wishlist-publique">
-    {# Permet de revenir à l’accueil public sans accéder aux actions privées de la wishlist. #}
-    <header class="bibliotheque-header">
-        <a href="{{ path('app_accueil') }}">← Retour à l’accueil</a>
-        <img src="{{ asset('images/incipit.png') }}" class="bibliotheque-logo" alt="Incipit">
-    </header>
+<div class="accueil wishlist-publique">
+    {# Partage la bannière et l’accès à la connexion des autres pages publiques. #}
+    {% include 'accueil/_entete.html.twig' only %}
 
-    <h1>Ma wishlist</h1>
-    <p>Les livres que je souhaite lire un jour.</p>
-
-    {# Le contrôleur fournit uniquement les souhaits dont la visibilité publique est activée. #}
-    <div class="wishlist-grille">
-        {% for souhait in souhaits %}
-            {% set livre = souhait.livre %}
-
-            {# Prépare les noms affichés en privilégiant le nom d’affichage de chaque auteur. #}
-            {% set auteurs = [] %}
-            {% for auteur in livre.auteurs %}
-                {% set auteurs = auteurs|merge([
-                    auteur.nomAffichage ?: (auteur.prenom ~ ' ' ~ auteur.nom)|trim
-                ]) %}
-            {% endfor %}
-
-            <article class="wishlist-carte">
-                {# Conserve les URL distantes et les chemins absolus ; complète les chemins locaux relatifs. #}
-                <div class="wishlist-couverture">
-                    {% if livre.imageCouverture %}
-                        <img
-                            src="{{ livre.imageCouverture starts with 'http' or livre.imageCouverture starts with '/' ? livre.imageCouverture : '/' ~ livre.imageCouverture }}"
-                            alt="Couverture de {{ livre.titre }}"
-                        >
-                    {% else %}
-                        <span aria-label="Couverture non renseignée"></span>
-                    {% endif %}
+    <main class="accueil-main">
+        <section class="accueil-section">
+            <div class="accueil-section-entete">
+                <img class="accueil-section-icone" src="{{ asset('images/stars.png') }}" alt="">
+                <div class="accueil-section-titres">
+                    <h2>Ma wishlist</h2>
+                    <p>Les livres que je souhaite lire un jour.</p>
                 </div>
+                <a class="accueil-lien" href="{{ path('app_accueil') }}">
+                    ← Retour à l'accueil
+                </a>
+            </div>
 
-                <h2>{{ livre.titre }}</h2>
-                <p>{{ auteurs is empty ? 'Auteur non renseigné' : auteurs|join(', ') }}</p>
-            </article>
-        {% else %}
-            <p>Aucun livre public dans ma wishlist pour le moment.</p>
-        {% endfor %}
-    </div>
-</main>
+            {# Affiche uniquement les souhaits publics encore souhaités, avec les cartes de la wishlist personnelle. #}
+            {% if souhaits is empty %}
+                <p class="accueil-vide">Aucun livre public dans ma wishlist pour le moment.</p>
+            {% else %}
+                <div class="wishlist-grille">
+                    {% for souhait in souhaits %}
+                        {% set livre = souhait.livre %}
+
+                        {# Prépare les noms affichés en privilégiant le nom d’affichage de chaque auteur. #}
+                        {% set auteurs = [] %}
+                        {% for auteur in livre.auteurs %}
+                            {% set auteurs = auteurs|merge([
+                                auteur.nomAffichage ?: (auteur.prenom ~ ' ' ~ auteur.nom)|trim
+                            ]) %}
+                        {% endfor %}
+
+                        <article class="wishlist-carte">
+                            {# Conserve les URL distantes et les chemins absolus ; complète les chemins locaux relatifs. #}
+                            <div class="wishlist-couverture">
+                                {% if livre.imageCouverture %}
+                                    <img
+                                        src="{{ livre.imageCouverture starts with 'http' or livre.imageCouverture starts with '/' ? livre.imageCouverture : '/' ~ livre.imageCouverture }}"
+                                        alt="Couverture de {{ livre.titre }}"
+                                    >
+                                {% else %}
+                                    <span aria-label="Couverture non renseignée"></span>
+                                {% endif %}
+                            </div>
+
+                            <h2>{{ livre.titre }}</h2>
+                            <p class="wishlist-auteur">{{ auteurs is empty ? 'Auteur non renseigné' : auteurs|join(', ') }}</p>
+                            <p class="wishlist-date">
+                                <img src="{{ asset('images/calendrier.png') }}" alt="">
+                                Ajouté le {{ souhait.dateAjout|date('d/m/Y') }}
+                            </p>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </section>
+    </main>
+</div>
 {% endblock %}
