@@ -4,6 +4,25 @@ import { creerFiltresLivres } from './components/filtres-livres.js';
 
 
 initialiserPage((ecouter) => {
+    // Les fiches privées et publiques utilisent les mêmes interactions, sans nouvel appel réseau.
+    ecouter(document, 'click', event => {
+        if (!(event.target instanceof Element)) return;
+        const fermeture = event.target.closest('[data-fermer-fiche]');
+        if (fermeture) {
+            fermeture.closest('dialog')?.close();
+            return;
+        }
+        if (event.target.closest('button, a, input, select')) return;
+        const carte = event.target.closest('[data-fiche-souhait]');
+        if (carte) document.getElementById(carte.dataset.ficheSouhait)?.showModal();
+    });
+    ecouter(document, 'keydown', event => {
+        if (!(event.target instanceof Element) || !event.target.matches('[data-fiche-souhait]')) return;
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        event.preventDefault();
+        document.getElementById(event.target.dataset.ficheSouhait)?.showModal();
+    });
+
     const page = document.getElementById('page-wishlist');
     if (!page) return;
     const grille = document.getElementById('wishlist-livres');
@@ -28,15 +47,20 @@ initialiserPage((ecouter) => {
     ecouter(grille, 'click', async event => {
         if (!(event.target instanceof Element)) return;
         const bouton = event.target.closest('button[data-action]');
-        const carte = bouton?.closest('.wishlist-carte');
+        // Les commandes de la fiche utilisent la même carte et les mêmes routes que la liste.
+        const fiche = bouton?.closest('.wishlist-details');
+        const carte = bouton?.closest('.wishlist-carte') || (fiche
+            ? [...grille.querySelectorAll('.wishlist-carte')].find(element => element.dataset.id === fiche.dataset.souhaitId)
+            : null);
         if (!carte || bouton.disabled) return;
         message.hidden = true;
         const action = bouton.dataset.action;
         if (action === 'modifier') {
+            fiche?.close();
             document.dispatchEvent(new CustomEvent('livre:modifier', { detail: { id: carte.dataset.id } }));
             return;
         }
-        const boutons = [...carte.querySelectorAll('button')];
+        const boutons = [...carte.querySelectorAll('button'), ...(fiche?.querySelectorAll('button[data-action]') || [])];
         boutons.forEach(element => { element.disabled = true; });
         try {
             const donnees = new FormData();
@@ -47,6 +71,9 @@ initialiserPage((ecouter) => {
             });
             const resultat = await reponse.json();
             if (!reponse.ok || !resultat.success) throw new Error(resultat.message || 'Impossible d’enregistrer cette action.');
+            const ficheLiee = document.getElementById(carte.dataset.ficheSouhait);
+            if (ficheLiee?.open) ficheLiee.close();
+            ficheLiee?.remove();
             carte.remove();
             filtrer();
         } catch (erreur) {

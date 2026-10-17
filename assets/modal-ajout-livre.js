@@ -65,6 +65,8 @@ initialiserPage((ecouter) => {
             }
 
             const valeurs = {
+                prixEstime: resultat.prixEstime,
+                lienAchat: resultat.lienAchat,
                 titre: livre.titre,
                 sousTitre: livre.sous_titre,
                 saga: livre.saga,

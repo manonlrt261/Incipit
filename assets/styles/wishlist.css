@@ -200,3 +200,52 @@
         margin-left: 0;
     }
 }
+
+/* =======================================
+   COUVERTURES ET FICHES DÉTAILLÉES
+   ======================================= */
+
+/* Centre les couvertures des listes privées et publiques. */
+.wishlist-couverture {
+    display: flex;
+    justify-content: center;
+}
+
+.wishlist-carte[data-fiche-souhait] {
+    cursor: pointer;
+}
+
+.wishlist-carte[data-fiche-souhait]:focus-visible {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 3px;
+}
+
+/* Hérite de la fenêtre des lectures et ajoute seulement les styles des données wishlist. */
+.wishlist-details:not([open]) {
+    display: none;
+}
+
+.wishlist-details .wishlist-details-titre {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-weight: 700;
+    color: var(--color-terra);
+}
+
+.wishlist-details-sous-titre {
+    margin: 0 0 10px;
+    color: #666;
+    font-size: 15px;
+}
+
+.wishlist-details-auteurs {
+    margin: 0 0 25px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    font-size: 15px;
+    color: var(--color-secondary);
+}
+
+.wishlist-details .details-livre-metadonnees a {
+    color: var(--color-terra);
+    overflow-wrap: anywhere;
+}

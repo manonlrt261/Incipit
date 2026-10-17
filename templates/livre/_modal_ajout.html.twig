@@ -317,7 +317,7 @@
                     >
                 </div>
                 <div class="modal-champ">
-                    <label for="modal-date-publication">Date de publication</label>
+                    <label for="modal-date-publication">{{ wishlist_mode ? 'Date de sortie (facultatif)' : 'Date de publication' }}</label>
                     <input
                         type="date"
                         id="modal-date-publication"
@@ -343,6 +343,20 @@
 
         {# La wishlist propose la visibilité publique ; les livres possédés proposent plutôt un statut de lecture et une note. #}
         {% if wishlist_mode %}
+        {# Conserve le prix et le lien avec le souhait, sans créer de livre possédé. #}
+        <section class="modal-section">
+            <h3>Informations d’achat</h3>
+            <div class="modal-deux-colonnes">
+                <div class="modal-champ">
+                    <label for="modal-prix-estime">Prix en euros (facultatif)</label>
+                    <input type="number" id="modal-prix-estime" name="prixEstime" min="0" max="99999999.99" step="0.01" inputmode="decimal">
+                </div>
+                <div class="modal-champ">
+                    <label for="modal-lien-achat">Lien (facultatif)</label>
+                    <input type="url" id="modal-lien-achat" name="lienAchat" maxlength="2048" placeholder="https://…">
+                </div>
+            </div>
+        </section>
         <section class="modal-section">
             <label class="wishlist-visibilite"><input type="checkbox" id="modal-publique" name="publique" value="1">Rendre publique</label>
             <p>Ce livre apparaîtra dans la wishlist de l’accueil public si cette case est cochée.</p>

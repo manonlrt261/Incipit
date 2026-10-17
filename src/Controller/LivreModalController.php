@@ -84,6 +84,24 @@ final class LivreModalController extends AbstractController
         };
 
         try {
+            // Les informations d’achat restent propres au souhait et sont facultatives.
+            $prixEstime = null;
+            $lienAchat = null;
+            if ($modeWishlist) {
+                $prixEstime = $valeur($request, 'prixEstime', 20);
+                if ($prixEstime !== null) {
+                    $prixEstime = str_replace(',', '.', $prixEstime);
+                    if (!preg_match('/^\d{1,8}(?:\.\d{1,2})?$/', $prixEstime)) {
+                        throw new \InvalidArgumentException('Le prix doit être positif, avec deux décimales maximum.');
+                    }
+                }
+                $lienAchat = $valeur($request, 'lienAchat', 2048);
+                if ($lienAchat !== null && (!filter_var($lienAchat, FILTER_VALIDATE_URL)
+                    || !in_array(strtolower((string) parse_url($lienAchat, PHP_URL_SCHEME)), ['http', 'https'], true))) {
+                    throw new \InvalidArgumentException('Le lien doit être une adresse HTTP ou HTTPS valide.');
+                }
+            }
+
             $sousTitre = $valeur($request, 'sousTitre', 255);
             $saga = $valeur($request, 'saga', 255);
             $edition = $valeur($request, 'edition', 255);
@@ -329,7 +347,8 @@ final class LivreModalController extends AbstractController
                     $souhait = (new Souhait())->setLivre($livre)->setDateAjout(new \DateTime())->setStatut('souhaité');
                     $entityManager->persist($souhait);
                 }
-                $souhait->setPublique($request->request->getBoolean('publique'));
+                $souhait->setPublique($request->request->getBoolean('publique'))
+                    ->setPrixEstime($prixEstime)->setLienAchat($lienAchat);
             } else {
             $exemplaire = new Exemplaire();
             $exemplaire->setLivre($livre);

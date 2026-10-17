@@ -1,0 +1,69 @@
+{# Réutilise la présentation de la fiche des lectures ; les actions dépendent de la page d’origine. #}
+{% set publique = publique|default(false) %}
+<dialog id="fiche-souhait-{{ souhait.id }}" class="modal-details-livre wishlist-details" data-souhait-id="{{ souhait.id }}" aria-labelledby="fiche-souhait-titre-{{ souhait.id }}">
+    <div class="details-livre-contenu">
+        <header class="details-livre-entete">
+            <h2 id="fiche-souhait-titre-{{ souhait.id }}">Détails du livre</h2>
+            <button type="button" class="modal-bouton-fermer" data-fermer-fiche aria-label="Fermer">×</button>
+        </header>
+
+        {# Les commandes de gestion restent réservées à la wishlist privée. #}
+        {% if not publique %}
+            <div class="details-livre-actions">
+                <button type="button" data-action="modifier" class="details-livre-modifier">
+                    <img src="{{ asset('images/modifier.png') }}" alt="">Modifier le livre
+                </button>
+                <button type="button" data-action="acheter" class="details-livre-modifier">Marquer comme acheté</button>
+                <button type="button" data-action="supprimer" class="details-livre-retirer">
+                    <img src="{{ asset('images/poubelle.png') }}" alt="">Supprimer de ma wishlist
+                </button>
+            </div>
+        {% endif %}
+
+        <section class="details-livre-principal">
+            <div class="details-livre-couverture-zone">
+                <div class="details-livre-couverture">
+                    {% if livre.imageCouverture %}
+                        <img src="{{ livre.imageCouverture starts with 'http' or livre.imageCouverture starts with '/' ? livre.imageCouverture : '/' ~ livre.imageCouverture }}" alt="Couverture de {{ livre.titre }}">
+                    {% else %}
+                        <span>Aucune couverture</span>
+                    {% endif %}
+                </div>
+                {% if not publique %}
+                    <button type="button" data-action="modifier" class="bouton-couverture">
+                        Modifier la couverture
+                    </button>
+                {% endif %}
+            </div>
+
+            <div class="details-livre-informations">
+                <h3 class="wishlist-details-titre">{{ livre.titre }}</h3>
+                {% if livre.sousTitre %}<p class="wishlist-details-sous-titre">{{ livre.sousTitre }}</p>{% endif %}
+                <p class="wishlist-details-auteurs">{{ auteurs|join(', ') ?: 'Auteur non renseigné' }}</p>
+
+                {# Prix et lien complètent uniquement la fiche wishlist, sans modifier celle des lectures. #}
+                <div class="details-livre-metadonnees">
+                    <div><strong>Saga</strong><span>{{ livre.saga ?: '—' }}</span></div>
+                    <div><strong>Tome</strong><span>{{ livre.tome ?: '—' }}</span></div>
+                    <div><strong>Genre(s)</strong><span>{{ livre.genres|map(genre => genre.nom)|join(', ') ?: '—' }}</span></div>
+                    <div><strong>ISBN-13</strong><span>{{ livre.isbn13 ?: '—' }}</span></div>
+                    <div><strong>ISBN-10</strong><span>{{ livre.isbn10 ?: '—' }}</span></div>
+                    <div><strong>Éditeur</strong><span>{{ livre.edition ?: '—' }}</span></div>
+                    <div class="wishlist-details-date"><strong>Date de publication</strong><span>{{ livre.datePublication ? livre.datePublication|date('d/m/Y') : '—' }}</span></div>
+                    <div><strong>Nombre de pages</strong><span>{{ livre.nombrePages ?: '—' }}</span></div>
+                    <div><strong>Langue</strong><span>{{ livre.langue ?: '—' }}</span></div>
+                    <div><strong>Prix</strong><span>{{ souhait.prixEstime is not null ? souhait.prixEstime|number_format(2, ',', ' ') ~ ' €' : '—' }}</span></div>
+                    <div><strong>Lien</strong><span>
+                        {% if souhait.lienAchat and (souhait.lienAchat starts with 'https://' or souhait.lienAchat starts with 'http://') %}
+                            <a href="{{ souhait.lienAchat }}" target="_blank" rel="noopener noreferrer">{{ souhait.lienAchat }}</a>
+                        {% else %}—{% endif %}
+                    </span></div>
+                </div>
+                <div class="details-livre-resume">
+                    <h4>Résumé</h4>
+                    <p>{{ livre.resume ?: 'Aucun résumé renseigné.' }}</p>
+                </div>
+            </div>
+        </section>
+    </div>
+</dialog>

@@ -148,7 +148,7 @@
     font-family: 'Cormorant Garamond', serif;
     font-size: 28px;
     font-weight: 600;
-    color: var(--color-bgdark);
+    color: var(--color-terra);
     margin: 0;
 }
 
@@ -338,4 +338,34 @@
         border-right: none;
         border-bottom: 1px solid var(--color-encadre);
     }
+}
+
+/* =======================================
+   PRÉSENTATION DE L’ACCUEIL PUBLIC
+   ======================================= */
+
+/* Reprend la police de la marque pour le message de bienvenue. */
+.accueil-public .accueil-introduction p {
+    font-size: clamp(26px, 3vw, 36px);
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
+    color: var(--color-terra);
+}
+
+/* Distingue les titres des sections de leurs descriptions. */
+.accueil-public .accueil-section-titres h2 {
+    color: var(--color-terra);
+}
+
+.accueil-public .accueil-section-titres p {
+    color: var(--color-secondary);
+}
+
+/* Réduit les noms du classement et met les nombres de lectures en couleur primary. */
+.accueil-public .accueil-auteur h3 {
+    font-size: 16px;
+}
+
+.accueil-public .accueil-auteur p {
+    color: var(--color-primary);
 }

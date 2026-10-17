@@ -401,12 +401,15 @@
 :root .dashboard-livre-infos > .dashboard-date,
 :root .wishlist-date,
 :root .details-lecture-dates,
-:root #details-livre-publication,
-:root .details-livre-informations div:has(> #details-livre-publication) > strong,
 :root input[type="date"],
 :root label[for="modal-date-publication"],
 :root label[for="lecture-date-debut"],
-:root label[for="lecture-date-fin"],
-:root select[data-tri-date] {
+:root label[for="lecture-date-fin"] {
     color: var(--color-primary);
+}
+
+/* Évite le contour au retour d’une fiche ouverte par un clic, sans déplacer le focus. */
+:root .carte-focus-souris:focus,
+:root .wishlist-carte.carte-focus-souris:focus {
+    outline: none;
 }

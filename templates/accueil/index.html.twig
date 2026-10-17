@@ -3,7 +3,7 @@
 {% block title %}Accueil - Incipit{% endblock %}
 
 {% block body %}
-<div class="accueil">
+<div class="accueil accueil-public">
 
     {# Réutilise l’en-tête public et son lien de connexion. #}
     {% include 'accueil/_entete.html.twig' only %}
@@ -12,7 +12,7 @@
 
         <div class="accueil-introduction">
             <div class="accueil-livre-rond">
-                <img src="{{ asset('images/livre_rondbeige.png') }}" alt="">
+                <img src="{{ asset('images/parchemin.png') }}" alt="">
             </div>
 
             <p>Bienvenue dans mon univers littéraire.</p>
@@ -24,7 +24,7 @@
             <section class="accueil-section">
                 <div class="accueil-section-entete">
                     <img class="accueil-section-icone"
-                         src="{{ asset('images/etoilevide.png') }}"
+                         src="{{ asset('images/hearts.png') }}"
                          alt="">
 
                     <div class="accueil-section-titres">
@@ -34,7 +34,7 @@
 
                     <a class="accueil-lien"
                        href="{{ path('app_livres_mieux_notes') }}">
-                        Voir tous mes livres
+                        Voir tous les livres
                     </a>
                 </div>
 
@@ -59,7 +59,7 @@
             <section class="accueil-section">
                 <div class="accueil-section-entete">
                     <img class="accueil-section-icone"
-                         src="{{ asset('images/statistiques.png') }}"
+                         src="{{ asset('images/autors.png') }}"
                          alt="">
 
                     <div class="accueil-section-titres">
@@ -94,7 +94,7 @@
             <section class="accueil-section">
                 <div class="accueil-section-entete">
                     <img class="accueil-section-icone"
-                         src="{{ asset('images/coeur.png') }}"
+                         src="{{ asset('images/stars.png') }}"
                          alt="">
 
                     <div class="accueil-section-titres">
@@ -104,7 +104,7 @@
 
                     <a class="accueil-lien"
                        href="{{ path('app_wishlist') }}">
-                        Voir toute ma wishlist
+                        Voir toute la wishlist
                     </a>
                 </div>
 

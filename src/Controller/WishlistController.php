@@ -31,7 +31,8 @@ final class WishlistController extends AbstractController
             return $this->json(['success' => false, 'message' => 'Souhait introuvable.'], 404);
         }
         $l = $souhait->getLivre();
-        return $this->json(['success' => true, 'publique' => $souhait->isPublique(), 'livre' => [
+        return $this->json(['success' => true, 'publique' => $souhait->isPublique(),
+            'prixEstime' => $souhait->getPrixEstime(), 'lienAchat' => $souhait->getLienAchat(), 'livre' => [
             'titre' => $l->getTitre(), 'sous_titre' => $l->getSousTitre(), 'saga' => $l->getSaga(),
             'tome' => $l->getTome(), 'isbn13' => $l->getIsbn13(), 'isbn10' => $l->getIsbn10(),
             'edition' => $l->getEdition(), 'langue' => $l->getLangue(),

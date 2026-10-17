@@ -61,6 +61,9 @@
                 {# Transmet au JavaScript les données de recherche, le tri, les routes d’action et le jeton du souhait. #}
                 <article
                     class="wishlist-carte"
+                    tabindex="0"
+                    data-fiche-souhait="fiche-souhait-{{ souhait.id }}"
+                    aria-label="Consulter {{ livre.titre }}"
                     data-id="{{ souhait.id }}"
                     data-auteurs="{{ auteurs|join(', ') }}"
                     data-statut-lecture="Pas commencé"
@@ -101,6 +104,7 @@
                         </button>
                     </div>
                 </article>
+                {% include 'wishlist/_fiche.html.twig' with {souhait: souhait, livre: livre, auteurs: auteurs} only %}
             {% endfor %}
         </div>
 
