@@ -29,7 +29,7 @@
                     placeholder="Rechercher un livre prêté..."
                     aria-label="Rechercher un prêt"
                 >
-                <button type="submit" aria-label="Lancer la recherche">Rechercher</button>
+                <button type="submit" aria-label="Lancer la recherche" class="bouton-rechercher">Rechercher</button>
             </form>
 
             <img
@@ -50,10 +50,8 @@
             <div class="prets-introduction">
 
                 <div>
-                    <h1>Mes prêts</h1>
-                    <p>
-                        Retrouvez et gérez tous les livres que vous avez prêtés.
-                    </p>
+                    <h1 class="titre-page">Mes prêts</h1>
+                    <p class="sous-titre-page">Retrouvez et gérez tous les livres que vous avez prêtés.</p>
                 </div>
 
                 {# Ouvre la fenêtre d’ajout et prépare un formulaire vide. #}
@@ -159,8 +157,8 @@
         <section id="prets-panneau-contacts" role="tabpanel" aria-labelledby="prets-tab-contacts" hidden>
             <div class="prets-introduction">
                 <div>
-                    <h2>Mes contacts</h2>
-                    <p>Retrouvez les personnes à qui vous prêtez vos livres.</p>
+                    <h2 class="titre-page">Mes contacts</h2>
+                    <p class="sous-titre-page">Retrouvez les personnes à qui vous prêtez vos livres.</p>
                 </div>
                 <button type="button" id="ouvrir-ajout-contact" class="prets-bouton-ajouter">Ajouter un contact</button>
             </div>

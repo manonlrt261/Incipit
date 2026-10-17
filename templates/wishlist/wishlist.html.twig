@@ -18,7 +18,7 @@
                     placeholder="Rechercher un titre, un auteur, un ISBN..."
                     aria-label="Rechercher dans ma wishlist"
                 >
-                <button type="submit" aria-label="Lancer la recherche">Rechercher</button>
+                <button type="submit" aria-label="Lancer la recherche" class="bouton-rechercher">Rechercher</button>
             </form>
 
             <img src="{{ asset('images/incipit.png') }}" class="bibliotheque-logo" alt="Incipit">
@@ -26,8 +26,8 @@
 
         <div class="bibliotheque-introduction">
             <div>
-                <h1>Ma wishlist</h1>
-                <p>Les livres que vous souhaitez lire un jour.</p>
+                <h1 class="titre-page">Ma wishlist</h1>
+                <p class="sous-titre-page">Les livres que vous souhaitez lire un jour.</p>
             </div>
             <button id="ouvrir-ajout" type="button" class="bibliotheque-ajouter">
                 + Ajouter un livre

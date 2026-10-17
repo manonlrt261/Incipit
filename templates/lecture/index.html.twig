@@ -17,7 +17,7 @@
         <header class="bibliotheque-header">
 
             {# Permet de rechercher les livres affichés sans recharger la page. #}
-            <div class="lectures-recherche">
+            <form id="lectures-recherche-form" class="lectures-recherche" role="search">
                 <img
                     src="{{ asset('images/rechercher.png') }}"
                     alt=""
@@ -29,7 +29,8 @@
                     placeholder="Rechercher un titre ou un auteur..."
                     aria-label="Rechercher un livre"
                 >
-            </div>
+                <button type="submit" aria-label="Lancer la recherche" class="bouton-rechercher">Rechercher</button>
+            </form>
 
             <img
                 src="{{ asset('images/incipit.png') }}"
@@ -42,8 +43,8 @@
         <div class="lectures-introduction">
 
             <div>
-                <h1>Mes lectures</h1>
-                <p>Suivez et gérez toutes vos sessions de lecture.</p>
+                <h1 class="titre-page">Mes lectures</h1>
+                <p class="sous-titre-page">Suivez et gérez toutes vos sessions de lecture.</p>
             </div>
 
             {# Ouvre le formulaire d’ajout déjà utilisé par la bibliothèque. #}

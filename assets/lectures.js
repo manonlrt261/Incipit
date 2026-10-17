@@ -70,6 +70,11 @@ initialiserPage((ecouter) => {
     // 4. RECHERCHE
 
     ecouter(recherche, 'input', filtrerLivres);
+    // Le bouton et la touche Entrée appliquent la recherche sans rechargement.
+    ecouter(document.getElementById('lectures-recherche-form'), 'submit', event => {
+        event.preventDefault();
+        filtrerLivres();
+    });
 
     // 5. ACCESSIBILITÉ DES CARTES
 

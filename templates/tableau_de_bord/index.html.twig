@@ -11,12 +11,12 @@
 
         {# Sur téléphone, affiche le titre et un accès direct au profil à la place de l’en-tête de bureau. #}
         <header class="dashboard-mobile-entete">
-            <h1>Tableau de bord</h1>
+            <h1 class="titre-page">Tableau de bord</h1>
             <a class="dashboard-profil-mobile" href="{{ path('app_espace_profil') }}">
                 <span>Profil</span>
                 <img src="{{ asset('images/profil.png') }}" alt="">
             </a>
-            <p>Retrouvez votre univers littéraire en un coup d’œil.</p>
+            <p class="sous-titre-page">Retrouvez votre univers littéraire en un coup d’œil.</p>
         </header>
 
         {# La recherche de bureau ouvre la bibliothèque en lui transmettant le texte saisi. #}
@@ -29,7 +29,7 @@
                     placeholder="Rechercher un titre, un auteur, un ISBN..."
                     aria-label="Rechercher un livre"
                 >
-                <button type="submit">Rechercher</button>
+                <button type="submit" class="bouton-rechercher">Rechercher</button>
             </form>
 
             <div class="dashboard-header-actions">
@@ -46,8 +46,8 @@
         </header>
 
         <div class="dashboard-introduction">
-            <h1>Mon tableau de bord</h1>
-            <p>Retrouvez votre univers littéraire en un coup d'œil.</p>
+            <h1 class="titre-page">Mon tableau de bord</h1>
+            <p class="sous-titre-page">Retrouvez votre univers littéraire en un coup d'œil.</p>
         </div>
 
         {# Génère les quatre compteurs avec une structure commune pour éviter de répéter les mêmes cartes. #}
