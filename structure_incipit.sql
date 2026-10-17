@@ -205,7 +205,7 @@ CREATE TABLE `session_lecture` (
   KEY `IDX_SESSION_LECTURE_LIVRE` (`livre_id`),
   CONSTRAINT `FK_SESSION_LECTURE_LIVRE` FOREIGN KEY (`livre_id`) REFERENCES `livre` (`id`) ON DELETE RESTRICT,
   CONSTRAINT `CHK_SESSION_LECTURE_NOTE` CHECK (((`note` is null) or ((`note` between 0 and 5) and (((`note` * 10) % 5) = 0)))),
-  CONSTRAINT `CHK_SESSION_LECTURE_STATUT` CHECK ((`statut` in (_utf8mb4'à lire',_utf8mb4'en cours',_utf8mb4'terminé',_utf8mb4'abandonné')))
+  CONSTRAINT `CHK_SESSION_LECTURE_STATUT` CHECK ((`statut` in (_utf8mb4'à lire',_utf8mb4'en cours',_utf8mb4'terminé',_utf8mb4'abandonné',_utf8mb4'Pas commencé',_utf8mb4'En pause')))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
