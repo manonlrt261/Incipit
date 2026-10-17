@@ -76,13 +76,17 @@
 }
 
 .stats-compteur strong {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
     font-size: 27px;
-    color: #241b15;
+    color: var(--color-terra);
 }
 
 .stats-compteur div span {
-    font-size: 14px;
-    color: #64656a;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: #87776c;
 }
 
 /* Choix de l’année*/
@@ -134,13 +138,15 @@
 }
 
 .stats-panneau h2 {
+    font-weight: 600;
+    color: var(--color-terra);
     font-size: 22px;
     line-height: 1.2;
     margin: 0 0 6px;
 }
 
 .stats-panneau header p {
-    color: #6b6b70;
+    color: var(--color-secondary);
     font-size: 14px;
     line-height: 1.4;
     margin: 0;
@@ -217,11 +223,12 @@
 }
 
 .stats-objectif-texte > strong {
+    color: var(--color-terra);
     font-size: 27px;
 }
 
 .stats-objectif-texte p {
-    color: #6b6b70;
+    color: var(--color-secondary);
     font-size: 14px;
 }
 
@@ -545,4 +552,18 @@
 .stats-modale button:disabled {
     opacity: .6;
     cursor: wait;
+}
+
+/* Conserve la taille des libellés du tableau de bord sur téléphone. */
+@media (max-width: 700px) {
+    .stats-compteur div span {
+        font-size: 12px;
+        line-height: 1.3;
+    }
+}
+
+@media (max-width: 350px) {
+    .stats-compteur div span {
+        font-size: 11px;
+    }
 }

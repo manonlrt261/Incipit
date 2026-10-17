@@ -188,20 +188,23 @@
                     <h2>Mes genres favoris</h2>
                 </div>
 
-                {# Présente les genres disponibles ou un message en attendant que des données soient renseignées. #}
+                {# Présente les trois genres les plus lus, classés par nombre de livres terminés. #}
                 {% if genresFavoris is not empty %}
                     <div class="dashboard-genres">
                         {% for genre in genresFavoris %}
-                            <div class="dashboard-genre">
-                                <span>{{ genre.nom }}</span>
-                                <strong>{{ genre.nombre }}</strong>
+                            <div class="dashboard-genre dashboard-genre--{{ loop.index }}">
+                                <div class="dashboard-genre-marche">
+                                    <strong>{{ loop.index }}</strong>
+                                    <small>{{ genre.nombre }} livre{{ genre.nombre > 1 ? 's' : '' }}</small>
+                                </div>
+                                <span class="dashboard-genre-nom">{{ genre.nom }}</span>
                             </div>
                         {% endfor %}
                     </div>
                 {% else %}
                     <p class="dashboard-vide">
-                        Le graphique de vos genres favoris apparaîtra lorsque
-                        les genres seront renseignés dans votre bibliothèque.
+                        Votre podium apparaîtra lorsque vous aurez terminé
+                        des livres dont le genre est renseigné.
                     </p>
                 {% endif %}
             </section>

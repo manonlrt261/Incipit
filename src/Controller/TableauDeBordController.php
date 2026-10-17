@@ -96,6 +96,21 @@ class TableauDeBordController extends AbstractController
              WHERE note IS NOT NULL'
         );
 
+        // Classe les genres des livres terminés sans compter deux fois un livre relu.
+        $genresFavoris = $connection->fetchAllAssociative(
+            "SELECT g.id, g.nom, COUNT(DISTINCT lg.livre_id) AS nombre
+             FROM genre g
+             INNER JOIN livre_genre lg ON lg.genre_id = g.id
+             WHERE EXISTS (
+                 SELECT 1 FROM session_lecture s
+                 WHERE s.livre_id = lg.livre_id
+                   AND LOWER(s.statut) IN ('terminé', 'termine', 'terminés', 'termines')
+             )
+             GROUP BY g.id, g.nom
+             ORDER BY nombre DESC, g.nom ASC, g.id ASC
+             LIMIT 3"
+        );
+
         return $this->render('tableau_de_bord/index.html.twig', [
             'livresPossedes' => $livresPossedes,
             'livresTermines' => $livresTermines,
@@ -104,7 +119,7 @@ class TableauDeBordController extends AbstractController
             'lectures' => $lectures,
             'derniersAjouts' => $derniersAjouts,
             'noteMoyenne' => $noteMoyenne,
-            'genresFavoris' => [],
+            'genresFavoris' => $genresFavoris,
         ]);
     }
 }

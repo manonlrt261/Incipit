@@ -140,13 +140,17 @@
 }
 
 .lectures-statistique-informations strong {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
     font-size: 25px;
-    color: var(--color-bgdark);
+    color: var(--color-terra);
 }
 
 .lectures-statistique-informations > span {
+    font-family: 'Inter', sans-serif;
     font-size: 13px;
-    color: var(--color-secondary);
+    font-weight: 400;
+    color: #87776c;
 }
 
 .lectures-resultats-compteur {
@@ -210,6 +214,7 @@
 .lectures-carte-informations h2 {
     margin: 0;
     font-family: 'Cormorant Garamond', Georgia, serif;
+    font-weight: 700;
     font-size: 21px;
     line-height: 1.15;
     color: var(--color-bgdark);
@@ -367,5 +372,19 @@
 
     .lectures-recherche {
         width: 100%;
+    }
+}
+
+/* Conserve la taille des libellés du tableau de bord sur téléphone. */
+@media (max-width: 700px) {
+    .lectures-statistique-informations > span {
+        font-size: 12px;
+        line-height: 1.3;
+    }
+}
+
+@media (max-width: 350px) {
+    .lectures-statistique-informations > span {
+        font-size: 11px;
     }
 }

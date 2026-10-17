@@ -73,6 +73,7 @@
 }
 
 .profil-carte h2 {
+    color: var(--color-secondary);
     margin: 0 0 7px;
     font-size: 24px;
 }
@@ -171,6 +172,7 @@
 }
 
 .profil-visibilite-ligne strong {
+    color: var(--color-terra);
     font-size: 17px;
 }
 
@@ -194,7 +196,7 @@
     padding: 3px;
     margin: 0;
     border-radius: 20px;
-    background: #d8cfc7;
+    background: var(--color-terra);
     cursor: pointer;
     transition: background .15s;
 }
@@ -207,10 +209,6 @@
     background: white;
     border-radius: 50%;
     transition: transform .15s;
-}
-
-.profil-interrupteur input:checked {
-    background: var(--color-secondary);
 }
 
 .profil-interrupteur input:checked::before {
@@ -253,14 +251,4 @@
     justify-content: center;
     margin-top: auto;
     padding-top: 32px;
-}
-
-.profil-bouton-deconnexion {
-    padding: 13px 28px;
-    border: 0;
-    border-radius: 8px;
-    background-color: var(--color-secondary);
-    color: var(--color-fond);
-    font: inherit;
-    cursor: pointer;
 }

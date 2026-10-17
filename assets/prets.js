@@ -10,6 +10,7 @@ initialiserPage((ecouter) => {
 
     const recherche = document.getElementById('prets-recherche');
     const liste = page.querySelector('.prets-liste');
+    const compteur = document.getElementById('prets-compteur');
 
     const messageAucunResultat = document.getElementById(
         'prets-aucun-resultat'
@@ -287,6 +288,8 @@ initialiserPage((ecouter) => {
     const filtres = creerFiltresLivres({
         page, conteneur: liste, selecteur: '.prets-carte', recherche, ecouter,
         actualiser({ total, visibles }) {
+            // Met à jour le compteur après une recherche, un filtre ou une suppression.
+            compteur.textContent = `${visibles} ${visibles === 1 ? 'livre prêté' : 'livres prêtés'}${visibles < total ? ` sur ${total}` : ''}`;
             messageListeVide.hidden = total !== 0;
             messageAucunResultat.hidden = total === 0 || visibles !== 0;
         }

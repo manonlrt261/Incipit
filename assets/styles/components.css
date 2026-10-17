@@ -296,3 +296,117 @@
         flex-wrap: wrap;
     }
 }
+
+/* =======================================
+   COULEUR DES ACTIONS DES PAGES PERSONNELLES
+   ======================================= */
+
+/* Partage le fond secondaire et le texte clair des actions principales. */
+.espace-contenu .bibliotheque-ajouter,
+.espace-contenu .lectures-bouton-ajouter,
+.espace-contenu .prets-bouton-ajouter,
+.espace-contenu .stats-objectif-texte button {
+    background: var(--color-secondary);
+    color: var(--color-fond);
+}
+
+/* Distingue les modifications du compte par la couleur terra. */
+.espace-contenu .profil-carte button[data-ouvrir-profil] {
+    background: var(--color-terra);
+    border-color: var(--color-terra);
+    color: var(--color-fond);
+}
+
+/* =======================================
+   COMPTEURS DE LIVRES
+   ======================================= */
+
+/* Reprend la typographie du compteur de la bibliothèque sur les listes de livres et de prêts. */
+.espace-contenu #bibliotheque-compteur,
+.espace-contenu #lectures-resultats-compteur,
+.espace-contenu #wishlist-compteur,
+.espace-contenu #prets-compteur {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--color-terra);
+}
+
+/* =======================================
+   TITRES DES LIVRES
+   ======================================= */
+
+/* Partage le même style sur les cartes, les détails et les résultats ajoutés en JavaScript. */
+:root .accueil-carte-livre h3,
+:root .bibliotheque-livre h2,
+:root .bibliotheque-livre-retire h3,
+:root .lectures-carte-informations h2,
+:root .prets-informations h2,
+:root .wishlist-carte h2,
+:root .dashboard-livre-infos h3,
+:root .modal-resultat-couverture span,
+:root #pret-livres-possedes .prets-suggestion strong,
+:root #details-livre-nom,
+:root #modal-titre,
+:root #pret-titre {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-weight: 700;
+    color: var(--color-terra);
+}
+
+/* Uniformise la taille et l’interligne des titres sur les trois collections. */
+:root .lectures-carte-informations h2,
+:root .bibliotheque-livre h2,
+:root .wishlist-carte h2 {
+    font-size: 21px;
+    line-height: 1.15;
+}
+
+/* =======================================
+   NOMS DES AUTEURS
+   ======================================= */
+
+/* Reprend la typographie des auteurs des cartes de Mes lectures sur toutes les collections. */
+:root .lectures-auteur,
+:root .bibliotheque-auteur,
+:root .bibliotheque-livre-retire h3 + p,
+:root .wishlist-auteur,
+:root .wishlist-publique .wishlist-carte h2 + p,
+:root .prets-auteur,
+:root .dashboard-livre-infos > p,
+:root .accueil-carte-livre h3 + p {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--color-secondary);
+}
+
+/* Identifie aussi les auteurs dans les détails, les classements, les suggestions et la saisie. */
+:root #details-livre-auteurs,
+:root .accueil-auteur h3,
+:root .stats-auteurs .stats-classement li > span:not(.stats-rang),
+:root #pret-livres-possedes .prets-suggestion > span,
+:root #modal-liste-auteurs input[name="auteurs[]"],
+:root #pret-auteur {
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    color: var(--color-secondary);
+}
+
+/* =======================================
+   DATES ET LEURS LIBELLÉS
+   ======================================= */
+
+/* Colore ensemble les dates et le texte qui les présente, y compris dans les détails. */
+:root .dashboard-livre-infos > .dashboard-date,
+:root .wishlist-date,
+:root .details-lecture-dates,
+:root #details-livre-publication,
+:root .details-livre-informations div:has(> #details-livre-publication) > strong,
+:root input[type="date"],
+:root label[for="modal-date-publication"],
+:root label[for="lecture-date-debut"],
+:root label[for="lecture-date-fin"],
+:root select[data-tri-date] {
+    color: var(--color-primary);
+}

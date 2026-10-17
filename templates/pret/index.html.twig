@@ -68,6 +68,11 @@
             {# Filtre les prêts par genre et les trie par prénom du contact, auteur ou date réelle du prêt. #}
             {% include 'components/_filtres_livres.html.twig' with {genres: genres, prefixe: 'prets-', mode_prets: true} only %}
 
+            {# Annonce le nombre de prêts et suit les résultats des filtres sans rechargement. #}
+            <p id="prets-compteur" aria-live="polite">
+                {{ prets|length }} {{ prets|length == 1 ? 'livre prêté' : 'livres prêtés' }}
+            </p>
+
             <section
                 class="prets-liste"
                 aria-label="Liste de mes prêts"
