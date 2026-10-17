@@ -1,5 +1,7 @@
 // Gère la recherche, les filtres par statut et l’actualisation des lectures.
 import { initialiserPage } from './components/initialisation-page.js';
+import { creerFiltresLivres } from './components/filtres-livres.js';
+
 
 initialiserPage((ecouter) => {
     const page = document.getElementById('page-mes-lectures');
@@ -18,7 +20,10 @@ initialiserPage((ecouter) => {
         return;
     }
 
-    let filtreActif = 'tous';
+    const statuts = {
+        'en-cours': 'En cours', 'termine': 'Terminé', 'en-pause': 'En pause',
+        'abandonne': 'Abandonné', 'pas-commence': 'Pas commencé', 'tous': ''
+    };
 
     // 1. OUVERTURE DES DÉTAILS D'UN LIVRE
 
@@ -40,58 +45,25 @@ initialiserPage((ecouter) => {
 
     // 2. FILTRAGE DES LIVRES
 
-    function filtrerLivres() {
-        const cartes = [...grille.querySelectorAll('.lectures-carte')];
-
-        const texteRecherche = (recherche?.value || '')
-            .trim()
-            .toLocaleLowerCase('fr');
-
-        let visibles = 0;
-
-        cartes.forEach((carte) => {
-            const correspondStatut =
-                filtreActif === 'tous' ||
-                carte.dataset.statut === filtreActif;
-
-            const correspondRecherche =
-                (carte.dataset.recherche || '')
-                    .toLocaleLowerCase('fr')
-                    .includes(texteRecherche);
-
-            const afficher = correspondStatut && correspondRecherche;
-
-            carte.hidden = !afficher;
-
-            if (afficher) {
-                visibles++;
-            }
-        });
-
-        if (compteur) {
-            compteur.textContent =
-                `${visibles} livre${visibles > 1 ? 's' : ''} affiché${visibles > 1 ? 's' : ''}`;
+    const filtres = creerFiltresLivres({
+        page, conteneur: grille, selecteur: '.lectures-carte', recherche, ecouter,
+        actualiser({ visibles, statut }) {
+            if (compteur) compteur.textContent = `${visibles} livre${visibles > 1 ? 's' : ''} affiché${visibles > 1 ? 's' : ''}`;
+            if (aucunResultat) aucunResultat.hidden = visibles !== 0;
+            boutonsFiltres.forEach(bouton => {
+                const actif = statuts[bouton.dataset.filtre] === statut;
+                bouton.classList.toggle('actif', actif);
+                bouton.setAttribute('aria-pressed', String(actif));
+            });
         }
-
-        if (aucunResultat) {
-            aucunResultat.hidden = visibles !== 0;
-        }
-    }
+    });
+    const filtrerLivres = filtres.appliquer;
 
     // 3. BOUTONS DE FILTRAGE
 
     boutonsFiltres.forEach((bouton) => {
         ecouter(bouton, 'click', () => {
-            filtreActif = bouton.dataset.filtre;
-
-            boutonsFiltres.forEach((element) => {
-                const actif = element === bouton;
-
-                element.classList.toggle('actif', actif);
-                element.setAttribute('aria-pressed', String(actif));
-            });
-
-            filtrerLivres();
+            filtres.choisirStatut(statuts[bouton.dataset.filtre]);
         });
     });
 

@@ -891,6 +891,9 @@ async function arreterScannerISBN() {
             livre.isbn10
         ].filter(Boolean).join(' ').toLowerCase();
 
+        // Conserve les données de tri pour intégrer le nouveau livre dans l’ordre actuellement choisi.
+        article.dataset.auteurs = auteurs;
+        article.dataset.dateAjout = String(livre.dateCreation ?? '');
         article.dataset.genres = genres.join('|');
         article.dataset.statut = statut;
 

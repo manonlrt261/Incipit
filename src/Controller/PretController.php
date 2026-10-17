@@ -28,7 +28,6 @@ class PretController extends AbstractController
         );
 
         $listePrets = [];
-
         // Prépare le titre, les auteurs et le nom de l’emprunteur pour chaque prêt.
         foreach ($prets as $pret) {
             $livre = $pret->getExemplaire()?->getLivre();
@@ -43,6 +42,10 @@ class PretController extends AbstractController
                 'id' => $pret->getId(),
                 'titre' => $livre?->getTitre() ?? 'Titre inconnu',
                 'auteur' => $this->obtenirAuteurs($livre),
+                'genres' => $livre ? implode('|', array_map(static fn ($genre) => $genre->getNom(), $livre->getGenres()->toArray())) : '',
+                'prenomContact' => $prenom,
+                'nomContact' => $nom,
+                'datePret' => $pret->getDatePret()?->getTimestamp(),
                 'emprunteur' => $emprunteur !== ''
                     ? $emprunteur
                     : 'Emprunteur inconnu',
@@ -51,6 +54,7 @@ class PretController extends AbstractController
 
         return $this->render('pret/index.html.twig', [
             'prets' => $listePrets,
+            'genres' => $entityManager->getRepository(\App\Entity\Genre::class)->findBy([], ['nom' => 'ASC']),
             'livresPossedes' => $entityManager->createQueryBuilder()
                 ->select('DISTINCT l')->from(Livre::class, 'l')
                 ->where('EXISTS (SELECT e.id FROM App\\Entity\\Exemplaire e WHERE e.livre = l AND e.dateRetrait IS NULL)')

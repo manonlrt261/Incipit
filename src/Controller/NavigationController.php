@@ -20,6 +20,10 @@ public function lectures(Connection $connection): Response
             l.id,
             l.titre,
             l.image_couverture,
+            l.date_creation,
+            COALESCE((SELECT GROUP_CONCAT(g.nom SEPARATOR '|')
+                FROM livre_genre lg INNER JOIN genre g ON g.id = lg.genre_id
+                WHERE lg.livre_id = l.id), '') AS genres,
 
             COALESCE((
                 SELECT GROUP_CONCAT(

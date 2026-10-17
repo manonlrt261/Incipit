@@ -1,5 +1,7 @@
 // Gère la recherche de prêts, leur ajout et leur suppression avec confirmation.
 import { initialiserPage } from './components/initialisation-page.js';
+import { creerFiltresLivres } from './components/filtres-livres.js';
+
 
 initialiserPage((ecouter) => {
     const page = document.getElementById('page-mes-prets');
@@ -55,31 +57,14 @@ initialiserPage((ecouter) => {
 
     // 1. RECHERCHE INSTANTANÉE
 
-    function filtrerPrets() {
-        const cartes = [
-            ...liste.querySelectorAll('.prets-carte')
-        ];
-
-        const texte = normaliser(recherche?.value || '');
-
-        let visibles = 0;
-
-        cartes.forEach(carte => {
-            const correspond = normaliser(carte.dataset.recherche || '')
-                .includes(texte);
-
-            carte.hidden = !correspond;
-
-            if (correspond) {
-                visibles++;
-            }
-        });
-
-        messageListeVide.hidden = cartes.length !== 0;
-
-        messageAucunResultat.hidden =
-            cartes.length === 0 || visibles !== 0;
-    }
+    const filtres = creerFiltresLivres({
+        page, conteneur: liste, selecteur: '.prets-carte', recherche, ecouter,
+        actualiser({ total, visibles }) {
+            messageListeVide.hidden = total !== 0;
+            messageAucunResultat.hidden = total === 0 || visibles !== 0;
+        }
+    });
+    const filtrerPrets = filtres.appliquer;
 
     // Actualise les résultats à mesure que la recherche est saisie.
     ecouter(recherche, 'input', filtrerPrets);

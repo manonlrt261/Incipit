@@ -1,0 +1,69 @@
+{# Partage les mêmes filtres, tailles et boutons entre les pages de la collection. #}
+{% set prefixe = prefixe|default('') %}
+{% set mode_prets = mode_prets|default(false) %}
+<form id="{{ prefixe ? prefixe ~ 'filtres' : 'bibliotheque-filtres' }}" data-filtres-livres data-champ-date="{{ mode_prets ? 'datePret' : 'dateAjout' }}" class="bibliotheque-filtres">
+    <div class="bibliotheque-selects">
+        <label class="bibliotheque-select">
+            <span class="sr-only">Genre</span>
+            <select id="{{ prefixe }}filtre-genre" data-filtre-genre>
+                <option value="">Genre</option>
+                {% for genre in genres %}
+                    <option value="{{ genre.nom }}">{{ genre.nom }}</option>
+                {% endfor %}
+            </select>
+        </label>
+
+        {% if mode_prets %}
+            {# Les contacts se trient par prénom, puis par nom en cas d’égalité. #}
+            <label class="bibliotheque-select">
+                <span class="sr-only">Contact</span>
+                <select id="{{ prefixe }}tri-contact" data-tri-contact>
+                    <option value="">Contact</option>
+                    <option value="asc">Contact : A à Z</option>
+                    <option value="desc">Contact : Z à A</option>
+                </select>
+            </label>
+        {% else %}
+            <label class="bibliotheque-select">
+                <span class="sr-only">Statut de lecture</span>
+                <select id="{{ prefixe }}filtre-statut" data-filtre-statut>
+                    <option value="">Statut de lecture</option>
+                    <option value="Pas commencé">Pas commencé</option>
+                    <option value="En cours">En cours</option>
+                    <option value="En pause">En pause</option>
+                    <option value="Terminé">Terminé</option>
+                    <option value="À lire">À lire</option>
+                    <option value="Abandonné">Abandonné</option>
+                </select>
+            </label>
+
+        {% endif %}
+
+        <label class="bibliotheque-select">
+            <span class="sr-only">Auteurs</span>
+            <select id="{{ prefixe }}tri-auteurs" data-tri-auteurs>
+                <option value="">Auteurs</option>
+                <option value="asc">Auteurs : A à Z</option>
+                <option value="desc">Auteurs : Z à A</option>
+            </select>
+        </label>
+
+        <label class="bibliotheque-select">
+            <span class="sr-only">{{ mode_prets ? 'Date de prêt' : 'Date d’ajout' }}</span>
+            <select id="{{ prefixe }}tri-date-{{ mode_prets ? 'pret' : 'ajout' }}" data-tri-date>
+                <option value="">{{ mode_prets ? 'Date de prêt' : 'Date d’ajout' }}</option>
+                <option value="desc">Plus récents</option>
+                <option value="asc">Plus anciens</option>
+            </select>
+        </label>
+
+        <button type="submit" class="bibliotheque-valider">
+            Valider
+        </button>
+    </div>
+
+    <button type="button" id="{{ prefixe }}reinitialiser-filtres" data-reinitialiser-filtres class="bibliotheque-reinitialiser">
+        <span aria-hidden="true">↻</span>
+        Réinitialiser les filtres
+    </button>
+</form>

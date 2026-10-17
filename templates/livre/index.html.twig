@@ -43,42 +43,8 @@
             </button>
         </div>
 
-        {# Combine les filtres de genre et de statut, avec une remise à zéro de la recherche. #}
-        <form id="bibliotheque-filtres" class="bibliotheque-filtres">
-            <div class="bibliotheque-selects">
-                <label class="bibliotheque-select">
-                    <span class="sr-only">Genre</span>
-                    <select id="filtre-genre">
-                        <option value="">Genre</option>
-                        {% for genre in genres %}
-                            <option value="{{ genre.nom }}">{{ genre.nom }}</option>
-                        {% endfor %}
-                    </select>
-                </label>
-
-                <label class="bibliotheque-select">
-                    <span class="sr-only">Statut de lecture</span>
-                    <select id="filtre-statut">
-                        <option value="">Statut de lecture</option>
-                        <option value="Pas commencé">Pas commencé</option>
-                        <option value="En cours">En cours</option>
-                        <option value="En pause">En pause</option>
-                        <option value="Terminé">Terminé</option>
-                        <option value="À lire">À lire</option>
-                        <option value="Abandonné">Abandonné</option>
-                    </select>
-                </label>
-
-                <button type="submit" class="bibliotheque-valider">
-                    Valider
-                </button>
-            </div>
-
-            <button type="button" id="reinitialiser-filtres" class="bibliotheque-reinitialiser">
-                <span aria-hidden="true">↻</span>
-                Réinitialiser les filtres
-            </button>
-        </form>
+        {# Combine les filtres de genre et de statut avec le tri par auteur ou par date d’ajout. #}
+        {% include 'components/_filtres_livres.html.twig' with {genres: genres} only %}
 
         {# Regroupe le compteur, le repli de la liste et le choix entre grille et liste. #}
         <div class="bibliotheque-outils">
@@ -125,6 +91,8 @@
                     <article
                         class="bibliotheque-livre"
                         data-livre-id="{{ livre.id }}"
+                        data-auteurs="{{ livre.auteurs|e('html_attr') }}"
+                        data-date-ajout="{{ livre.date_creation ? livre.date_creation|date('U') : '' }}"
                         data-recherche="{{ (livre.titre ~ ' ' ~ livre.sous_titre ~ ' ' ~ livre.auteurs ~ ' ' ~ livre.isbn13 ~ ' ' ~ livre.isbn10)|lower|e('html_attr') }}"
                         data-genres="{{ livre.genres|e('html_attr') }}"
                         data-statut="{{ livre.statut|e('html_attr') }}"

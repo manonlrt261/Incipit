@@ -365,6 +365,7 @@ final class LivreModalController extends AbstractController
                     ),
                     'statut' => $statut,
                     'imageCouverture' => $livre->getImageCouverture(),
+                    'dateCreation' => $livre->getDateCreation()?->getTimestamp(),
                 ],
             ], $modificationWishlist ? 200 : 201);
 
