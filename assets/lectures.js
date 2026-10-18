@@ -142,9 +142,10 @@ initialiserPage((ecouter) => {
         carte.click();
     });
 
-    // Recharge les cartes et compteurs après une nouvelle lecture sans perdre les filtres.
-
-    ecouter(document, 'lecture:ajoutee', async () => {
+    // Recharge les cartes et les six compteurs après un ajout de livre ou un changement de session.
+    let numeroActualisation = 0;
+    async function actualiserLectures() {
+        const numeroRequete = ++numeroActualisation;
         try {
             const reponse = await fetch(window.location.pathname, {
                 headers: {
@@ -157,6 +158,8 @@ initialiserPage((ecouter) => {
             }
 
             const html = await reponse.text();
+            // Ignore une réponse ancienne si un autre ajout a déjà demandé une actualisation.
+            if (numeroRequete !== numeroActualisation) return;
 
             const documentActualise = new DOMParser()
                 .parseFromString(html, 'text/html');
@@ -213,7 +216,11 @@ initialiserPage((ecouter) => {
                 erreur
             );
         }
-    });
+    }
+
+    // Partage la même actualisation sans ajouter d’écouteurs aux cartes remplacées.
+    ecouter(document, 'lecture:ajoutee', actualiserLectures);
+    ecouter(document, 'bibliotheque:livre-ajoute', actualiserLectures);
 
     // Applique les critères initiaux dès l’affichage de la page.
 

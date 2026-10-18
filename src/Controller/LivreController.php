@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Livre;
+use App\Service\GenresLivre;
 use App\Form\LivreType;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
@@ -93,7 +94,8 @@ final class LivreController extends AbstractController
     // Traite le formulaire Symfony d’ajout de livre et affiche ses éventuelles erreurs.
     public function ajouter(
         Request $request,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        GenresLivre $gestionGenres
     ): Response {
         $livre = new Livre();
 
@@ -101,6 +103,8 @@ final class LivreController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Applique également le classement par défaut au formulaire Symfony classique.
+            $gestionGenres->associer($livre, $livre->getGenres()->toArray());
             $entityManager->persist($livre);
             $entityManager->flush();
 
@@ -181,6 +185,12 @@ final class LivreController extends AbstractController
         // Transmet les auteurs séparément pour modifier leurs champs sans découper les noms contenant une virgule.
         $livre['auteurs_liste'] = $connection->fetchFirstColumn(
             'SELECT a.nom_affichage FROM auteur a INNER JOIN livre_auteur la ON la.auteur_id = a.id WHERE la.livre_id = ? ORDER BY a.id',
+            [$id]
+        );
+
+        // Préserve les genres cochés lors de la réouverture du formulaire de modification.
+        $livre['genres_ids'] = $connection->fetchFirstColumn(
+            'SELECT genre_id FROM livre_genre WHERE livre_id = ?',
             [$id]
         );
 

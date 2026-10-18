@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Service\AuteursLivre;
+use App\Service\GenresLivre;
 use App\Service\DonneesLecture;
 use App\Service\CouvertureLivre;
 use App\Entity\Exemplaire;
@@ -32,6 +33,7 @@ final class LivreModalController extends AbstractController
         DonneesLecture $donneesLecture,
         AuteursLivre $gestionAuteurs,
         CouvertureLivre $couvertures,
+        GenresLivre $gestionGenres,
         ?int $id = null
     ): JsonResponse {
         // Identifie le parcours wishlist pour éviter de créer un exemplaire possédé lors d’un simple souhait.
@@ -273,9 +275,8 @@ final class LivreModalController extends AbstractController
                 $nombrePages === '' ? null : (int) $nombrePages
             );
 
-            foreach ($genresSelectionnes as $genre) {
-                $livre->addGenre($genre);
-            }
+            // Applique le genre par défaut et retire Sans genre si un classement précis est choisi.
+            $gestionGenres->associer($livre, $genresSelectionnes);
 
             $gestionAuteurs->associer($livre, $auteursNettoyes);
 
@@ -294,6 +295,9 @@ final class LivreModalController extends AbstractController
                 $exemplaire->setLivre($livre);
                 $exemplaire->setDateCreation(new \DateTime());
                 $entityManager->persist($exemplaire);
+
+                // Enregistre la sélection avec le livre ; une lecture déjà terminée reste hors de la pile.
+                $livre->setPileALire($request->request->getBoolean('pileALire') && $lecture['statut'] !== 'Terminé');
 
                 $session = new SessionLecture();
                 $session->setLivre($livre);
@@ -319,7 +323,7 @@ final class LivreModalController extends AbstractController
                     'auteurs' => array_values($auteursNettoyes),
                     'genres' => array_map(
                         static fn (Genre $genre) => $genre->getNom(),
-                        $genresSelectionnes
+                        $livre->getGenres()->toArray()
                     ),
                     'statut' => $statut,
                     'imageCouverture' => $livre->getImageCouverture(),

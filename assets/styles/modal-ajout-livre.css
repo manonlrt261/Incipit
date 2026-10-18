@@ -764,3 +764,66 @@ dialog#modal-ajout-livre {
         flex-basis: 100%;
     }
 }
+
+/* =======================================
+   SUGGESTIONS D’AUTEURS
+   ======================================= */
+
+/* Assure un contraste constant, indépendamment de l’apparence du navigateur. */
+#modal-ajout-livre .modal-auteur-ligne {
+    position: relative;
+}
+
+#modal-ajout-livre .modal-suggestions-auteurs {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    z-index: 10;
+    max-height: 220px;
+    overflow-y: auto;
+    border: 1px solid var(--color-secondary);
+    border-radius: 8px;
+    background: var(--color-secondary);
+    color: var(--color-white);
+    box-shadow: 0 6px 18px #0003;
+}
+
+#modal-ajout-livre .modal-suggestions-auteurs[hidden] {
+    display: none;
+}
+
+#modal-ajout-livre .modal-suggestions-auteurs [role='option'] {
+    padding: 12px 14px;
+    font-family: Inter, sans-serif;
+    font-size: 16px;
+    color: var(--color-white);
+    cursor: pointer;
+}
+
+#modal-ajout-livre .modal-suggestions-auteurs [role='option']:hover,
+#modal-ajout-livre .modal-suggestions-auteurs [aria-selected='true'] {
+    background: var(--color-terra);
+}
+
+/* Ajout facultatif du nouveau livre à la pile à lire. */
+#modal-ajout-livre .modal-pile-selection {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 20px 0;
+    color: var(--color-secondary);
+}
+
+#modal-ajout-livre .modal-pile-selection[hidden] {
+    display: none;
+}
+
+:root #modal-ajout-livre #modal-pile-a-lire {
+    width: 18px;
+    height: 18px;
+    min-height: 0;
+    padding: 0;
+    flex: 0 0 18px;
+    accent-color: var(--color-terra);
+}

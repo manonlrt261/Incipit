@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Livre;
 use App\Service\AuteursLivre;
+use App\Service\GenresLivre;
 use App\Entity\SessionLecture;
 use App\Service\DonneesLecture;
 use App\Service\CouvertureLivre;
@@ -28,7 +29,8 @@ final class LivreModificationController extends AbstractController
         EntityManagerInterface $entityManager,
         DonneesLecture $donneesLecture,
         AuteursLivre $gestionAuteurs,
-        CouvertureLivre $couvertures
+        CouvertureLivre $couvertures,
+        GenresLivre $gestionGenres
     ): JsonResponse {
         if (!$this->getUser()) {
             return $this->json([
@@ -145,6 +147,9 @@ final class LivreModificationController extends AbstractController
                 }
             }
 
+            // Valide les genres avant toute modification, y compris une sélection devenue vide.
+            $genresSelectionnes = $gestionGenres->lire($request->request->all('genres'));
+
             $livre->setTitre($titre);
             $livre->setSousTitre($sousTitre);
             $livre->setSaga($saga);
@@ -161,6 +166,7 @@ final class LivreModificationController extends AbstractController
             $livre->setDateModification(new \DateTime());
 
             $gestionAuteurs->associer($livre, $auteurs);
+            $gestionGenres->associer($livre, $genresSelectionnes);
 
             // Réutilise la dernière session afin de préserver l’historique des lectures précédentes.
             $session = $entityManager->getRepository(SessionLecture::class)->findOneBy(['livre' => $livre], ['dateCreation' => 'DESC', 'id' => 'DESC']);

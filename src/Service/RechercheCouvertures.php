@@ -54,7 +54,7 @@ final class RechercheCouvertures
                 throw new \RuntimeException('La recherche de couvertures est momentanément indisponible.', 502);
             }
             if (!empty($donnees['error'])) {
-                throw new \RuntimeException('SerpApi ne peut pas effectuer cette recherche pour le moment.', 502);
+                throw new \RuntimeException('Aucune image trouvée.', 502);
             }
 
             // Ne renvoie que les données nécessaires à la sélection ; ignore les doublons et URL non sécurisées.

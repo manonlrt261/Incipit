@@ -82,7 +82,7 @@
                 },
                 {
                     filtre: 'termine',
-                    titre: 'Terminées',
+                    titre: 'Terminés',
                     image: 'termine'
                 },
                 {
@@ -97,7 +97,7 @@
                 },
                 {
                     filtre: 'pas-commence',
-                    titre: 'Pas commencé',
+                    titre: 'Pas commencés',
                     image: 'pascommence2'
                 }
             ] %}
@@ -220,16 +220,19 @@
                     <div class="lectures-carte-informations">
 
                         <h2>{{ livre.titre }}</h2>
-                        <button type="button" class="pile-ajouter-depuis-lectures" data-pile-action="ajouter" data-livre-id="{{ livre.id }}" {{ livre.pile_a_lire ? 'disabled' : '' }}>{{ livre.pile_a_lire ? 'Dans ma pile à lire' : 'Ajouter à ma pile à lire' }}</button>
+
 
                         <p class="lectures-auteur">
                             {{ livre.auteurs ?: 'Auteur non renseigné' }}
                         </p>
 
-                        {# Réutilise le badge commun pour garder les mêmes couleurs de statut sur toutes les pages. #}
-                        {% include 'components/_badge_lecture.html.twig' with {
-                            statut: livre.statut
-                        } only %}
+                        {# Regroupe le statut et la sélection de pile à lire sur une même ligne lorsque l’espace le permet. #}
+                        <div class="lectures-statut-actions">
+                            {% include 'components/_badge_lecture.html.twig' with {
+                                statut: livre.statut
+                            } only %}
+                            <button type="button" class="pile-ajouter-depuis-lectures" data-pile-action="ajouter" data-livre-id="{{ livre.id }}" {{ livre.pile_a_lire ? 'disabled' : '' }}>{{ livre.pile_a_lire ? 'Dans ma pile à lire' : 'Ajouter à ma pile à lire' }}</button>
+                        </div>
 
                         {# Affiche uniquement les notes renseignées, en conservant les demi-étoiles et la note zéro. #}
                         {% if livre.note is not null %}

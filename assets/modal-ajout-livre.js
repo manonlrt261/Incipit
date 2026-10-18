@@ -17,6 +17,18 @@ initialiserPage(ecouter => {
     // Conserve les dates saisies quand le statut change, mais n’envoie que celles qui s’appliquent.
     function actualiserDatesLecture() {
         const statut = champStatut?.value;
+        const selectionPile = document.getElementById('modal-pile-a-lire');
+        if (selectionPile) {
+            // Un livre terminé ne peut pas rejoindre la sélection des prochaines lectures.
+            selectionPile.disabled = statut === 'Terminé';
+            if (selectionPile.disabled) selectionPile.checked = false;
+        }
+        // Affiche la note automatique et empêche de saisir une autre valeur pour une lecture abandonnée.
+        const note = document.getElementById('modal-note');
+        if (note) {
+            note.readOnly = statut === 'Abandonné';
+            if (note.readOnly) note.value = '0';
+        }
         const debutVisible = ['En cours', 'En pause', 'Abandonné', 'Terminé'].includes(statut);
         const finVisible = statut === 'Terminé';
         const dateFin = document.getElementById('modal-date-fin');
@@ -70,6 +82,8 @@ initialiserPage(ecouter => {
             requetePhotoISBN++;
             annulerSuggestionsAuteurs();
             form.reset();
+            const zonePile = document.getElementById('modal-pile-zone');
+            if (zonePile) zonePile.hidden = true;
 
             if (champLivreId) {
                 champLivreId.value = String(id);
@@ -120,12 +134,13 @@ initialiserPage(ecouter => {
             actualiserDatesLecture();
             if (modeWishlist) {
                 document.getElementById('modal-publique').checked = Boolean(resultat.publique);
-                optionsGenres?.querySelectorAll('input').forEach(input => {
-                    input.checked = livre.genres_ids.map(String).includes(input.value);
-                });
-                actualiserGenres();
-                fermerGenres();
             }
+            // Reprend les genres enregistrés pour ne pas les perdre en modifiant un autre champ.
+            optionsGenres?.querySelectorAll('input').forEach(input => {
+                input.checked = (livre.genres_ids || []).map(String).includes(input.value);
+            });
+            actualiserGenres();
+            fermerGenres();
             if (livre.image_couverture) {
                 const cheminCouverture = /^(https?:\/\/|\/)/i.test(livre.image_couverture)
                     ? livre.image_couverture
@@ -211,6 +226,8 @@ initialiserPage(ecouter => {
     const messageErreur = document.getElementById('modal-erreur-ajout');
 
     const suggestionsAuteurs = document.getElementById('modal-suggestions-auteurs');
+    let champAuteurActif = null;
+    let indexAuteurActif = -1;
     let attenteSuggestionsAuteurs = null;
     let controleurSuggestionsAuteurs = null;
 
@@ -223,7 +240,11 @@ initialiserPage(ecouter => {
         input.name = 'auteurs[]';
         input.maxLength = 255;
         input.placeholder = "Nom de l'auteur";
-        input.setAttribute('list', 'modal-suggestions-auteurs');
+        input.setAttribute('role', 'combobox');
+        input.setAttribute('aria-autocomplete', 'list');
+        input.setAttribute('aria-controls', 'modal-suggestions-auteurs');
+        input.setAttribute('aria-expanded', 'false');
+        input.autocomplete = 'off';
         input.value = nom;
         const supprimer = document.createElement('button');
         supprimer.type = 'button';
@@ -237,6 +258,7 @@ initialiserPage(ecouter => {
     function afficherChampsAuteurs(noms) {
         if (!listeAuteurs) return;
         const valeurs = noms.length ? noms.slice(0, 50) : [''];
+        if (suggestionsAuteurs) listeAuteurs.after(suggestionsAuteurs);
         listeAuteurs.replaceChildren(...valeurs.map(nom => creerLigneAuteur(nom)));
     }
 
@@ -245,7 +267,16 @@ initialiserPage(ecouter => {
         clearTimeout(attenteSuggestionsAuteurs);
         controleurSuggestionsAuteurs?.abort();
         controleurSuggestionsAuteurs = null;
-        suggestionsAuteurs?.replaceChildren();
+        if (champAuteurActif) {
+            champAuteurActif.setAttribute('aria-expanded', 'false');
+            champAuteurActif.removeAttribute('aria-activedescendant');
+        }
+        champAuteurActif = null;
+        indexAuteurActif = -1;
+        if (suggestionsAuteurs) {
+            suggestionsAuteurs.hidden = true;
+            suggestionsAuteurs.replaceChildren();
+        }
     }
     ecouter(modal, 'close', annulerSuggestionsAuteurs);
 
@@ -267,15 +298,58 @@ initialiserPage(ecouter => {
                 const resultat = await reponse.json();
                 if (controleur.signal.aborted || !modal.open || input.value.trim() !== texte) return;
                 const noms = [...new Set((resultat.auteurs || []).map(auteur => auteur.nom))];
-                suggestionsAuteurs.replaceChildren(...noms.map(nom => {
-                    const option = document.createElement('option');
-                    option.value = nom;
+                if (document.activeElement !== input || !noms.length) return;
+                champAuteurActif = input;
+                // Place les suggestions sous le champ concerné, y compris pour les auteurs ajoutés ensuite.
+                input.closest('.modal-auteur-ligne').appendChild(suggestionsAuteurs);
+                suggestionsAuteurs.replaceChildren(...noms.map((nom, index) => {
+                    const option = document.createElement('div');
+                    option.id = `modal-auteur-option-${index}`;
+                    option.setAttribute('role', 'option');
+                    option.setAttribute('aria-selected', 'false');
+                    option.textContent = nom;
                     return option;
                 }));
+                suggestionsAuteurs.hidden = false;
+                input.setAttribute('aria-expanded', 'true');
             } catch {
                 // La saisie libre reste disponible si les suggestions ne peuvent pas être chargées.
             }
         }, 250);
+    });
+
+    // Valide une suggestion sans empêcher de conserver un nom saisi librement.
+    function choisirAuteur(option) {
+        if (!champAuteurActif || !option) return;
+        champAuteurActif.value = option.textContent;
+        champAuteurActif.focus();
+        annulerSuggestionsAuteurs();
+    }
+    ecouter(suggestionsAuteurs, 'pointerdown', event => event.preventDefault());
+    ecouter(suggestionsAuteurs, 'click', event => choisirAuteur(event.target.closest('[role="option"]')));
+
+    // Conserve le focus dans le champ et annonce l’option parcourue au clavier.
+    ecouter(listeAuteurs, 'keydown', event => {
+        if (event.target !== champAuteurActif || suggestionsAuteurs.hidden) return;
+        const options = [...suggestionsAuteurs.children];
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            event.stopPropagation();
+            annulerSuggestionsAuteurs();
+        } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+            event.preventDefault();
+            indexAuteurActif = (indexAuteurActif + (event.key === 'ArrowDown' ? 1 : -1) + options.length) % options.length;
+            options.forEach((option, index) => option.setAttribute('aria-selected', String(index === indexAuteurActif)));
+            champAuteurActif.setAttribute('aria-activedescendant', options[indexAuteurActif].id);
+            options[indexAuteurActif].scrollIntoView({ block: 'nearest' });
+        } else if (event.key === 'Enter' && indexAuteurActif >= 0) {
+            event.preventDefault();
+            choisirAuteur(options[indexAuteurActif]);
+        }
+    });
+    // Referme les propositions dès que la saisie passe à un autre champ.
+    ecouter(listeAuteurs, 'focusout', event => {
+        if (event.target instanceof HTMLInputElement) annulerSuggestionsAuteurs();
     });
 
     // RECHERCHE AUTOMATIQUE PAR ISBN
@@ -944,6 +1018,18 @@ initialiserPage(ecouter => {
     const resultatsCouvertures = document.getElementById('modal-resultats-couvertures');
 
     let rechercheCouvertureEnCours = false;
+    let numeroRechercheCouverture = 0;
+
+    // Vide les résultats du livre précédent et invalide les réponses qui arriveraient après sa fermeture.
+    function reinitialiserRechercheCouverture() {
+        numeroRechercheCouverture++;
+        rechercheCouvertureEnCours = false;
+        if (boutonLancerRechercheCouverture) boutonLancerRechercheCouverture.disabled = false;
+        if (inputRechercheCouverture) inputRechercheCouverture.value = '';
+        if (messageRechercheCouverture) messageRechercheCouverture.textContent = '';
+        resultatsCouvertures?.replaceChildren();
+        if (zoneRechercheCouverture) zoneRechercheCouverture.hidden = true;
+    }
 
     // Ouvre la recherche de couvertures en ligne.
     ecouter(boutonEnLigne, 'click', () => {
@@ -953,10 +1039,13 @@ initialiserPage(ecouter => {
 
         zoneRechercheCouverture.hidden = false;
 
+        // Combine le titre et le premier auteur saisi, sans écraser une recherche ajustée manuellement.
         const titre = document.getElementById('modal-titre')?.value.trim();
+        const premierAuteur = listeAuteurs?.querySelector('input[name="auteurs[]"]')?.value.trim();
+        const recherche = [titre, premierAuteur].filter(Boolean).join(' ');
 
-        if (inputRechercheCouverture && titre && !inputRechercheCouverture.value) {
-            inputRechercheCouverture.value = titre;
+        if (inputRechercheCouverture && recherche && !inputRechercheCouverture.value) {
+            inputRechercheCouverture.value = recherche;
         }
 
         inputRechercheCouverture?.focus();
@@ -983,6 +1072,7 @@ initialiserPage(ecouter => {
             return;
         }
 
+        const numeroRequete = ++numeroRechercheCouverture;
         rechercheCouvertureEnCours = true;
         boutonLancerRechercheCouverture.disabled = true;
         resultatsCouvertures.replaceChildren();
@@ -999,6 +1089,7 @@ initialiserPage(ecouter => {
             const reponse = await fetch(url.toString());
 
             const donnees = await reponse.json();
+            if (numeroRequete !== numeroRechercheCouverture) return;
             if (!reponse.ok || !donnees.success) {
                 throw new Error(donnees.message || 'La recherche est momentanément indisponible.');
             }
@@ -1007,7 +1098,7 @@ initialiserPage(ecouter => {
             if (!livres.length) {
                 if (messageRechercheCouverture) {
                     messageRechercheCouverture.textContent =
-                        'Aucune couverture trouvée pour cette recherche.';
+                        'Aucune image trouvée.';
                 }
                 return;
             }
@@ -1059,14 +1150,17 @@ initialiserPage(ecouter => {
                 messageRechercheCouverture.textContent = `${livres.length} couverture(s) trouvée(s). Sélectionne une image.`;
             }
         } catch (erreur) {
+            if (numeroRequete !== numeroRechercheCouverture) return;
             console.error('Erreur recherche de couverture :', erreur);
 
             if (messageRechercheCouverture) {
                 messageRechercheCouverture.textContent = erreur.message || 'Impossible de rechercher des couvertures pour le moment.';
             }
         } finally {
-            rechercheCouvertureEnCours = false;
-            boutonLancerRechercheCouverture.disabled = false;
+            if (numeroRequete === numeroRechercheCouverture) {
+                rechercheCouvertureEnCours = false;
+                boutonLancerRechercheCouverture.disabled = false;
+            }
         }
     }
 
@@ -1089,6 +1183,11 @@ initialiserPage(ecouter => {
 
     // Insère la nouvelle carte dans la bibliothèque et signale l’ajout pour actualiser les filtres.
     function ajouterLivreDansBibliotheque(livre) {
+        // Mes lectures recharge ses cartes complètes et ses compteurs sans recharger la page.
+        if (document.getElementById('page-mes-lectures')) {
+            document.dispatchEvent(new CustomEvent('bibliotheque:livre-ajoute'));
+            return;
+        }
         const conteneur = document.getElementById('bibliotheque-livres');
 
         if (!conteneur || !livre) return;
@@ -1123,7 +1222,10 @@ initialiserPage(ecouter => {
         if (livre.imageCouverture) {
             const image = document.createElement('img');
             image.className = 'bibliotheque-couverture';
-            image.src = livre.imageCouverture;
+            // Les fichiers importés sont relatifs à la racine, et non à l’URL de la page actuelle.
+            image.src = /^(https?:\/\/|\/)/i.test(livre.imageCouverture)
+                ? livre.imageCouverture
+                : `/${livre.imageCouverture}`;
             image.alt = `Couverture de ${livre.titre}`;
             article.appendChild(image);
         } else {
@@ -1172,7 +1274,10 @@ initialiserPage(ecouter => {
     // Partage la remise à zéro entre l’ouverture d’un ajout et la fermeture du formulaire.
     function reinitialiserFormulaire() {
         requetePhotoISBN++;
+        reinitialiserRechercheCouverture();
         form.reset();
+        const zonePile = document.getElementById('modal-pile-zone');
+        if (zonePile) zonePile.hidden = false;
         couvertureSelectionnee = null;
         if (boutonCouverture?.lastChild?.nodeType === 3) {
             boutonCouverture.lastChild.textContent = ' Ajouter une couverture';

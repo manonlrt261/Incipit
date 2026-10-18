@@ -298,6 +298,12 @@ initialiserPage(ecouter => {
 
     // Préremplit la date locale du jour sans remplacer une date déjà saisie.
     function actualiserDatesSession() {
+        // Applique la même note automatique lors de la création ou modification d’une session.
+        const note = formulaireLecture?.elements.namedItem('note');
+        if (note) {
+            note.readOnly = champStatutLecture?.value === 'Abandonné';
+            if (note.readOnly) note.value = '0';
+        }
         const fin = formulaireLecture?.elements.namedItem('dateFin');
         const debut = formulaireLecture?.elements.namedItem('dateDebut');
         const termine = champStatutLecture?.value === 'Terminé';

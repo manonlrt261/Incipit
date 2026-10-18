@@ -14,7 +14,8 @@ final class DonneesLecture
         if (!in_array($statut, ['Pas commencé', 'En cours', 'En pause', 'Abandonné', 'Terminé', 'À lire'], true)) {
             throw new \InvalidArgumentException('Statut de lecture invalide.');
         }
-        $note = trim($request->request->getString('note'));
+        // Une lecture abandonnée reçoit toujours zéro, même si une ancienne note est envoyée.
+        $note = $statut === 'Abandonné' ? '0' : trim($request->request->getString('note'));
         if ($note !== '' && !preg_match('/^(?:[0-4](?:\.[05])?|5(?:\.0)?)$/', $note)) {
             throw new \InvalidArgumentException('La note doit être comprise entre 0 et 5, par demi-étoile.');
         }

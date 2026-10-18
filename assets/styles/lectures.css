@@ -448,3 +448,24 @@
         padding: 14px;
     }
 }
+
+/* Statut et sélection de pile à lire, avec la même hauteur compacte. */
+.lectures-statut-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.lectures-statut-actions .pile-ajouter-depuis-lectures {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: content-box;
+    padding: 6px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+}
