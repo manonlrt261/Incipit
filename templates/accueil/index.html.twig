@@ -4,13 +4,7 @@
 
 {% block body %}
 <div class="accueil accueil-public" {% if edition|default(false) %}id="edition-accueil" data-url="{{ path('app_accueil_ordre') }}" data-token="{{ csrf_token('ordre_accueil') }}" data-retour="{{ path('app_espace_profil') }}#visibilite"{% endif %}>
-    {% if edition|default(false) %}
-        <aside class="accueil-edition-commandes">
-            <p>Maintenez un livre appuyé puis faites-le glisser dans sa section. Au clavier : sélectionnez sa carte puis utilisez les flèches.</p>
-            <button type="button" id="quitter-edition-accueil">Quitter le mode édition</button>
-            <p id="edition-accueil-message" role="status" aria-live="polite"></p>
-        </aside>
-    {% endif %}
+    {% include 'accueil/_edition_commandes.html.twig' %}
 
     {# Réutilise l’en-tête public et son lien de connexion. #}
     {% include 'accueil/_entete.html.twig' only %}
@@ -40,8 +34,8 @@
                         <p>Mes livres notés 5 étoiles.</p>
                     </div>
 
-                    <a class="accueil-lien"
-                       href="{{ path('app_livres_mieux_notes') }}">
+                    <a class="accueil-lien" {% if edition|default(false) %}data-edition-navigation{% endif %}
+                       href="{{ path('app_livres_mieux_notes', edition|default(false) ? {edition: 1} : {}) }}">
                         Voir tous les livres
                     </a>
                 </div>
@@ -110,8 +104,8 @@
                         <p>Les livres que j’aimerais découvrir prochainement.</p>
                     </div>
 
-                    <a class="accueil-lien"
-                       href="{{ path('app_wishlist') }}">
+                    <a class="accueil-lien" {% if edition|default(false) %}data-edition-navigation{% endif %}
+                       href="{{ path('app_wishlist', edition|default(false) ? {edition: 1} : {}) }}">
                         Voir toute la wishlist
                     </a>
                 </div>

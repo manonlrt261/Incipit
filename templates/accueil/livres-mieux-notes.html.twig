@@ -3,7 +3,8 @@
 {% block title %}Livres les mieux notés - Incipit{% endblock %}
 
 {% block body %}
-<div class="accueil">
+<div class="accueil" {% if edition|default(false) %}id="edition-accueil" data-url="{{ path('app_accueil_ordre') }}" data-token="{{ csrf_token('ordre_accueil') }}" data-retour="{{ path('app_espace_profil') }}#visibilite"{% endif %}>
+    {% include 'accueil/_edition_commandes.html.twig' %}
 
     {# Réutilise l’en-tête public et son lien de connexion. #}
     {% include 'accueil/_entete.html.twig' only %}
@@ -22,7 +23,7 @@
                     <p>Mes livres notés 5 étoiles.</p>
                 </div>
 
-                <a class="accueil-lien" href="{{ path('app_accueil') }}">
+                <a class="accueil-lien" {% if edition|default(false) %}data-edition-navigation{% endif %} href="{{ path(edition|default(false) ? 'app_accueil_edition' : 'app_accueil') }}">
                     ← Retour à l'accueil
                 </a>
             </div>
@@ -33,7 +34,7 @@
                     Aucun livre noté 5 étoiles pour le moment.
                 </p>
             {% else %}
-                <div class="accueil-grille-livres">
+                <div class="accueil-grille-livres" {% if edition|default(false) %}data-ordre-section="favoris"{% endif %}>
                     {# Affiche tous les favoris avec la carte commune et leur note de cinq étoiles. #}
                     {% for livre in livres %}
                         {% include 'accueil/_carte_livre.html.twig' with {livre: livre, note: 5} only %}

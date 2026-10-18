@@ -3,7 +3,8 @@
 {% block title %}Wishlist publique | Incipit{% endblock %}
 
 {% block body %}
-<div class="accueil wishlist-publique">
+<div class="accueil wishlist-publique" {% if edition|default(false) %}id="edition-accueil" data-url="{{ path('app_accueil_ordre') }}" data-token="{{ csrf_token('ordre_accueil') }}" data-retour="{{ path('app_espace_profil') }}#visibilite"{% endif %}>
+    {% include 'accueil/_edition_commandes.html.twig' %}
     {# Partage la bannière et l’accès à la connexion des autres pages publiques. #}
     {% include 'accueil/_entete.html.twig' only %}
 
@@ -15,7 +16,7 @@
                     <h2>Ma wishlist</h2>
                     <p>Les livres que je souhaite lire un jour.</p>
                 </div>
-                <a class="accueil-lien" href="{{ path('app_accueil') }}">
+                <a class="accueil-lien" {% if edition|default(false) %}data-edition-navigation{% endif %} href="{{ path(edition|default(false) ? 'app_accueil_edition' : 'app_accueil') }}">
                     ← Retour à l'accueil
                 </a>
             </div>
@@ -24,7 +25,7 @@
             {% if souhaits is empty %}
                 <p class="accueil-vide">Aucun livre public dans ma wishlist pour le moment.</p>
             {% else %}
-                <div class="wishlist-grille">
+                <div class="wishlist-grille" {% if edition|default(false) %}data-ordre-section="wishlist"{% endif %}>
                     {% for souhait in souhaits %}
                         {% set livre = souhait.livre %}
 
@@ -36,7 +37,7 @@
                             ]) %}
                         {% endfor %}
 
-                        <article class="wishlist-carte" tabindex="0" data-fiche-souhait="fiche-souhait-{{ souhait.id }}" aria-label="Consulter {{ livre.titre }}">
+                        <article class="wishlist-carte" data-ordre-livre data-livre-id="{{ livre.id }}" tabindex="0" {% if not edition|default(false) %}data-fiche-souhait="fiche-souhait-{{ souhait.id }}"{% endif %} aria-label="Consulter {{ livre.titre }}">
                             {# Conserve les URL distantes et les chemins absolus ; complète les chemins locaux relatifs. #}
                             <div class="wishlist-couverture">
                                 {% if livre.imageCouverture %}

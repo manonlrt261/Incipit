@@ -28,7 +28,7 @@ final class AccueilController extends AbstractController
         $visibilite = $reglages->publique();
         // Les 5 livres dont la dernière lecture terminée et notée
         // a obtenu la note maximale.
-        $livres = $this->chargerLivresFavoris($connection, 5);
+        $livres = $this->chargerLivresFavoris($connection);
 
         // Les 5 auteurs ayant le plus de lectures terminées
         // pendant l'année civile en cours.
@@ -66,15 +66,15 @@ final class AccueilController extends AbstractController
              WHERE sh.statut = :statut AND sh.publique = 1
              GROUP BY sh.id, l.id, l.titre, l.image_couverture, sh.date_ajout
              ORDER BY sh.date_ajout DESC, sh.id DESC
-             LIMIT 5",
+             ",
             ['statut' => 'souhaité']
         );
 
         return $this->render('accueil/index.html.twig', [
             'edition' => $edition,
-            'livres' => $ordre->appliquer($livres, 'favoris'),
+            'livres' => array_slice($ordre->appliquer($livres, 'favoris'), 0, 5),
             'auteurs' => $auteurs,
-            'wishlist' => $ordre->appliquer($wishlist, 'wishlist'),
+            'wishlist' => array_slice($ordre->appliquer($wishlist, 'wishlist'), 0, 5),
             'visibilite' => $visibilite,
         ]);
     }
@@ -94,12 +94,15 @@ final class AccueilController extends AbstractController
             return $this->json(['success' => false, 'message' => 'Ordre invalide.'], 422);
         }
         $autorises = [
-            'favoris' => array_column($this->chargerLivresFavoris($connection, 5), 'id'),
-            'wishlist' => $connection->fetchFirstColumn("SELECT l.id FROM souhait sh JOIN livre l ON l.id = sh.livre_id WHERE sh.statut = 'souhaité' AND sh.publique = 1 ORDER BY sh.date_ajout DESC, sh.id DESC LIMIT 5"),
+            'favoris' => array_column($this->chargerLivresFavoris($connection), 'id'),
+            'wishlist' => $connection->fetchFirstColumn("SELECT l.id FROM souhait sh JOIN livre l ON l.id = sh.livre_id WHERE sh.statut = 'souhaité' AND sh.publique = 1 ORDER BY sh.date_ajout DESC, sh.id DESC"),
         ];
-        foreach (['favoris', 'wishlist'] as $section) {
+        // Une page n’envoie que sa section : préserve les autres positions déjà enregistrées.
+        $jsonExistant = $connection->fetchOne('SELECT ordre_accueil FROM parametre_confidentialite WHERE utilisateur_id = ?', [$id]);
+        $existant = is_string($jsonExistant) ? (json_decode($jsonExistant, true) ?: []) : [];
+        foreach (array_keys($ordre) as $section) {
             $ids = $ordre[$section] ?? [];
-            if (!is_array($ids) || count($ids) > 5 || count($ids) !== count(array_unique($ids, SORT_REGULAR))) {
+            if (!is_array($ids) || count($ids) > 10000 || count($ids) !== count(array_unique($ids, SORT_REGULAR))) {
                 return $this->json(['success' => false, 'message' => 'Sélection invalide.'], 422);
             }
             foreach ($ids as $livreId) {
@@ -107,36 +110,53 @@ final class AccueilController extends AbstractController
                     return $this->json(['success' => false, 'message' => 'Les livres visibles ont changé. Recharge le mode édition.'], 409);
                 }
             }
-            $ordre[$section] = $ids;
+            // Depuis l’accueil, les cinq cartes visibles passent devant sans effacer l’ordre du reste de la liste.
+            $reste = array_values(array_diff($existant[$section] ?? [], $ids));
+            $existant[$section] = [...$ids, ...$reste];
         }
         // Crée les réglages si nécessaire et préserve les interrupteurs de visibilité déjà enregistrés.
         $connection->executeStatement(
             'INSERT INTO parametre_confidentialite (utilisateur_id, afficher_wishlist, afficher_auteurs_favoris, afficher_livres_favoris, date_modification, ordre_accueil) VALUES (?, 1, 1, 1, NOW(), ?) ON DUPLICATE KEY UPDATE ordre_accueil = VALUES(ordre_accueil), date_modification = NOW()',
-            [$id, json_encode($ordre, JSON_THROW_ON_ERROR)]
+            [$id, json_encode($existant, JSON_THROW_ON_ERROR)]
         );
         return $this->json(['success' => true]);
     }
 
     #[Route('/mes-livres-mieux-notes', name: 'app_livres_mieux_notes', methods: ['GET'])]
     // Affiche les livres favoris lorsque leur section publique est visible.
-    public function livresMieuxNotes(Connection $connection, \App\Service\VisibiliteAccueil $reglages): Response
+    public function livresMieuxNotes(Request $request, Connection $connection, \App\Service\VisibiliteAccueil $reglages, OrdreAccueil $ordre): Response
     {
+        $edition = $this->modeEdition($request, $connection);
         if (!$reglages->publique()['favoris']) throw $this->createNotFoundException();
         $livres = $this->chargerLivresFavoris($connection);
 
         return $this->render('accueil/livres-mieux-notes.html.twig', [
-            'livres' => $livres,
+            'livres' => $ordre->appliquer($livres, 'favoris'),
+            'edition' => $edition,
         ]);
     }
 
     #[Route('/ma-wishlist', name: 'app_wishlist', methods: ['GET'])]
     // Affiche la wishlist publique en respectant la visibilité de la section et de chaque souhait.
-    public function wishlist(\App\Repository\SouhaitRepository $repository, \App\Service\VisibiliteAccueil $reglages): Response
+    public function wishlist(Request $request, Connection $connection, \App\Repository\SouhaitRepository $repository, \App\Service\VisibiliteAccueil $reglages, OrdreAccueil $ordre): Response
     {
+        $edition = $this->modeEdition($request, $connection);
         if (!$reglages->publique()['wishlist']) throw $this->createNotFoundException();
         return $this->render('wishlist/public.html.twig', [
-            'souhaits' => $repository->findBy(['statut' => 'souhaité', 'publique' => true], ['dateAjout' => 'DESC', 'id' => 'DESC']),
+            'souhaits' => $ordre->appliquer($repository->findBy(['statut' => 'souhaité', 'publique' => true], ['dateAjout' => 'DESC', 'id' => 'DESC']), 'wishlist'),
+            'edition' => $edition,
         ]);
+    }
+
+    // L’édition des pages publiques complètes reste réservée au propriétaire de l’accueil.
+    private function modeEdition(Request $request, Connection $connection): bool
+    {
+        if (!$request->query->getBoolean('edition')) return false;
+        $this->denyAccessUnlessGranted('ROLE_USER');
+        if ((int) $this->getUser()->getId() !== (int) $connection->fetchOne('SELECT MIN(id) FROM utilisateur')) {
+            throw $this->createAccessDeniedException();
+        }
+        return true;
     }
 
     // Partage la sélection des livres notés cinq étoiles entre l’accueil et la liste complète.

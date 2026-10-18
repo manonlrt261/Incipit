@@ -14,8 +14,10 @@ final class OrdreAccueil
         $json = $this->connexion->fetchOne('SELECT p.ordre_accueil FROM utilisateur u LEFT JOIN parametre_confidentialite p ON p.utilisateur_id = u.id ORDER BY u.id ASC LIMIT 1');
         $ordre = is_string($json) ? json_decode($json, true) : [];
         $positions = array_flip($ordre[$section] ?? []);
-        $initial = array_flip(array_column($livres, 'id'));
-        usort($livres, static fn (array $a, array $b): int => ($positions[$a['id']] ?? PHP_INT_MAX) <=> ($positions[$b['id']] ?? PHP_INT_MAX) ?: $initial[$a['id']] <=> $initial[$b['id']]);
+        // Les favoris sont des lignes SQL ; la wishlist complète utilise les entités Souhait.
+        $id = static fn ($livre): int => is_array($livre) ? (int) $livre['id'] : $livre->getLivre()->getId();
+        $initial = array_flip(array_map($id, $livres));
+        usort($livres, static fn ($a, $b): int => ($positions[$id($a)] ?? PHP_INT_MAX) <=> ($positions[$id($b)] ?? PHP_INT_MAX) ?: $initial[$id($a)] <=> $initial[$id($b)]);
         return $livres;
     }
 }

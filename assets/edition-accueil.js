@@ -13,9 +13,9 @@ initialiserPage(ecouter => {
     let derniereCible = null;
 
     // Les mêmes cartes se déplacent au clavier ou après un appui prolongé, sans perdre leurs données.
-    page.querySelectorAll('[data-ordre-section] .accueil-carte-livre').forEach(carte => {
+    page.querySelectorAll('[data-ordre-section] [data-ordre-livre]').forEach(carte => {
         carte.tabIndex = 0;
-        carte.setAttribute('aria-label', `Déplacer ${carte.querySelector('h3').textContent}`);
+        carte.setAttribute('aria-label', `Déplacer ${carte.querySelector('h3, h2').textContent}`);
         carte.querySelectorAll('img').forEach(image => image.draggable = false);
     });
     function terminerDeplacement() {
@@ -27,7 +27,7 @@ initialiserPage(ecouter => {
         derniereCible = null;
     }
     ecouter(page, 'pointerdown', event => {
-        const carte = event.target.closest('[data-ordre-section] .accueil-carte-livre');
+        const carte = event.target.closest('[data-ordre-section] [data-ordre-livre]');
         if (!carte || event.button !== 0) return;
         terminerDeplacement();
         depart = { x: event.clientX, y: event.clientY };
@@ -47,7 +47,7 @@ initialiserPage(ecouter => {
             return;
         }
         event.preventDefault();
-        const cible = document.elementFromPoint(event.clientX, event.clientY)?.closest('.accueil-carte-livre');
+        const cible = document.elementFromPoint(event.clientX, event.clientY)?.closest('[data-ordre-livre]');
         // Une carte reste dans sa section afin de préserver la distinction favoris / wishlist.
         if (!cible || cible === carteActive || cible === derniereCible || cible.parentElement !== carteActive.parentElement) return;
         derniereCible = cible;
@@ -58,14 +58,15 @@ initialiserPage(ecouter => {
     ecouter(document, 'pointerup', terminerDeplacement);
     ecouter(document, 'pointercancel', terminerDeplacement);
     ecouter(page, 'contextmenu', event => {
-        if (event.target.closest('[data-ordre-section] .accueil-carte-livre')) event.preventDefault();
+        if (event.target.closest('[data-ordre-section] [data-ordre-livre]')) event.preventDefault();
     });
     ecouter(page, 'keydown', event => {
-        const carte = event.target.closest('[data-ordre-section] .accueil-carte-livre');
+        const carte = event.target.closest('[data-ordre-section] [data-ordre-livre]');
         if (!carte || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return;
         event.preventDefault();
         const precedent = event.key === 'ArrowLeft' || event.key === 'ArrowUp';
-        const voisine = precedent ? carte.previousElementSibling : carte.nextElementSibling;
+        const cartes = [...carte.parentElement.querySelectorAll(':scope > [data-ordre-livre]')];
+        const voisine = cartes[cartes.indexOf(carte) + (precedent ? -1 : 1)];
         if (!voisine) return;
         if (precedent) voisine.before(carte);
         else voisine.after(carte);
@@ -74,14 +75,14 @@ initialiserPage(ecouter => {
     });
 
     // En cas d’échec, conserve les positions à l’écran et permet de réessayer sans quitter l’édition.
-    ecouter(quitter, 'click', async () => {
+    async function enregistrerPuisNaviguer(destination) {
         terminerDeplacement();
         if (quitter.disabled) return;
         quitter.disabled = true;
         message.textContent = 'Enregistrement…';
         const ordre = {};
         page.querySelectorAll('[data-ordre-section]').forEach(zone => {
-            ordre[zone.dataset.ordreSection] = [...zone.querySelectorAll('.accueil-carte-livre')].map(carte => Number(carte.dataset.livreId));
+            ordre[zone.dataset.ordreSection] = [...zone.querySelectorAll('[data-ordre-livre]')].map(carte => Number(carte.dataset.livreId));
         });
         try {
             const reponse = await fetch(page.dataset.url, {
@@ -91,10 +92,18 @@ initialiserPage(ecouter => {
             });
             const resultat = await reponse.json();
             if (!reponse.ok || !resultat.success) throw new Error(resultat.message || 'Impossible d’enregistrer les positions. Réessayez.');
-            window.location.assign(page.dataset.retour);
+            window.location.assign(destination);
         } catch (erreur) {
             message.textContent = erreur.message;
             quitter.disabled = false;
         }
+    }
+    ecouter(quitter, 'click', () => enregistrerPuisNaviguer(page.dataset.retour));
+    // Enregistre aussi avant de passer à une liste complète ou de revenir à l’accueil en mode édition.
+    ecouter(page, 'click', event => {
+        const lien = event.target.closest('[data-edition-navigation]');
+        if (!lien) return;
+        event.preventDefault();
+        enregistrerPuisNaviguer(lien.href);
     });
 });
