@@ -24,6 +24,45 @@ initialiserPage((ecouter) => {
     let controleur = null;
     let anneeAffichee = select.value;
 
+    let periodeComparaison = '3';
+    const modalMois = document.getElementById('stats-mois-modal');
+
+    // Conserve la période choisie lorsque l’année ou l’objectif actualise les graphiques.
+    function appliquerPeriodeComparaison() {
+        const choix = graphiques.querySelector('[data-stats-periode]');
+        if (choix) choix.value = periodeComparaison;
+        graphiques.querySelectorAll('[data-stats-comparaison]').forEach(zone => {
+            zone.hidden = zone.dataset.statsComparaison !== periodeComparaison;
+        });
+    }
+    ecouter(graphiques, 'change', event => {
+        if (!event.target.matches('[data-stats-periode]')) return;
+        periodeComparaison = event.target.value;
+        appliquerPeriodeComparaison();
+    });
+    appliquerPeriodeComparaison();
+
+    // Réutilise les listes du mois rendues par le serveur, sans requête ni rechargement.
+    function ouvrirMois(cible) {
+        const modele = graphiques.querySelector(`[data-stats-details-mois="${cible.dataset.statsMois}"]`);
+        if (!modele || !modalMois) return;
+        document.getElementById('stats-mois-modal-titre').textContent = modele.dataset.titre;
+        document.getElementById('stats-mois-liste').replaceChildren(modele.content.cloneNode(true));
+        modalMois.showModal();
+    }
+    ecouter(graphiques, 'click', event => {
+        const mois = event.target.closest('[data-stats-mois]');
+        if (mois) ouvrirMois(mois);
+    });
+    ecouter(graphiques, 'keydown', event => {
+        const mois = event.target.closest('[data-stats-mois]');
+        if (mois && (event.key === 'Enter' || event.key === ' ')) {
+            event.preventDefault();
+            ouvrirMois(mois);
+        }
+    });
+    ecouter(document.getElementById('stats-mois-fermer'), 'click', () => modalMois.close());
+
     // Recharge les graphiques de l’année choisie sans recharger toute la page.
     ecouter(select, 'change', async () => {
         controleur?.abort();
@@ -41,6 +80,7 @@ initialiserPage((ecouter) => {
             if (!reponse.ok || !resultat.success) throw new Error(resultat.message || 'Impossible de charger les statistiques.');
             if (!page.isConnected || requete.signal.aborted) return;
             graphiques.innerHTML = resultat.html;
+            appliquerPeriodeComparaison();
             anneeAffichee = select.value;
             window.history.replaceState(window.history.state, '', url.pathname + url.search);
         } catch (exception) {
@@ -118,6 +158,7 @@ initialiserPage((ecouter) => {
             if (!page.isConnected) return;
             objectifActuel = resultat.objectif;
             graphiques.innerHTML = resultat.html;
+            appliquerPeriodeComparaison();
             afficherObjectif();
             succesObjectif.textContent = 'Objectif enregistré.';
             succesObjectif.hidden = false;

@@ -9,7 +9,7 @@ final class StatistiquesLecture
 
     public function calculer(int $annee, int $utilisateurId): array
     {
-        $lectures = $this->connexion->fetchAllAssociative('SELECT id, livre_id, statut, date_fin FROM session_lecture');
+        $lectures = $this->connexion->fetchAllAssociative('SELECT sl.id, sl.livre_id, sl.statut, sl.date_fin, l.titre FROM session_lecture sl JOIN livre l ON l.id = sl.livre_id');
         $genresParLivre = [];
         foreach ($this->connexion->fetchAllAssociative('SELECT lg.livre_id, g.id, g.nom FROM livre_genre lg JOIN genre g ON g.id = lg.genre_id') as $ligne) {
             $genresParLivre[(int) $ligne['livre_id']][(int) $ligne['id']] = $ligne['nom'];
@@ -20,6 +20,8 @@ final class StatistiquesLecture
         }
         $compteurs = ['terminé' => 0, 'en cours' => 0, 'pas commencé' => 0, 'abandonné' => 0];
         $mois = array_fill(1, 12, 0);
+        $detailsMois = array_fill(1, 12, []);
+        $tousLivresLus = [];
         $parAnnee = [];
         $livresLus = [];
         $auteurs = [];
@@ -28,12 +30,19 @@ final class StatistiquesLecture
             $statut = mb_strtolower(trim($lecture['statut']));
             if (array_key_exists($statut, $compteurs)) $compteurs[$statut]++;
             if ($statut !== 'terminé') continue;
+            $tousLivresLus[(int) $lecture['livre_id']] = true;
             if (!$lecture['date_fin']) { $sansDate++; continue; }
             $date = new \DateTimeImmutable($lecture['date_fin']);
             $an = (int) $date->format('Y');
             $parAnnee[$an] = ($parAnnee[$an] ?? 0) + 1;
             if ($an !== $annee) continue;
-            $mois[(int) $date->format('n')]++;
+            $numeroMois = (int) $date->format('n');
+            $mois[$numeroMois]++;
+            $detailsMois[$numeroMois][] = [
+                'titre' => $lecture['titre'],
+                'auteurs' => implode(', ', $auteursParLivre[(int) $lecture['livre_id']] ?? []),
+                'date' => $lecture['date_fin'],
+            ];
             $livreId = (int) $lecture['livre_id'];
             $livresLus[$livreId] = true;
             foreach ($auteursParLivre[$livreId] ?? [] as $id => $nom) {
@@ -68,10 +77,40 @@ final class StatistiquesLecture
         // Inclure les années sans lecture entre la première année connue et aujourd’hui.
         $comparaison = [];
         for ($an = min($annees); $an <= max($annees); $an++) $comparaison[$an] = $parAnnee[$an] ?? 0;
+        // Les périodes courtes incluent les années sans lecture ; toutes les années conserve l’historique complet.
+        $comparaisons = ['toutes' => $comparaison];
+        $derniereAnnee = max($annees);
+        foreach ([3, 5, 10] as $duree) {
+            $comparaisons[(string) $duree] = [];
+            for ($an = $derniereAnnee - $duree + 1; $an <= $derniereAnnee; $an++) {
+                $comparaisons[(string) $duree][$an] = $parAnnee[$an] ?? 0;
+            }
+        }
+
+        // Compte chaque livre encore possédé une seule fois par genre et une seule fois parmi les livres lus.
+        $genresCollection = [];
+        $possedes = $this->connexion->fetchFirstColumn('SELECT l.id FROM livre l WHERE EXISTS (SELECT 1 FROM exemplaire e WHERE e.livre_id = l.id AND e.date_retrait IS NULL)');
+        foreach ($possedes as $id) {
+            foreach ($genresParLivre[(int) $id] ?? [0 => 'Sans genre'] as $genreId => $nom) {
+                $genresCollection[$genreId] ??= ['nom' => $nom, 'possedes' => 0, 'lus' => 0];
+                $genresCollection[$genreId]['possedes']++;
+                if (isset($tousLivresLus[(int) $id])) $genresCollection[$genreId]['lus']++;
+            }
+        }
+        foreach ($genresCollection as &$genre) {
+            $genre['pourcentage'] = (int) round($genre['lus'] / $genre['possedes'] * 100);
+        }
+        unset($genre);
+        usort($genresCollection, static fn (array $a, array $b): int => strnatcasecmp($a['nom'], $b['nom']));
+        foreach ($detailsMois as &$details) {
+            usort($details, static fn (array $a, array $b): int => strcmp($b['date'], $a['date']) ?: strnatcasecmp($a['titre'], $b['titre']));
+        }
+        unset($details);
         $objectif = $this->connexion->fetchOne('SELECT nombre_livres FROM objectif_annuel WHERE utilisateur_id = :id AND annee = :annee', ['id' => $utilisateurId, 'annee' => $annee]);
         $objectif = $objectif !== false && (int) $objectif > 0 ? (int) $objectif : null;
         $termineesAnnee = array_sum($mois);
         return [
+            'detailsMois' => $detailsMois, 'comparaisons' => $comparaisons, 'genresCollection' => $genresCollection,
             'annee' => $annee, 'annees' => $annees, 'compteurs' => $compteurs,
             'mois' => $mois, 'maximumMois' => max(1, ...array_values($mois)),
             'comparaison' => $comparaison, 'maximumAnnuel' => max(1, ...array_values($comparaison)),

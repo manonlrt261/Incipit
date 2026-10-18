@@ -12,7 +12,7 @@
 
         {# Choisit une échelle d’au moins quatre lectures, divisible en quatre graduations égales. #}
         {% set echelle = maximumMois < 4 ? 4 : (maximumMois / 4)|round(0, 'ceil') * 4 %}
-        <svg class="stats-barres" viewBox="0 0 680 230" role="img" aria-labelledby="stats-mois-titre">
+        <svg class="stats-barres" viewBox="0 0 680 230" role="group" aria-labelledby="stats-mois-titre">
             <title id="stats-mois-titre">Lectures terminées par mois en {{ annee }} : {{ termineesAnnee }} au total</title>
             {% for i in 0..4 %}
                 {% set y = 180 - i * 40 %}
@@ -23,6 +23,8 @@
             {% for numero, nombre in mois %}
                 {% set x = 44 + (numero - 1) * 52 %}
                 {% set hauteur = nombre / echelle * 160 %}
+                <g data-stats-mois="{{ numero }}" role="button" tabindex="0" aria-label="Voir les {{ nombre }} lectures de {{ nomsMois[numero - 1] }} {{ annee }}">
+                <rect x="{{ x - 8 }}" y="10" width="49" height="210" fill="transparent"/>
                 <rect
                     x="{{ x }}"
                     y="{{ 180 - hauteur }}"
@@ -35,8 +37,23 @@
                 </rect>
                 <text x="{{ x + 16.5 }}" y="{{ 172 - hauteur }}" text-anchor="middle" class="stats-valeur">{{ nombre }}</text>
                 <text x="{{ x + 16.5 }}" y="204" text-anchor="middle">{{ nomsMois[numero - 1] }}</text>
+                </g>
             {% endfor %}
         </svg>
+        {# Les listes restent liées à l’année affichée, même après une actualisation des graphiques. #}
+        {% for numero, lectures in detailsMois %}
+            <template data-stats-details-mois="{{ numero }}" data-titre="Lectures de {{ nomsMois[numero - 1] }} {{ annee }}">
+                {% for lecture in lectures %}
+                    <article class="stats-lecture-mois">
+                        <h3>{{ lecture.titre }}</h3>
+                        <p>{{ lecture.auteurs ?: 'Auteur non renseigné' }}</p>
+                        <p class="stats-date-lecture">Terminé le {{ lecture.date|date('d/m/Y') }}</p>
+                    </article>
+                {% else %}
+                    <p>Aucune lecture terminée pour ce mois.</p>
+                {% endfor %}
+            </template>
+        {% endfor %}
         {% if termineesAnnee == 0 %}
             <p class="stats-vide">Aucune lecture terminée datée en {{ annee }}.</p>
         {% endif %}
@@ -152,6 +169,25 @@
         {% endif %}
     </section>
 
+    {# Mesure la part lue de chaque genre de la collection, toutes années confondues. #}
+    <section class="stats-panneau stats-collection-genres">
+        <header>
+            <img src="{{ asset('images/graphique.png') }}" alt="">
+            <div><h2>Livres lus par genre</h2><p>Part des livres lus parmi vos livres possédés, toutes années confondues.</p></div>
+        </header>
+        <div class="stats-progressions-genres">
+            {% for genre in genresCollection %}
+                <div class="stats-progression-genre">
+                    <div><strong>{{ genre.nom }}</strong><span>{{ genre.lus }} / {{ genre.possedes }} livre{{ genre.possedes > 1 ? 's' : '' }} lus · {{ genre.pourcentage }} %</span></div>
+                    <progress value="{{ genre.lus }}" max="{{ genre.possedes }}" aria-label="{{ genre.nom }} : {{ genre.pourcentage }} % lus">{{ genre.pourcentage }} %</progress>
+                </div>
+            {% else %}
+                <p class="stats-vide">Aucun livre possédé pour le moment.</p>
+            {% endfor %}
+        </div>
+        <p class="stats-note">Un livre est considéré comme lu dès qu’une session est terminée. Les relectures ne le comptent pas plusieurs fois.</p>
+    </section>
+
     {# Compare les totaux par année et adapte la largeur du graphique pour permettre son défilement. #}
     <section class="stats-panneau stats-comparaison">
         <header>
@@ -161,6 +197,17 @@
                 <p>Nombre de lectures terminées par année.</p>
             </div>
         </header>
+        <label class="stats-periode-comparaison">Période
+            <select data-stats-periode aria-label="Période de comparaison annuelle">
+                <option value="3">3 dernières années</option>
+                <option value="5">5 dernières années</option>
+                <option value="10">10 dernières années</option>
+                <option value="toutes">Toutes les années</option>
+            </select>
+        </label>
+        {% for periode, comparaison in comparaisons %}
+        <div data-stats-comparaison="{{ periode }}" {{ periode != 3 ? 'hidden' : '' }}>
+        {% set maximumAnnuel = max(comparaison) %}
         {% set largeur = max(680, comparaison|length * 95) %}
         {% set echelleAn = maximumAnnuel < 4 ? 4 : (maximumAnnuel / 4)|round(0, 'ceil') * 4 %}
         <div
@@ -174,9 +221,9 @@
                 style="min-width: {{ largeur }}px"
                 viewBox="0 0 {{ largeur }} 220"
                 role="img"
-                aria-labelledby="stats-annees-titre"
+                aria-labelledby="stats-annees-titre-{{ periode }}"
             >
-                <title id="stats-annees-titre">Comparaison des lectures terminées par année</title>
+                <title id="stats-annees-titre-{{ periode }}">Comparaison des lectures terminées par année</title>
                 {% for i in 0..4 %}
                     {% set y = 170 - i * 35 %}
                     <line x1="35" y1="{{ y }}" x2="{{ largeur - 10 }}" y2="{{ y }}" class="stats-graduation"/>
@@ -201,6 +248,8 @@
                 {% endfor %}
             </svg>
         </div>
+        </div>
+        {% endfor %}
     </section>
 </div>
 
