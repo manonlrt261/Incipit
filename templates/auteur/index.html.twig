@@ -16,13 +16,18 @@
         <div class="bibliotheque-introduction">
             <div><h1 class="titre-page">Mes auteurs</h1><p class="sous-titre-page">Retrouvez les auteurs de vos livres.</p></div>
         </div>
+        {# Chaque menu trie les fiches selon le prénom ou le nom, sans rechargement. #}
+        <div class="auteurs-tris">
+            <label><span class="sr-only">Prénom</span><select id="auteurs-tri-prenom"><option value="">Prénom</option><option value="asc">Prénom : A à Z</option><option value="desc">Prénom : Z à A</option></select></label>
+            <label><span class="sr-only">Nom</span><select id="auteurs-tri-nom"><option value="">Nom</option><option value="asc">Nom : A à Z</option><option value="desc">Nom : Z à A</option></select></label>
+        </div>
         <p id="auteurs-compteur" class="auteurs-compteur" aria-live="polite">{{ auteurs|length }} auteur{{ auteurs|length > 1 ? 's' : '' }}</p>
         {# Chaque carte ouvre la fiche persistante déjà liée aux livres et aux suggestions de saisie. #}
         <div class="auteurs-grille">
             {% for auteur in auteurs %}
-                <a class="auteurs-carte" href="{{ path('app_auteur_fiche', {id: auteur.id}) }}" data-auteur-nom="{{ auteur.nom|e('html_attr') }}">
-                    <img src="{{ asset('images/auteur.png') }}" alt="">
-                    <h2>{{ auteur.nom }}</h2>
+                <a class="auteurs-carte" href="{{ path('app_auteur_fiche', {id: auteur.id}) }}" data-auteur-nom="{{ auteur.affichage|e('html_attr') }}" data-prenom="{{ auteur.prenom|e('html_attr') }}" data-nom="{{ auteur.nom|e('html_attr') }}">
+                    <span class="auteurs-initiales" aria-hidden="true">{{ auteur.initiales }}</span>
+                    <h2>{{ auteur.affichage }}</h2>
                     <p>{{ auteur.nombre }} livre{{ auteur.nombre > 1 ? 's' : '' }} enregistré{{ auteur.nombre > 1 ? 's' : '' }}</p>
                     <span>Voir les livres</span>
                 </a>

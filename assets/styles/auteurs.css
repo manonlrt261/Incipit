@@ -136,3 +136,117 @@
         font-size: 14px;
     }
 }
+
+/* =======================================
+   IDENTITÉ ET MODIFICATION DES AUTEURS
+   ======================================= */
+
+/* Initiales centrées dans les cartes à la place de l’ancienne icône. */
+.auteurs-carte .auteurs-initiales {
+    display: block;
+    width: 100%;
+    text-align: center;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 48px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--color-terra);
+}
+
+/* Menus de tri et formulaire d’identité, adaptés au clavier et au mobile. */
+.auteurs-tris {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.auteurs-tris label {
+    flex: 0 1 220px;
+    min-width: 0;
+}
+
+.auteurs-tris select,
+.auteur-formulaire input:not([type='hidden']) {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    padding: 12px;
+    border: 1px solid var(--color-encadre);
+    border-radius: 8px;
+    background: var(--color-white);
+    color: var(--color-secondary);
+    font: inherit;
+    font-size: 16px;
+}
+
+.auteur-formulaire {
+    display: grid;
+    gap: 12px;
+    max-width: 600px;
+    padding: 24px;
+    border: 1px solid var(--color-encadre);
+    border-radius: 12px;
+    background: var(--color-white);
+}
+
+.auteur-formulaire-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 12px;
+}
+
+.auteurs-modifier,
+.auteur-formulaire button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--color-secondary);
+    color: var(--color-fond);
+    font: inherit;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.auteurs-modifier img {
+    width: 18px;
+    height: 18px;
+}
+
+/* Ouverture des fiches détaillées depuis les quatre catégories. */
+.auteur-livre[data-details-url] {
+    cursor: pointer;
+}
+
+.auteur-livre:focus-visible {
+    outline: 2px solid var(--color-terra);
+    outline-offset: 3px;
+}
+
+.auteur-details-titre-livre {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--color-terra);
+}
+
+.auteur-details-noms {
+    font-family: Inter, sans-serif;
+    font-weight: 400;
+    color: var(--color-secondary);
+}
+
+.auteur-details-session {
+    padding: 16px 0;
+    border-bottom: 1px solid var(--color-encadre);
+}
+
+.auteur-details-date {
+    color: var(--color-primary);
+}

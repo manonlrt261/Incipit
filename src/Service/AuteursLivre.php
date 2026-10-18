@@ -36,7 +36,9 @@ final class AuteursLivre
                 ->where('LOWER(TRIM(a.nomAffichage)) = :nom')->setParameter('nom', mb_strtolower($nom))
                 ->orderBy('a.id', 'ASC')->setMaxResults(1)->getQuery()->getOneOrNullResult();
             if (!$auteur) {
-                $auteur = (new Auteur())->setNom($nom)->setNomAffichage($nom);
+                // Stocke les nouvelles fiches avec prénom puis nom, tout en gardant le nom complet pour les suggestions.
+                $parties = NomsAuteur::separer($nom);
+                $auteur = (new Auteur())->setPrenom($parties['prenom'] ?: null)->setNom($parties['nom'])->setNomAffichage($nom);
                 $this->entityManager->persist($auteur);
             }
             $livre->addAuteur($auteur);

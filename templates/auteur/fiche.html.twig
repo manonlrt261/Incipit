@@ -1,5 +1,5 @@
 {% extends 'base.html.twig' %}
-{% block title %}{{ auteur.nom }} | Incipit{% endblock %}
+{% block title %}{{ auteur.affichage }} | Incipit{% endblock %}
 {% block body %}
 <div class="espace-layout">
     {% include 'components/_sidebar.html.twig' %}
@@ -9,7 +9,8 @@
             <img src="{{ asset('images/incipit.png') }}" alt="Incipit" class="bibliotheque-logo">
         </header>
         <div class="bibliotheque-introduction">
-            <div><h1 class="titre-page">{{ auteur.nom }}</h1><p class="sous-titre-page">Tous vos livres de cet auteur.</p></div>
+            <div><h1 class="titre-page">{{ auteur.affichage }}</h1><p class="sous-titre-page">Tous vos livres de cet auteur.</p></div>
+            <a class="auteurs-modifier" href="{{ path('app_auteur_modifier', {id: auteur.id}) }}"><img src="{{ asset('images/modifier.png') }}" alt="">Modifier l’auteur</a>
         </div>
         {# Les quatre onglets utilisent les associations existantes, sans déplacer ni modifier les livres. #}
         <div class="auteurs-onglets" role="tablist" aria-label="Livres de cet auteur">
@@ -21,14 +22,14 @@
             <section role="tabpanel" id="auteur-panel-{{ cle }}" aria-labelledby="auteur-tab-{{ cle }}" {{ not loop.first ? 'hidden' : '' }} tabindex="0">
                 <div class="auteur-livres-grille">
                     {% for livre in onglet.livres %}
-                        <article class="auteur-livre" data-livre-id="{{ livre.id }}">
+                        <article class="auteur-livre" data-livre-id="{{ livre.id }}" data-details-url="{{ path('app_auteur_livre_details', {id: auteur.id, livreId: livre.id}) }}" tabindex="0" role="button" aria-label="Voir les détails de {{ livre.titre }}">
                             <div class="auteur-couverture">
                                 {% if livre.image_couverture %}
                                     <img src="{{ livre.image_couverture starts with 'http' or livre.image_couverture starts with '/' ? livre.image_couverture : '/' ~ livre.image_couverture }}" alt="Couverture de {{ livre.titre }}">
                                 {% endif %}
                             </div>
                             <h2>{{ livre.titre }}</h2>
-                            <p>{{ auteur.nom }}</p>
+                            <p>{{ auteur.affichage }}</p>
                             {% if cle == 'possedes' %}
                                 {% include 'components/_badge_lecture.html.twig' with {statut: livre.statut} only %}
                             {% endif %}
@@ -39,6 +40,8 @@
                 </div>
             </section>
         {% endfor %}
+        <div id="auteur-detail-conteneur"></div>
+        <p id="auteur-detail-erreur" role="alert" hidden></p>
     </main>
 </div>
 {% endblock %}
