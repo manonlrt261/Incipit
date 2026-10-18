@@ -5,6 +5,7 @@ initialiserPage(ecouter => {
     const recherche = document.getElementById('auteurs-recherche');
     if (recherche) {
         const cartes = [...document.querySelectorAll('[data-auteur-nom]')];
+        const ordreInitial = [...cartes];
         const prenom = document.getElementById('auteurs-tri-prenom');
         const nom = document.getElementById('auteurs-tri-nom');
         const alphabet = new Intl.Collator('fr', { sensitivity: 'base', numeric: true });
@@ -31,6 +32,15 @@ initialiserPage(ecouter => {
             document.getElementById('auteurs-compteur').textContent = `${nombre} auteur${nombre > 1 ? 's' : ''}`;
             document.getElementById('auteurs-vide').hidden = nombre !== 0;
         }
+        // Efface recherche et tris, puis rétablit l’ordre initial des fiches sans navigation.
+        ecouter(document.getElementById('auteurs-reinitialiser'), 'click', () => {
+            recherche.value = '';
+            prenom.value = '';
+            nom.value = '';
+            cartes.splice(0, cartes.length, ...ordreInitial);
+            cartes.forEach(carte => document.querySelector('.auteurs-grille').appendChild(carte));
+            filtrer();
+        });
         ecouter(recherche, 'input', filtrer);
         ecouter(prenom, 'change', () => { nom.value = ''; filtrer(); });
         ecouter(nom, 'change', () => { prenom.value = ''; filtrer(); });

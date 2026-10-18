@@ -20,6 +20,7 @@
         <div class="auteurs-tris">
             <label><span class="sr-only">Prénom</span><select id="auteurs-tri-prenom"><option value="">Prénom</option><option value="asc">Prénom : A à Z</option><option value="desc">Prénom : Z à A</option></select></label>
             <label><span class="sr-only">Nom</span><select id="auteurs-tri-nom"><option value="">Nom</option><option value="asc">Nom : A à Z</option><option value="desc">Nom : Z à A</option></select></label>
+            <button type="button" id="auteurs-reinitialiser" class="bibliotheque-reinitialiser">↻ Réinitialiser les filtres</button>
         </div>
         <p id="auteurs-compteur" class="auteurs-compteur" aria-live="polite">{{ auteurs|length }} auteur{{ auteurs|length > 1 ? 's' : '' }}</p>
         {# Chaque carte ouvre la fiche persistante déjà liée aux livres et aux suggestions de saisie. #}
