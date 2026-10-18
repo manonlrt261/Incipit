@@ -42,6 +42,14 @@
             <span class="sidebar-libelle-mobile">Pile à lire</span>
         </a>
 
+        <a href="{{ path('app_auteurs') }}"
+           class="sidebar-lien {{ route_active in ['app_auteurs', 'app_auteur_fiche'] ? 'sidebar-lien-actif' : '' }}"
+           {{ route_active in ['app_auteurs', 'app_auteur_fiche'] ? 'aria-current="page"' : '' }}>
+            <picture><source media="(max-width: 700px)" srcset="{{ asset('images/auteur.png') }}"><img src="{{ asset('images/auteursbeige.png') }}" alt=""></picture>
+            <span class="sidebar-libelle-desktop">Mes auteurs</span>
+            <span class="sidebar-libelle-mobile">Auteurs</span>
+        </a>
+
         <a href="{{ path('app_prets_index') }}"
            class="sidebar-lien {{ route_active in ['app_espace_prets', 'app_prets_index'] ? 'sidebar-lien-actif' : '' }}"
            {{ route_active in ['app_espace_prets', 'app_prets_index'] ? 'aria-current="page"' : '' }}>

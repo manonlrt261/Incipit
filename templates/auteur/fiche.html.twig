@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+{% block title %}{{ auteur.nom }} | Incipit{% endblock %}
+{% block body %}
+<div class="espace-layout">
+    {% include 'components/_sidebar.html.twig' %}
+    <main class="espace-contenu bibliotheque page-auteurs" id="page-auteur-fiche">
+        <header class="bibliotheque-header">
+            <a class="auteurs-retour" href="{{ path('app_auteurs') }}">← Mes auteurs</a>
+            <img src="{{ asset('images/incipit.png') }}" alt="Incipit" class="bibliotheque-logo">
+        </header>
+        <div class="bibliotheque-introduction">
+            <div><h1 class="titre-page">{{ auteur.nom }}</h1><p class="sous-titre-page">Tous vos livres de cet auteur.</p></div>
+        </div>
+        {# Les quatre onglets utilisent les associations existantes, sans déplacer ni modifier les livres. #}
+        <div class="auteurs-onglets" role="tablist" aria-label="Livres de cet auteur">
+            {% for cle, onglet in onglets %}
+                <button type="button" role="tab" id="auteur-tab-{{ cle }}" aria-controls="auteur-panel-{{ cle }}" aria-selected="{{ loop.first ? 'true' : 'false' }}" tabindex="{{ loop.first ? '0' : '-1' }}">{{ onglet.titre }} ({{ onglet.livres|length }})</button>
+            {% endfor %}
+        </div>
+        {% for cle, onglet in onglets %}
+            <section role="tabpanel" id="auteur-panel-{{ cle }}" aria-labelledby="auteur-tab-{{ cle }}" {{ not loop.first ? 'hidden' : '' }} tabindex="0">
+                <div class="auteur-livres-grille">
+                    {% for livre in onglet.livres %}
+                        <article class="auteur-livre" data-livre-id="{{ livre.id }}">
+                            <div class="auteur-couverture">
+                                {% if livre.image_couverture %}
+                                    <img src="{{ livre.image_couverture starts with 'http' or livre.image_couverture starts with '/' ? livre.image_couverture : '/' ~ livre.image_couverture }}" alt="Couverture de {{ livre.titre }}">
+                                {% endif %}
+                            </div>
+                            <h2>{{ livre.titre }}</h2>
+                            <p>{{ auteur.nom }}</p>
+                            {% if cle == 'possedes' %}
+                                {% include 'components/_badge_lecture.html.twig' with {statut: livre.statut} only %}
+                            {% endif %}
+                        </article>
+                    {% else %}
+                        <p class="bibliotheque-vide">Aucun livre dans cette catégorie.</p>
+                    {% endfor %}
+                </div>
+            </section>
+        {% endfor %}
+    </main>
+</div>
+{% endblock %}

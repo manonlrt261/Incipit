@@ -21,6 +21,7 @@ final class StatistiquesLecture
         $compteurs = ['terminé' => 0, 'en cours' => 0, 'pas commencé' => 0, 'abandonné' => 0];
         $mois = array_fill(1, 12, 0);
         $detailsMois = array_fill(1, 12, []);
+        $detailsAnnees = [];
         $tousLivresLus = [];
         $parAnnee = [];
         $livresLus = [];
@@ -35,8 +36,14 @@ final class StatistiquesLecture
             $date = new \DateTimeImmutable($lecture['date_fin']);
             $an = (int) $date->format('Y');
             $parAnnee[$an] = ($parAnnee[$an] ?? 0) + 1;
-            if ($an !== $annee) continue;
             $numeroMois = (int) $date->format('n');
+            // Conserve le détail de toutes les années, indépendamment de l’année du graphique mensuel.
+            $detailsAnnees[$an][$numeroMois][] = [
+                'titre' => $lecture['titre'],
+                'auteurs' => implode(', ', $auteursParLivre[(int) $lecture['livre_id']] ?? []),
+                'date' => $lecture['date_fin'],
+            ];
+            if ($an !== $annee) continue;
             $mois[$numeroMois]++;
             $detailsMois[$numeroMois][] = [
                 'titre' => $lecture['titre'],
@@ -106,11 +113,20 @@ final class StatistiquesLecture
             usort($details, static fn (array $a, array $b): int => strcmp($b['date'], $a['date']) ?: strnatcasecmp($a['titre'], $b['titre']));
         }
         unset($details);
+        // Présente les mois de janvier à décembre et les lectures par date croissante dans chaque mois.
+        foreach ($detailsAnnees as &$moisAnnee) {
+            ksort($moisAnnee, SORT_NUMERIC);
+            foreach ($moisAnnee as &$lecturesMois) {
+                usort($lecturesMois, static fn (array $a, array $b): int => strcmp($a['date'], $b['date']) ?: strnatcasecmp($a['titre'], $b['titre']));
+            }
+            unset($lecturesMois);
+        }
+        unset($moisAnnee);
         $objectif = $this->connexion->fetchOne('SELECT nombre_livres FROM objectif_annuel WHERE utilisateur_id = :id AND annee = :annee', ['id' => $utilisateurId, 'annee' => $annee]);
         $objectif = $objectif !== false && (int) $objectif > 0 ? (int) $objectif : null;
         $termineesAnnee = array_sum($mois);
         return [
-            'detailsMois' => $detailsMois, 'comparaisons' => $comparaisons, 'genresCollection' => $genresCollection,
+            'detailsAnnees' => $detailsAnnees, 'detailsMois' => $detailsMois, 'comparaisons' => $comparaisons, 'genresCollection' => $genresCollection,
             'annee' => $annee, 'annees' => $annees, 'compteurs' => $compteurs,
             'mois' => $mois, 'maximumMois' => max(1, ...array_values($mois)),
             'comparaison' => $comparaison, 'maximumAnnuel' => max(1, ...array_values($comparaison)),

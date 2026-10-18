@@ -1,0 +1,138 @@
+/* =======================================
+   FICHES D’AUTEURS
+   ======================================= */
+
+/* Liste des auteurs et cartes ouvrant leurs livres. */
+.auteurs-grille,
+.auteur-livres-grille {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr));
+    gap: 18px;
+}
+
+.auteurs-carte,
+.auteur-livre {
+    min-width: 0;
+    padding: 20px;
+    border: 1px solid var(--color-encadre);
+    border-radius: 12px;
+    background: var(--color-white);
+    overflow-wrap: anywhere;
+}
+
+.auteurs-carte {
+    display: block;
+    text-decoration: none;
+    color: var(--color-secondary);
+}
+
+.auteurs-carte[hidden] {
+    display: none;
+}
+
+.auteurs-carte:hover {
+    border-color: var(--color-secondary);
+}
+
+.auteurs-carte > img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+}
+
+.auteurs-carte h2,
+.auteur-livre p {
+    font-family: Inter, sans-serif;
+    font-weight: 400;
+    color: var(--color-secondary);
+}
+
+.auteurs-carte h2 {
+    font-size: 20px;
+    margin: 14px 0 8px;
+}
+
+.auteurs-carte p,
+.auteurs-carte span,
+.auteur-livre p {
+    font-size: 13px;
+}
+
+.auteurs-compteur,
+.auteurs-carte span {
+    color: var(--color-terra);
+}
+
+/* Catégories de livres à l’intérieur de la fiche. */
+.auteurs-onglets {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--color-encadre);
+    overflow-x: auto;
+}
+
+.auteurs-onglets button {
+    padding: 14px 12px;
+    border: 0;
+    border-bottom: 3px solid transparent;
+    background: transparent;
+    color: var(--color-secondary);
+    font: inherit;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.auteurs-onglets [aria-selected='true'] {
+    border-bottom-color: var(--color-secondary);
+    font-weight: 600;
+}
+
+.page-auteurs [role='tabpanel'][hidden] {
+    display: none;
+}
+
+.auteurs-retour {
+    color: var(--color-secondary);
+}
+
+/* Livres liés à l’auteur, avec les mêmes couleurs que les cartes des lectures. */
+.auteur-couverture {
+    height: 180px;
+    border-radius: 6px;
+    background: var(--color-encadre);
+}
+
+.auteur-couverture img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.auteur-livre h2 {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--color-terra);
+    margin: 14px 0 8px;
+}
+
+/* =======================================
+   ADAPTATION AUX TÉLÉPHONES
+   ======================================= */
+@media (max-width: 700px) {
+    /* Réserve l’espace nécessaire à la navigation fixe. */
+    .page-auteurs {
+        padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .auteurs-onglets {
+        max-width: 100%;
+        gap: 4px;
+    }
+
+    .auteurs-onglets button {
+        font-size: 14px;
+    }
+}

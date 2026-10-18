@@ -42,23 +42,31 @@ initialiserPage((ecouter) => {
     });
     appliquerPeriodeComparaison();
 
-    // Réutilise les listes du mois rendues par le serveur, sans requête ni rechargement.
-    function ouvrirMois(cible) {
-        const modele = graphiques.querySelector(`[data-stats-details-mois="${cible.dataset.statsMois}"]`);
-        if (!modele || !modalMois) return;
-        document.getElementById('stats-mois-modal-titre').textContent = modele.dataset.titre;
-        document.getElementById('stats-mois-liste').replaceChildren(modele.content.cloneNode(true));
+    // Réutilise les listes mensuelles ou annuelles rendues par le serveur, sans requête ni rechargement.
+    function ouvrirListeLectures(cible) {
+        const annuel = cible.hasAttribute('data-stats-annee');
+        const valeur = annuel ? cible.dataset.statsAnnee : cible.dataset.statsMois;
+        const modele = graphiques.querySelector(`[data-stats-details-${annuel ? 'annee' : 'mois'}="${valeur}"]`);
+        if (!modalMois) return;
+        document.getElementById('stats-mois-modal-titre').textContent = modele?.dataset.titre || `Lectures terminées en ${valeur}`;
+        const liste = document.getElementById('stats-mois-liste');
+        if (modele) liste.replaceChildren(modele.content.cloneNode(true));
+        else {
+            const vide = document.createElement('p');
+            vide.textContent = 'Aucune lecture terminée pour cette année.';
+            liste.replaceChildren(vide);
+        }
         modalMois.showModal();
     }
     ecouter(graphiques, 'click', event => {
-        const mois = event.target.closest('[data-stats-mois]');
-        if (mois) ouvrirMois(mois);
+        const mois = event.target.closest('[data-stats-mois], [data-stats-annee]');
+        if (mois) ouvrirListeLectures(mois);
     });
     ecouter(graphiques, 'keydown', event => {
-        const mois = event.target.closest('[data-stats-mois]');
+        const mois = event.target.closest('[data-stats-mois], [data-stats-annee]');
         if (mois && (event.key === 'Enter' || event.key === ' ')) {
             event.preventDefault();
-            ouvrirMois(mois);
+            ouvrirListeLectures(mois);
         }
     });
     ecouter(document.getElementById('stats-mois-fermer'), 'click', () => modalMois.close());

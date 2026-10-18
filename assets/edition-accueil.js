@@ -10,7 +10,6 @@ initialiserPage(ecouter => {
     let carteActive = null;
     let depart = null;
     let pointeur = null;
-    let derniereCible = null;
 
     // Les mêmes cartes se déplacent au clavier ou après un appui prolongé, sans perdre leurs données.
     page.querySelectorAll('[data-ordre-section] [data-ordre-livre]').forEach(carte => {
@@ -23,8 +22,11 @@ initialiserPage(ecouter => {
         carteActive?.classList.remove('accueil-livre-deplace');
         carteActive = null;
         depart = null;
+        const ancienPointeur = pointeur;
         pointeur = null;
-        derniereCible = null;
+        if (ancienPointeur !== null && page.hasPointerCapture?.(ancienPointeur)) {
+            page.releasePointerCapture(ancienPointeur);
+        }
     }
     ecouter(page, 'pointerdown', event => {
         const carte = event.target.closest('[data-ordre-section] [data-ordre-livre]');
@@ -32,6 +34,9 @@ initialiserPage(ecouter => {
         terminerDeplacement();
         depart = { x: event.clientX, y: event.clientY };
         pointeur = event.pointerId;
+        // Capture sur un parent stable : déplacer une carte ne doit pas interrompre le suivi tactile de Safari.
+        try { page.setPointerCapture(event.pointerId); } catch { /* Un événement synthétique ne possède pas de pointeur natif. */ }
+        event.preventDefault();
         attente = setTimeout(() => {
             if (!page.isConnected || !depart) return;
             carteActive = carte;
@@ -49,14 +54,16 @@ initialiserPage(ecouter => {
         event.preventDefault();
         const cible = document.elementFromPoint(event.clientX, event.clientY)?.closest('[data-ordre-livre]');
         // Une carte reste dans sa section afin de préserver la distinction favoris / wishlist.
-        if (!cible || cible === carteActive || cible === derniereCible || cible.parentElement !== carteActive.parentElement) return;
-        derniereCible = cible;
+        if (!cible || cible === carteActive || cible.parentElement !== carteActive.parentElement) return;
         const cartes = [...cible.parentElement.children];
         if (cartes.indexOf(carteActive) < cartes.indexOf(cible)) cible.after(carteActive);
         else cible.before(carteActive);
     });
     ecouter(document, 'pointerup', terminerDeplacement);
     ecouter(document, 'pointercancel', terminerDeplacement);
+    // Libère également le mode déplacement si le navigateur perd le pointeur ou si la fenêtre perd le focus.
+    ecouter(page, 'lostpointercapture', terminerDeplacement);
+    ecouter(window, 'blur', terminerDeplacement);
     ecouter(page, 'contextmenu', event => {
         if (event.target.closest('[data-ordre-section] [data-ordre-livre]')) event.preventDefault();
     });

@@ -584,11 +584,13 @@
    ======================================= */
 
 /* Rend chaque mois accessible au pointeur et au clavier. */
-.stats-barres [data-stats-mois] {
+.stats-barres [data-stats-mois],
+.stats-barres [data-stats-annee] {
     cursor: pointer;
 }
 
-.stats-barres [data-stats-mois]:focus-visible {
+.stats-barres [data-stats-mois]:focus-visible,
+.stats-barres [data-stats-annee]:focus-visible {
     outline: 2px solid var(--color-terra);
 }
 
@@ -692,4 +694,12 @@
     height: 12px;
     margin-top: 10px;
     accent-color: var(--color-terra);
+}
+
+/* Sépare les mois dans la liste annuelle, classée de janvier à décembre. */
+.stats-mois-annee {
+    margin: 24px 0 8px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--color-primary);
+    color: var(--color-secondary);
 }

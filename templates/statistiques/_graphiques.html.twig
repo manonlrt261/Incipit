@@ -220,7 +220,7 @@
                 class="stats-barres stats-annuelles"
                 style="min-width: {{ largeur }}px"
                 viewBox="0 0 {{ largeur }} 220"
-                role="img"
+                role="group"
                 aria-labelledby="stats-annees-titre-{{ periode }}"
             >
                 <title id="stats-annees-titre-{{ periode }}">Comparaison des lectures terminées par année</title>
@@ -233,6 +233,8 @@
                 {% for an, nombre in comparaison %}
                     {% set hauteur = nombre / echelleAn * 140 %}
                     {% set x = 40 + (loop.index0 + 0.2) * pas %}
+                    <g data-stats-annee="{{ an }}" role="button" tabindex="0" aria-label="Voir les {{ nombre }} lectures de {{ an }}">
+                    <rect x="{{ x - pas * 0.1 }}" y="10" width="{{ pas * 0.8 }}" height="200" fill="transparent"/>
                     <rect
                         x="{{ x }}"
                         y="{{ 170 - hauteur }}"
@@ -245,6 +247,7 @@
                     </rect>
                     <text x="{{ x + pas * 0.3 }}" y="{{ 162 - hauteur }}" text-anchor="middle" class="stats-valeur">{{ nombre }}</text>
                     <text x="{{ x + pas * 0.3 }}" y="196" text-anchor="middle">{{ an }}</text>
+                    </g>
                 {% endfor %}
             </svg>
         </div>
@@ -252,6 +255,23 @@
         {% endfor %}
     </section>
 </div>
+
+{# Une liste par année, partagée entre les différentes périodes de comparaison. #}
+{% set moisComplets = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'] %}
+{% for an, moisAnnee in detailsAnnees %}
+    <template data-stats-details-annee="{{ an }}" data-titre="Lectures terminées en {{ an }}">
+        {% for numero, lectures in moisAnnee %}
+            <h3 class="stats-mois-annee">{{ moisComplets[numero - 1] }}</h3>
+            {% for lecture in lectures %}
+                <article class="stats-lecture-mois">
+                    <h3>{{ lecture.titre }}</h3>
+                    <p>{{ lecture.auteurs ?: 'Auteur non renseigné' }}</p>
+                    <p class="stats-date-lecture">Terminé le {{ lecture.date|date('d/m/Y') }}</p>
+                </article>
+            {% endfor %}
+        {% endfor %}
+    </template>
+{% endfor %}
 
 {# Explique pourquoi les lectures terminées sans date sont incluses dans le total mais absentes des graphiques annuels. #}
 {% if sansDate > 0 %}

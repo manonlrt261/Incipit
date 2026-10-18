@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+{% block title %}Mes auteurs | Incipit{% endblock %}
+{% block body %}
+<div class="espace-layout">
+    {% include 'components/_sidebar.html.twig' %}
+    <main class="espace-contenu bibliotheque page-auteurs" id="page-auteurs">
+        {# Réutilise le format de recherche des autres pages de la bibliothèque. #}
+        <header class="bibliotheque-header">
+            <form id="auteurs-recherche-form" class="bibliotheque-recherche" role="search">
+                <img src="{{ asset('images/rechercher.png') }}" alt="">
+                <input type="search" id="auteurs-recherche" placeholder="Rechercher un auteur…" aria-label="Rechercher un auteur">
+                <button type="submit" class="bouton-rechercher">Rechercher</button>
+            </form>
+            <img src="{{ asset('images/incipit.png') }}" alt="Incipit" class="bibliotheque-logo">
+        </header>
+        <div class="bibliotheque-introduction">
+            <div><h1 class="titre-page">Mes auteurs</h1><p class="sous-titre-page">Retrouvez les auteurs de vos livres.</p></div>
+        </div>
+        <p id="auteurs-compteur" class="auteurs-compteur" aria-live="polite">{{ auteurs|length }} auteur{{ auteurs|length > 1 ? 's' : '' }}</p>
+        {# Chaque carte ouvre la fiche persistante déjà liée aux livres et aux suggestions de saisie. #}
+        <div class="auteurs-grille">
+            {% for auteur in auteurs %}
+                <a class="auteurs-carte" href="{{ path('app_auteur_fiche', {id: auteur.id}) }}" data-auteur-nom="{{ auteur.nom|e('html_attr') }}">
+                    <img src="{{ asset('images/auteur.png') }}" alt="">
+                    <h2>{{ auteur.nom }}</h2>
+                    <p>{{ auteur.nombre }} livre{{ auteur.nombre > 1 ? 's' : '' }} enregistré{{ auteur.nombre > 1 ? 's' : '' }}</p>
+                    <span>Voir les livres</span>
+                </a>
+            {% endfor %}
+        </div>
+        <p id="auteurs-vide" class="bibliotheque-vide" {{ auteurs is not empty ? 'hidden' : '' }}>Aucun auteur à afficher.</p>
+    </main>
+</div>
+{% endblock %}

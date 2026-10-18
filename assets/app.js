@@ -67,3 +67,6 @@ import './navigation.js';
 import './tableau-de-bord.js';
 
 import './edition-accueil.js';
+
+import './auteurs.js';
+import './styles/auteurs.css';
