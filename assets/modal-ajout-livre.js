@@ -1407,23 +1407,32 @@ initialiserPage(ecouter => {
             if (couverture && !champImageCouverture?.value) {
                 donnees.set('fichierCouverture', await preparerCouverture(couverture));
             }
-            const reponse = await fetch(urlEnregistrement, {
+            // Réutilise le même envoi uniquement si la personne confirme l’avertissement de doublon.
+            const envoyer = () => fetch(urlEnregistrement, {
                 method: 'POST',
                 body: donnees,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
             });
-
-            const resultat = await reponse.json();
+            let reponse = await envoyer();
+            let resultat = await reponse.json();
+            if (reponse.status === 409 && resultat.code === 'livre_deja_present') {
+                const confirmer = window.confirm(`${resultat.message}\n\nVoulez-vous quand même ajouter ce livre ?`);
+                if (!confirmer) return;
+                donnees.set('confirmerDoublon', '1');
+                reponse = await envoyer();
+                resultat = await reponse.json();
+            }
 
             if (!reponse.ok || !resultat.success) {
                 throw new Error(resultat.message || "L'enregistrement a échoué.");
             }
 
             fermer();
-            if (modeModification || modeWishlist) {
-                // Actualise la page pour afficher les modifications ou la wishlist.
+            if (modeModification && document.getElementById('page-mes-lectures')) {
+                // Recalcule les cartes et compteurs avec les filtres en place, sans recharger la page.
+                document.dispatchEvent(new CustomEvent('bibliotheque:livre-ajoute'));
+            } else if (modeModification || modeWishlist) {
+                // Actualise les autres pages après une modification ou un ajout à la wishlist.
                 window.location.reload();
             } else {
                 ajouterLivreDansBibliotheque(resultat.livre);

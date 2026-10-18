@@ -574,10 +574,10 @@
 
 /* Actions de sélection distinctes de l’ouverture de la fiche du livre. */
 .pile-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 14px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    margin-top: 10px;
 }
 
 .pile-actions button,
@@ -590,6 +590,15 @@
     color: var(--color-secondary);
     font: inherit;
     cursor: pointer;
+}
+
+.pile-actions button {
+    min-width: 0;
+    padding: 6px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    line-height: 1.2;
+    white-space: normal;
 }
 
 .pile-actions button:first-child {

@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Service\AuteursLivre;
 use App\Service\GenresLivre;
+use App\Service\DoublonsLivre;
 use App\Service\DonneesLecture;
 use App\Service\CouvertureLivre;
 use App\Entity\Exemplaire;
@@ -34,6 +35,7 @@ final class LivreModalController extends AbstractController
         AuteursLivre $gestionAuteurs,
         CouvertureLivre $couvertures,
         GenresLivre $gestionGenres,
+        DoublonsLivre $doublons,
         ?int $id = null
     ): JsonResponse {
         // Identifie le parcours wishlist pour éviter de créer un exemplaire possédé lors d’un simple souhait.
@@ -234,6 +236,16 @@ final class LivreModalController extends AbstractController
                 'success' => false,
                 'message' => $exception->getMessage(),
             ], 422);
+        }
+
+        // Avertit avant toute écriture et permet de confirmer volontairement un autre exemplaire.
+        if (!$modeWishlist && !$request->request->getBoolean('confirmerDoublon')
+            && $doublons->existe($titre, $auteursNettoyes)) {
+            return $this->json([
+                'success' => false,
+                'code' => 'livre_deja_present',
+                'message' => 'Attention ce livre se trouve déjà dans votre bibliothèque',
+            ], 409);
         }
 
         // Les fichiers de couverture sont acceptés pour les livres possédés comme pour les souhaits.

@@ -14,15 +14,8 @@
            class="sidebar-lien {{ route_active == 'app_tableau_de_bord' ? 'sidebar-lien-actif' : '' }}"
            {{ route_active == 'app_tableau_de_bord' ? 'aria-current="page"' : '' }}>
             <picture><source media="(max-width: 700px)" srcset="{{ asset('images/maison.png') }}"><img src="{{ asset('images/maisonbeige2.png') }}" alt=""></picture>
-            <span>Tableau de bord</span>
-        </a>
-
-        <a href="{{ path('app_livre') }}"
-           class="sidebar-lien {{ route_active starts with 'app_livre' ? 'sidebar-lien-actif' : '' }}"
-           {{ route_active starts with 'app_livre' ? 'aria-current="page"' : '' }}>
-            <picture><source media="(max-width: 700px)" srcset="{{ asset('images/pilealire.png') }}"><img src="{{ asset('images/pilealirebeige.png') }}" alt=""></picture>
-            <span class="sidebar-libelle-desktop">Ma pile à lire</span>
-            <span class="sidebar-libelle-mobile">Pile à lire</span>
+            <span class="sidebar-libelle-desktop">Mon tableau de bord</span>
+            <span class="sidebar-libelle-mobile">Tableau de bord</span>
         </a>
 
         <a href="{{ path('app_espace_lectures') }}"
@@ -33,20 +26,28 @@
             <span class="sidebar-libelle-mobile">Lectures</span>
         </a>
 
-        <a href="{{ path('app_prets_index') }}"
-           class="sidebar-lien {{ route_active in ['app_espace_prets', 'app_prets_index'] ? 'sidebar-lien-actif' : '' }}"
-           {{ route_active in ['app_espace_prets', 'app_prets_index'] ? 'aria-current="page"' : '' }}>
-            <picture><source media="(max-width: 700px)" srcset="{{ asset('images/pretsbeige3.png') }}"><img src="{{ asset('images/pretsbeige2.png') }}" alt=""></picture>
-            <span class="sidebar-libelle-desktop">Mes prêts</span>
-            <span class="sidebar-libelle-mobile">Prêts</span>
-        </a>
-
         <a href="{{ path('app_espace_wishlist') }}"
            class="sidebar-lien {{ route_active == 'app_espace_wishlist' ? 'sidebar-lien-actif' : '' }}"
            {{ route_active == 'app_espace_wishlist' ? 'aria-current="page"' : '' }}>
             <picture><source media="(max-width: 700px)" srcset="{{ asset('images/coeur.png') }}"><img src="{{ asset('images/coeurbeige2.png') }}" alt=""></picture>
             <span class="sidebar-libelle-desktop">Ma wishlist</span>
             <span class="sidebar-libelle-mobile">Wishlist</span>
+        </a>
+
+        <a href="{{ path('app_livre') }}"
+           class="sidebar-lien {{ route_active starts with 'app_livre' ? 'sidebar-lien-actif' : '' }}"
+           {{ route_active starts with 'app_livre' ? 'aria-current="page"' : '' }}>
+            <picture><source media="(max-width: 700px)" srcset="{{ asset('images/pilealire.png') }}"><img src="{{ asset('images/pilealirebeige.png') }}" alt=""></picture>
+            <span class="sidebar-libelle-desktop">Ma pile à lire</span>
+            <span class="sidebar-libelle-mobile">Pile à lire</span>
+        </a>
+
+        <a href="{{ path('app_prets_index') }}"
+           class="sidebar-lien {{ route_active in ['app_espace_prets', 'app_prets_index'] ? 'sidebar-lien-actif' : '' }}"
+           {{ route_active in ['app_espace_prets', 'app_prets_index'] ? 'aria-current="page"' : '' }}>
+            <picture><source media="(max-width: 700px)" srcset="{{ asset('images/pretsbeige3.png') }}"><img src="{{ asset('images/pretsbeige2.png') }}" alt=""></picture>
+            <span class="sidebar-libelle-desktop">Mes prêts</span>
+            <span class="sidebar-libelle-mobile">Prêts</span>
         </a>
 
         <a href="{{ path('app_espace_statistiques') }}"
