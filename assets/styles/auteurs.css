@@ -155,14 +155,14 @@
 
 /* Menus de tri et formulaire d’identité, adaptés au clavier et au mobile. */
 .auteurs-tris {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    max-width: 804px;
     gap: 12px;
     margin-bottom: 20px;
 }
 
 .auteurs-tris label {
-    flex: 0 1 220px;
     min-width: 0;
 }
 
@@ -249,4 +249,30 @@
 
 .auteur-details-date {
     color: var(--color-primary);
+}
+
+/* Donne exactement les mêmes dimensions aux deux tris et à leur réinitialisation. */
+.auteurs-tris select,
+.auteurs-tris .bibliotheque-reinitialiser {
+    box-sizing: border-box;
+    width: 100%;
+    height: 48px;
+    min-width: 0;
+}
+
+@media (max-width: 700px) {
+    .auteurs-tris {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* Distingue les deux initiales sans modifier leur police ni leur centrage. */
+.auteurs-initiales .auteur-initiale-prenom {
+    font: inherit;
+    color: var(--color-terra);
+}
+
+.auteurs-initiales .auteur-initiale-nom {
+    font: inherit;
+    color: var(--color-secondary);
 }
