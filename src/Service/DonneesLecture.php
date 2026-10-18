@@ -46,6 +46,10 @@ final class DonneesLecture
     // Applique les mêmes informations à la session créée ou modifiée depuis le livre.
     public function appliquer(SessionLecture $session, array $donnees): void
     {
+        // Retire la sélection dès qu’une lecture est terminée, tout en conservant le livre.
+        if ($donnees['statut'] === 'Terminé') {
+            $session->getLivre()?->setPileALire(false);
+        }
         $session->setStatut($donnees['statut']);
         $session->setNote($donnees['note']);
         $session->setDateDebut($donnees['dateDebut']);

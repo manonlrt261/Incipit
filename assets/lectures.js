@@ -19,6 +19,56 @@ initialiserPage((ecouter) => {
         return;
     }
 
+    const boutonGrille = document.getElementById('vue-grille');
+    const boutonListe = document.getElementById('vue-liste');
+    const boutonRepli = document.getElementById('bibliotheque-basculer-livres');
+    const zoneLivres = document.getElementById('bibliotheque-liste-zone');
+    const mobile = window.matchMedia('(max-width: 700px)');
+
+    // Distingue le mode choisi par la personne du mode adapté automatiquement à l’écran.
+    let vueChoisie = false;
+    function changerVue(mode) {
+        const enGrille = mode === 'grille';
+        grille.classList.toggle('vue-grille', enGrille);
+        grille.classList.toggle('vue-liste', !enGrille);
+        boutonGrille.classList.toggle('actif', enGrille);
+        boutonListe.classList.toggle('actif', !enGrille);
+        boutonGrille.setAttribute('aria-pressed', String(enGrille));
+        boutonListe.setAttribute('aria-pressed', String(!enGrille));
+    }
+
+    // Affiche une liste sur téléphone et une grille sur ordinateur, jusqu’au choix manuel d’un mode.
+    function adapterVue() {
+        if (!vueChoisie) changerVue(mobile.matches ? 'liste' : 'grille');
+    }
+    ecouter(mobile, 'change', adapterVue);
+    ecouter(boutonGrille, 'click', () => {
+        vueChoisie = true;
+        changerVue('grille');
+    });
+    ecouter(boutonListe, 'click', () => {
+        vueChoisie = true;
+        changerVue('liste');
+    });
+    adapterVue();
+
+    // Masque les résultats sans effacer les filtres ni le mode d’affichage sélectionné.
+    ecouter(boutonRepli, 'click', () => {
+        const ouvert = boutonRepli.getAttribute('aria-expanded') === 'true';
+        boutonRepli.setAttribute('aria-expanded', String(!ouvert));
+        boutonRepli.setAttribute('aria-label', ouvert ? 'Afficher les livres' : 'Masquer les livres');
+        zoneLivres.hidden = ouvert;
+    });
+
+    // Conserve le repli indépendant de la section des livres retirés de la collection.
+    const boutonRetires = document.getElementById('basculer-retires');
+    ecouter(boutonRetires, 'click', () => {
+        const ouvert = boutonRetires.getAttribute('aria-expanded') === 'true';
+        boutonRetires.setAttribute('aria-expanded', String(!ouvert));
+        document.getElementById('contenu-retires').hidden = ouvert;
+        document.getElementById('chevron-retires').textContent = ouvert ? '⌄' : '⌃';
+    });
+
     const statuts = {
         'en-cours': 'En cours', 'termine': 'Terminé', 'en-pause': 'En pause',
         'abandonne': 'Abandonné', 'pas-commence': 'Pas commencé', 'tous': ''
@@ -27,6 +77,7 @@ initialiserPage((ecouter) => {
     // Demande à la fenêtre commune d’ouvrir le livre sélectionné dans la liste.
 
     ecouter(grille, 'click', (event) => {
+        if (event.target.closest('[data-pile-action]')) return;
         const carte = event.target.closest('.lectures-carte');
 
         if (!carte) return;
@@ -78,6 +129,7 @@ initialiserPage((ecouter) => {
     // Permet d’ouvrir les cartes avec Entrée ou Espace, comme avec un clic.
 
     ecouter(grille, 'keydown', (event) => {
+        if (event.target.closest('[data-pile-action]')) return;
         const carte = event.target.closest('.lectures-carte');
 
         if (!carte) return;

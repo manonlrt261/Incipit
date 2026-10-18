@@ -567,3 +567,141 @@
 }
 
 /* Conserve des menus lisibles sur téléphone en les répartissant sur deux colonnes. */
+
+/* =======================================
+   PILE À LIRE
+   ======================================= */
+
+/* Actions de sélection distinctes de l’ouverture de la fiche du livre. */
+.pile-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.pile-actions button,
+.pile-ajouter-depuis-lectures,
+.pile-selection button {
+    padding: 10px 12px;
+    border: 1px solid var(--color-secondary);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--color-secondary);
+    font: inherit;
+    cursor: pointer;
+}
+
+.pile-actions button:first-child {
+    background: var(--color-secondary);
+    color: var(--color-fond);
+}
+
+.pile-ajouter-depuis-lectures:disabled {
+    opacity: 0.65;
+    cursor: default;
+}
+
+/* Fenêtre de sélection parmi les livres possédés. */
+.pile-selection {
+    box-sizing: border-box;
+    width: min(650px, calc(100vw - 24px));
+    max-height: calc(100dvh - 24px);
+    padding: 24px;
+    border: 1px solid var(--color-encadre);
+    border-radius: 14px;
+    color: var(--color-secondary);
+    background: var(--color-fond);
+    overflow-y: auto;
+}
+
+.pile-selection::backdrop {
+    background: #0008;
+}
+
+.pile-selection header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.pile-selection h2 {
+    margin: 0 0 20px;
+    color: var(--color-terra);
+}
+
+.pile-selection input {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    padding: 12px;
+    margin: 8px 0 20px;
+    border: 1px solid var(--color-encadre);
+    border-radius: 8px;
+    font: inherit;
+    font-size: 16px;
+}
+
+.pile-selection-liste article {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--color-encadre);
+}
+
+/* Distingue les boutons d’ajout dans la sélection des livres possédés. */
+.pile-selection-liste [data-pile-action='ajouter'] {
+    color: var(--color-terra);
+}
+
+.pile-selection-liste article[hidden] {
+    display: none;
+}
+
+.pile-selection h3 {
+    margin: 0;
+    font-weight: 700;
+    color: var(--color-terra);
+}
+
+.pile-selection p {
+    font-family: Inter, sans-serif;
+    font-weight: 400;
+    color: var(--color-secondary);
+}
+
+@media (max-width: 700px) {
+    /* Répartit les commandes et les actions sans élargir les cartes du téléphone. */
+    #page-pile-a-lire {
+        padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px));
+    }
+
+    #page-pile-a-lire .bibliotheque-outils {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    #page-pile-a-lire .bibliotheque-vues {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    #page-pile-a-lire .bibliotheque-livres.vue-liste .bibliotheque-livre {
+        min-width: 0;
+        gap: 12px;
+        padding: 14px;
+    }
+
+    #page-pile-a-lire .bibliotheque-livre-infos {
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+
+    .pile-selection-liste article {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}

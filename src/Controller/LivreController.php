@@ -14,12 +14,13 @@ use Symfony\Component\Routing\Attribute\Route;
 final class LivreController extends AbstractController
 {
     #[Route('/livre', name: 'app_livre', methods: ['GET'])]
-    // Prépare la bibliothèque et les livres retirés, avec les informations nécessaires aux filtres.
+    // Prépare les livres possédés et les informations nécessaires aux filtres.
     public function index(Connection $connection): Response
     {
-        // Partage les informations bibliographiques et la dernière session entre les livres actifs et retirés.
+        // Rassemble les informations bibliographiques et le dernier statut des livres possédés.
         $sql = "
             SELECT
+                l.pile_a_lire,
                 l.id,
                 l.titre,
                 l.sous_titre,
@@ -72,33 +73,14 @@ final class LivreController extends AbstractController
             "
         );
 
-        // Classe parmi les livres retirés ceux qui n’ont plus aucun exemplaire actif.
-        $livresRetires = $connection->fetchAllAssociative(
-            $sql . "
-                WHERE EXISTS (
-                    SELECT 1
-                    FROM exemplaire e
-                    WHERE e.livre_id = l.id
-                    AND e.date_retrait IS NOT NULL
-                )
-                AND NOT EXISTS (
-                    SELECT 1
-                    FROM exemplaire e
-                    WHERE e.livre_id = l.id
-                    AND e.date_retrait IS NULL
-                )
-                ORDER BY l.date_creation DESC, l.id DESC
-            "
-        );
-
         // Charge les genres proposés dans les filtres et le formulaire d’ajout.
         $genres = $connection->fetchAllAssociative(
             'SELECT id, nom FROM genre ORDER BY id ASC'
         );
 
         return $this->render('livre/index.html.twig', [
-            'livres' => $livres,
-            'livresRetires' => $livresRetires,
+            'livres' => array_values(array_filter($livres, fn (array $livre) => (bool) $livre['pile_a_lire'])),
+            'livresDisponibles' => array_values(array_filter($livres, fn (array $livre) => !$livre['pile_a_lire'])),
             'genres' => $genres,
         ]);
     }

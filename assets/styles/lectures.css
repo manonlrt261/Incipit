@@ -398,3 +398,53 @@
         font-size: 11px;
     }
 }
+
+/* =======================================
+   COMMANDES D’AFFICHAGE ET MODE LISTE
+   ======================================= */
+
+/* Aligne les commandes à droite du compteur sans modifier les cartes en grille. */
+.lectures-outils .lectures-resultats-compteur {
+    margin: 0;
+}
+
+/* Présente la couverture à gauche des informations lorsque le mode liste est actif. */
+.lectures-livres.vue-liste {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.lectures-livres.vue-liste .lectures-carte {
+    flex-direction: row;
+    align-items: center;
+}
+
+.lectures-livres.vue-liste .lectures-couverture {
+    width: 80px;
+    height: 115px;
+    flex: 0 0 80px;
+}
+
+.lectures-livres.vue-liste .lectures-carte-informations {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+/* =======================================
+   COMMANDES SUR TÉLÉPHONE
+   ======================================= */
+@media (max-width: 700px) {
+    /* Garde le compteur et la flèche ensemble, puis les choix d’affichage sur la ligne suivante. */
+    .lectures-outils {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .lectures-outils .bibliotheque-vues {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .lectures-livres.vue-liste .lectures-carte {
+        padding: 14px;
+    }
+}

@@ -68,6 +68,7 @@ final class LivreRetraitController extends AbstractController
             $exemplaire->setDateRetrait($dateRetrait);
         }
 
+        $livre->setPileALire(false);
         $entityManager->flush();
 
         return $this->json([

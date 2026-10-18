@@ -214,6 +214,7 @@ initialiserPage(ecouter => {
     ecouter(bibliotheque, 'click', event => {
         if (!(event.target instanceof Element)) return;
 
+        if (event.target.closest('[data-pile-action]')) return;
         const carte = event.target.closest('.bibliotheque-livre');
 
         if (!carte || !bibliotheque.contains(carte)) return;

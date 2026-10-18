@@ -46,8 +46,8 @@ final class SessionLectureController extends AbstractController
             if (mb_strlen($avis) > 100000) {
                 throw new \InvalidArgumentException('Le commentaire est trop long.');
             }
-            $donneesLecture->appliquer($lecture, $donnees);
             $lecture->setLivre($livre);
+            $donneesLecture->appliquer($lecture, $donnees);
             $lecture->setAvis($avis === '' ? null : $avis);
             if ($lectureId === null) {
                 $lecture->setDateCreation(new \DateTime());

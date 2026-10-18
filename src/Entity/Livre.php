@@ -11,6 +11,21 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Table(name: 'livre')]
 class Livre
 {
+    #[ORM\Column(name: 'pile_a_lire', options: ['default' => false])]
+    private bool $pileALire = false;
+
+    // La sélection est indépendante de la possession et des sessions de lecture.
+    public function isPileALire(): bool
+    {
+        return $this->pileALire;
+    }
+
+    public function setPileALire(bool $selectionne): static
+    {
+        $this->pileALire = $selectionne;
+        return $this;
+    }
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]

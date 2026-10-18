@@ -17,6 +17,7 @@ final class NavigationController extends AbstractController
         // Retient les livres possédés avec le statut et la note de leur session la plus récente.
         $livres = $connection->fetchAllAssociative("
         SELECT
+            l.pile_a_lire,
             l.id,
             l.titre,
             l.image_couverture,
@@ -66,6 +67,30 @@ final class NavigationController extends AbstractController
         ORDER BY l.titre ASC, l.id ASC
     ");
 
+        // Conserve les mêmes livres retirés et leur historique, désormais présentés sous les lectures.
+        $livresRetires = $connection->fetchAllAssociative("
+            SELECT l.id, l.titre, l.image_couverture,
+                COALESCE((
+                    SELECT GROUP_CONCAT(
+                        COALESCE(NULLIF(a.nom_affichage, ''), CONCAT_WS(' ', a.prenom, a.nom))
+                        SEPARATOR ', '
+                    )
+                    FROM livre_auteur la
+                    INNER JOIN auteur a ON a.id = la.auteur_id
+                    WHERE la.livre_id = l.id
+                ), '') AS auteurs
+            FROM livre l
+            WHERE EXISTS (
+                SELECT 1 FROM exemplaire e
+                WHERE e.livre_id = l.id AND e.date_retrait IS NOT NULL
+            )
+            AND NOT EXISTS (
+                SELECT 1 FROM exemplaire e
+                WHERE e.livre_id = l.id AND e.date_retrait IS NULL
+            )
+            ORDER BY l.date_creation DESC, l.id DESC
+        ");
+
         $statistiques = [
             'tous' => count($livres),
             'en-cours' => 0,
@@ -90,6 +115,7 @@ final class NavigationController extends AbstractController
 
         return $this->render('lecture/index.html.twig', [
             'livres' => $livres,
+            'livresRetires' => $livresRetires,
             'statistiques' => $statistiques,
             'genres' => $connection->fetchAllAssociative(
                 'SELECT id, nom FROM genre ORDER BY id ASC'

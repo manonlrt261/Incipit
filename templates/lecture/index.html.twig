@@ -12,6 +12,7 @@
     <main
         id="page-mes-lectures"
         class="espace-contenu page-lectures"
+        data-pile-token="{{ csrf_token('pile_a_lire') }}"
     >
 
         <header class="bibliotheque-header">
@@ -54,7 +55,7 @@
                 class="lectures-bouton-ajouter"
                 onclick="document.getElementById('modal-ajout-livre').showModal()"
             >
-                Ajouter une lecture
+                Ajouter un livre
             </button>
 
         </div>
@@ -132,12 +133,42 @@
 
         </section>
 
-        {# Le JavaScript actualise ce compteur et annonce les changements aux lecteurs d’écran. #}
-        <p id="lectures-resultats-compteur" class="lectures-resultats-compteur" aria-live="polite"></p>
+        {# Réunit le compteur, le repli des livres et les deux modes d’affichage. #}
+        <div class="bibliotheque-outils lectures-outils">
+            <p id="lectures-resultats-compteur" class="lectures-resultats-compteur" aria-live="polite"></p>
+            <button type="button" id="bibliotheque-basculer-livres" class="bibliotheque-basculer-livres" aria-expanded="true" aria-controls="bibliotheque-liste-zone" aria-label="Masquer les livres">
+                <span class="bibliotheque-ligne-repli" aria-hidden="true"></span>
+                <span class="bibliotheque-fleche-repli" aria-hidden="true"></span>
+            </button>
+
+            <div class="bibliotheque-vues" aria-label="Mode d'affichage">
+                <button
+                    type="button"
+                    id="vue-grille"
+                    class="bibliotheque-vue actif"
+                    aria-pressed="true"
+                >
+                    <img src="{{ asset('images/grille.png') }}" alt="">
+                    Grille
+                </button>
+
+                <button
+                    type="button"
+                    id="vue-liste"
+                    class="bibliotheque-vue"
+                    aria-pressed="false"
+                >
+                    <img src="{{ asset('images/liste.png') }}" alt="">
+                    Liste
+                </button>
+            </div>
+        </div>
+
+        <div id="bibliotheque-liste-zone">
 
         <section
             id="bibliotheque-livres"
-            class="lectures-livres"
+            class="lectures-livres vue-grille"
             aria-label="Livres de ma collection"
         >
 
@@ -189,6 +220,7 @@
                     <div class="lectures-carte-informations">
 
                         <h2>{{ livre.titre }}</h2>
+                        <button type="button" class="pile-ajouter-depuis-lectures" data-pile-action="ajouter" data-livre-id="{{ livre.id }}" {{ livre.pile_a_lire ? 'disabled' : '' }}>{{ livre.pile_a_lire ? 'Dans ma pile à lire' : 'Ajouter à ma pile à lire' }}</button>
 
                         <p class="lectures-auteur">
                             {{ livre.auteurs ?: 'Auteur non renseigné' }}
@@ -222,6 +254,54 @@
             Aucun livre ne correspond à ce filtre.
         </p>
 
+        </div>
+
+        {# Conserve l’accès aux titres retirés de la collection et à leur historique. #}
+        <section class="bibliotheque-retires">
+            <button
+                type="button"
+                id="basculer-retires"
+                class="bibliotheque-retires-entete"
+                aria-expanded="true"
+                aria-controls="contenu-retires"
+            >
+                <img src="{{ asset('images/poubelle.png') }}" alt="">
+
+                <span class="bibliotheque-retires-titre">
+                    <strong>Livres retirés de ma collection</strong>
+                    <small>
+                        Ces livres ne sont plus dans votre bibliothèque,
+                        mais leur historique est conservé.
+                    </small>
+                </span>
+
+                <span id="chevron-retires" aria-hidden="true">⌃</span>
+            </button>
+
+            <div id="contenu-retires" class="bibliotheque-retires-liste">
+                {% for livre in livresRetires %}
+                    <article class="bibliotheque-livre-retire">
+                        {% if livre.image_couverture %}
+                            <img
+                                src="{{ asset(livre.image_couverture) }}"
+                                alt="Couverture de {{ livre.titre }}"
+                            >
+                        {% else %}
+                            <div class="bibliotheque-couverture-retire-vide"></div>
+                        {% endif %}
+
+                        <div>
+                            <h3>{{ livre.titre }}</h3>
+                            <p>{{ livre.auteurs ?: 'Auteur non renseigné' }}</p>
+                        </div>
+                    </article>
+                {% else %}
+                    <p class="bibliotheque-vide">
+                        Aucun livre retiré de votre collection.
+                    </p>
+                {% endfor %}
+            </div>
+        </section>
     </main>
 
 </div>

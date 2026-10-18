@@ -1,13 +1,13 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Ma bibliothèque | Incipit{% endblock %}
+{% block title %}Ma pile à lire | Incipit{% endblock %}
 
 {% block body %}
 <div class="espace-layout">
     {# Réutilise la navigation commune avec l’onglet Bibliothèque actif. #}
     {% include 'components/_sidebar.html.twig' %}
 
-    <main class="espace-contenu bibliotheque">
+    <main id="page-pile-a-lire" class="espace-contenu bibliotheque" data-pile-token="{{ csrf_token('pile_a_lire') }}">
 
         {# Recherche par titre, auteur ou ISBN ; les résultats sont filtrés par JavaScript sans rechargement. #}
         <header class="bibliotheque-header">
@@ -33,12 +33,12 @@
 
         <div class="bibliotheque-introduction">
             <div>
-                <h1 class="titre-page">Ma bibliothèque</h1>
-                <p class="sous-titre-page">Les livres que vous possédez.</p>
+                <h1 class="titre-page">Ma pile à lire</h1>
+                <p class="sous-titre-page">Les livres que vous voulez lire.</p>
             </div>
 
-            {# Ouvre le formulaire commun d’ajout d’un livre. #}
-            <button type="button" id="ouvrir-ajout" class="bibliotheque-ajouter">
+            {# Ouvre la sélection parmi les livres possédés qui ne sont pas encore dans la pile. #}
+            <button type="button" id="ouvrir-selection-pile" class="bibliotheque-ajouter">
                 Ajouter un livre
             </button>
         </div>
@@ -46,10 +46,10 @@
         {# Combine les filtres de genre et de statut avec le tri par auteur ou par date d’ajout. #}
         {% include 'components/_filtres_livres.html.twig' with {genres: genres} only %}
 
-        {# Regroupe le compteur, le repli de la liste et le choix entre grille et liste. #}
+        {# Réunit le compteur, le repli et le choix entre grille et liste. #}
         <div class="bibliotheque-outils">
             <p id="bibliotheque-compteur" aria-live="polite">
-                {{ livres|length }} livres dans ma bibliothèque
+                {{ livres|length }} livres dans ma pile à lire
             </p>
 
             <button type="button" id="bibliotheque-basculer-livres" class="bibliotheque-basculer-livres" aria-expanded="true" aria-controls="bibliotheque-liste-zone" aria-label="Masquer les livres">
@@ -78,6 +78,8 @@
                     Liste
                 </button>
             </div>
+
+
         </div>
 
         <div id="bibliotheque-liste-zone">
@@ -119,6 +121,11 @@
                             {% include 'components/_badge_lecture.html.twig' with {
                                 statut: livre.statut
                             } only %}
+                            {# Ces actions modifient la sélection ou la session, sans supprimer le livre. #}
+                            <div class="pile-actions">
+                                <button type="button" data-pile-action="commencer" data-livre-id="{{ livre.id }}">Commencer la lecture</button>
+                                <button type="button" data-pile-action="retirer" data-livre-id="{{ livre.id }}">Retirer de ma pile</button>
+                            </div>
                         </div>
                     </article>
                 {% endfor %}
@@ -130,56 +137,30 @@
             </p>
         </div>
 
-        {# Conserve l’accès aux titres retirés de la collection et à leur historique. #}
-        <section class="bibliotheque-retires">
-            <button
-                type="button"
-                id="basculer-retires"
-                class="bibliotheque-retires-entete"
-                aria-expanded="true"
-                aria-controls="contenu-retires"
-            >
-                <img src="{{ asset('images/poubelle.png') }}" alt="">
-
-                <span class="bibliotheque-retires-titre">
-                    <strong>Livres retirés de ma collection</strong>
-                    <small>
-                        Ces livres ne sont plus dans votre bibliothèque,
-                        mais leur historique est conservé.
-                    </small>
-                </span>
-
-                <span id="chevron-retires" aria-hidden="true">⌃</span>
-            </button>
-
-            <div id="contenu-retires" class="bibliotheque-retires-liste">
-                {% for livre in livresRetires %}
-                    <article class="bibliotheque-livre-retire">
-                        {% if livre.image_couverture %}
-                            <img
-                                src="{{ asset(livre.image_couverture) }}"
-                                alt="Couverture de {{ livre.titre }}"
-                            >
-                        {% else %}
-                            <div class="bibliotheque-couverture-retire-vide"></div>
-                        {% endif %}
-
-                        <div>
-                            <h3>{{ livre.titre }}</h3>
-                            <p>{{ livre.auteurs ?: 'Auteur non renseigné' }}</p>
-                        </div>
-                    </article>
-                {% else %}
-                    <p class="bibliotheque-vide">
-                        Aucun livre retiré de votre collection.
-                    </p>
-                {% endfor %}
-            </div>
-        </section>
     </main>
 </div>
 
 {# Charge les fenêtres communes d’ajout, de modification et de consultation des livres. #}
+{# Ne propose que des livres possédés ; aucun nouveau livre n’est créé depuis cette sélection. #}
+<dialog id="modal-selection-pile" class="pile-selection">
+    <header>
+        <h2>Ajouter à ma pile à lire</h2>
+        <button type="button" id="fermer-selection-pile" aria-label="Fermer">×</button>
+    </header>
+    <label for="pile-recherche-selection">Rechercher parmi mes livres</label>
+    <input id="pile-recherche-selection" type="search" placeholder="Un titre ou un auteur…">
+    <div class="pile-selection-liste">
+        {% for livre in livresDisponibles %}
+            <article data-selection-recherche="{{ (livre.titre ~ ' ' ~ livre.auteurs)|lower|e('html_attr') }}">
+                <div><h3>{{ livre.titre }}</h3><p>{{ livre.auteurs ?: 'Auteur non renseigné' }}</p></div>
+                <button type="button" data-pile-action="ajouter" data-livre-id="{{ livre.id }}">Ajouter à ma pile à lire</button>
+            </article>
+        {% endfor %}
+    </div>
+    <p id="pile-selection-vide" {{ livresDisponibles is not empty ? 'hidden' : '' }}>Aucun livre disponible. Ajoutez d’abord un livre dans Mes lectures.</p>
+</dialog>
+<p id="pile-erreur" role="alert" hidden></p>
+{# Garde le formulaire commun accessible uniquement depuis la modification d’une fiche. #}
 {% include 'livre/_modal_ajout.html.twig' %}
 {% include 'livre/_modal_details.html.twig' %}
 

@@ -4,7 +4,7 @@
 <aside class="sidebar">
     <a href="{{ path('app_tableau_de_bord') }}" class="sidebar-logo">
         <img src="{{ asset('images/logobeige2.png') }}" alt="">
-        <span>Ma<br>Bibliothèque</span>
+        <span>Ma<br>Pile à lire</span>
     </a>
 
     {# Les images et les libellés courts s’adaptent au téléphone sans dupliquer les liens. #}
@@ -20,9 +20,9 @@
         <a href="{{ path('app_livre') }}"
            class="sidebar-lien {{ route_active starts with 'app_livre' ? 'sidebar-lien-actif' : '' }}"
            {{ route_active starts with 'app_livre' ? 'aria-current="page"' : '' }}>
-            <picture><source media="(max-width: 700px)" srcset="{{ asset('images/mabibliotheque3.png') }}"><img src="{{ asset('images/mabibliotheque2.png') }}" alt=""></picture>
-            <span class="sidebar-libelle-desktop">Ma bibliothèque</span>
-            <span class="sidebar-libelle-mobile">Bibliothèque</span>
+            <picture><source media="(max-width: 700px)" srcset="{{ asset('images/pilealire.png') }}"><img src="{{ asset('images/pilealirebeige.png') }}" alt=""></picture>
+            <span class="sidebar-libelle-desktop">Ma pile à lire</span>
+            <span class="sidebar-libelle-mobile">Pile à lire</span>
         </a>
 
         <a href="{{ path('app_espace_lectures') }}"

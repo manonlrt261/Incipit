@@ -1,4 +1,5 @@
-// Gère les filtres, les modes d’affichage et le repli des livres de la bibliothèque.
+// Gère la recherche, les filtres et le tri des livres de la bibliothèque.
+import './components/pile-a-lire.js';
 import { initialiserPage } from './components/initialisation-page.js';
 
 // Active les interactions uniquement lorsque la bibliothèque et ses filtres sont présents.
@@ -9,21 +10,34 @@ function initialiserBibliotheque(ecouter) {
         return;
     }
 
+    const boutonGrille = document.getElementById('vue-grille');
+    const boutonListe = document.getElementById('vue-liste');
     const boutonRepli = document.getElementById('bibliotheque-basculer-livres');
-    const zoneLivres = document.getElementById('bibliotheque-liste-zone');
-    // Synchronise la visibilité des livres et le libellé accessible du bouton de repli.
-    function actualiserRepli() {
-        if (!boutonRepli || !zoneLivres) return;
-        const ouvert = boutonRepli.getAttribute('aria-expanded') === 'true';
-        zoneLivres.hidden = !ouvert;
-        boutonRepli.setAttribute('aria-label', ouvert ? 'Masquer les livres' : 'Afficher les livres');
+    const zone = document.getElementById('bibliotheque-liste-zone');
+    const mobile = window.matchMedia('(max-width: 700px)');
+    let choixManuel = false;
+
+    // Adapte le mode initial à l’écran, puis respecte le choix manuel tant que la page reste ouverte.
+    function changerVue(grille) {
+        conteneur.classList.toggle('vue-grille', grille);
+        conteneur.classList.toggle('vue-liste', !grille);
+        boutonGrille.classList.toggle('actif', grille);
+        boutonListe.classList.toggle('actif', !grille);
+        boutonGrille.setAttribute('aria-pressed', String(grille));
+        boutonListe.setAttribute('aria-pressed', String(!grille));
     }
-    // Affiche ou masque la liste des livres au clic sur la flèche.
+    changerVue(!mobile.matches);
+    ecouter(mobile, 'change', () => { if (!choixManuel) changerVue(!mobile.matches); });
+    ecouter(boutonGrille, 'click', () => { choixManuel = true; changerVue(true); });
+    ecouter(boutonListe, 'click', () => { choixManuel = true; changerVue(false); });
+
+    // Replie la sélection sans perdre ses filtres ni son mode d’affichage.
     ecouter(boutonRepli, 'click', () => {
-        boutonRepli.setAttribute('aria-expanded', String(boutonRepli.getAttribute('aria-expanded') !== 'true'));
-        actualiserRepli();
+        const ouvert = boutonRepli.getAttribute('aria-expanded') === 'true';
+        boutonRepli.setAttribute('aria-expanded', String(!ouvert));
+        boutonRepli.setAttribute('aria-label', ouvert ? 'Afficher les livres' : 'Masquer les livres');
+        zone.hidden = ouvert;
     });
-    actualiserRepli();
 
     const formulaireFiltres = document.getElementById('bibliotheque-filtres');
     const formulaireRecherche = document.getElementById('bibliotheque-recherche');
@@ -38,13 +52,6 @@ function initialiserBibliotheque(ecouter) {
     const reinitialiser = document.getElementById('reinitialiser-filtres');
     const compteur = document.getElementById('bibliotheque-compteur');
     const aucunResultat = document.getElementById('bibliotheque-aucun-resultat');
-
-    const boutonGrille = document.getElementById('vue-grille');
-    const boutonListe = document.getElementById('vue-liste');
-
-    const boutonRetires = document.getElementById('basculer-retires');
-    const contenuRetires = document.getElementById('contenu-retires');
-    const chevronRetires = document.getElementById('chevron-retires');
 
     // Ignore les accents et les majuscules pour faciliter les recherches.
     function normaliser(texte) {
@@ -126,7 +133,7 @@ function initialiserBibliotheque(ecouter) {
         trierLivres(livres);
 
         compteur.textContent =
-            `${nombreVisible} livre${nombreVisible > 1 ? 's' : ''} dans ma bibliothèque`;
+            `${nombreVisible} livre${nombreVisible > 1 ? 's' : ''} dans ma pile à lire`;
 
         aucunResultat.hidden = nombreVisible !== 0;
     }
@@ -162,46 +169,6 @@ function initialiserBibliotheque(ecouter) {
     ecouter(triDateAjout, 'change', () => {
         triAuteurs.value = '';
         appliquerFiltres();
-    });
-
-    // Bascule entre grille et liste et indique quel mode d’affichage est actif.
-    function changerVue(mode) {
-        const grilleActive = mode === 'grille';
-
-        conteneur.classList.toggle('vue-grille', grilleActive);
-        conteneur.classList.toggle('vue-liste', !grilleActive);
-
-        boutonGrille.classList.toggle('actif', grilleActive);
-        boutonListe.classList.toggle('actif', !grilleActive);
-
-        boutonGrille.setAttribute(
-            'aria-pressed',
-            String(grilleActive)
-        );
-
-        boutonListe.setAttribute(
-            'aria-pressed',
-            String(!grilleActive)
-        );
-    }
-
-    // Passe à l’affichage des livres en grille.
-    ecouter(boutonGrille, 'click', () => changerVue('grille'));
-    // Passe à l’affichage des livres en liste.
-    ecouter(boutonListe, 'click', () => changerVue('liste'));
-
-    // Affiche ou masque les livres retirés de la collection.
-    ecouter(boutonRetires, 'click', () => {
-        const estOuvert =
-            boutonRetires.getAttribute('aria-expanded') === 'true';
-
-        boutonRetires.setAttribute(
-            'aria-expanded',
-            String(!estOuvert)
-        );
-
-        contenuRetires.hidden = estOuvert;
-        chevronRetires.textContent = estOuvert ? '⌄' : '⌃';
     });
 
     const rechercheURL = new URLSearchParams(
