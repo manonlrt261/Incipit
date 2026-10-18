@@ -3,6 +3,9 @@
 namespace App\Controller;
 
 use Doctrine\DBAL\Connection;
+use App\Service\OrdreAccueil;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -10,9 +13,17 @@ use Symfony\Component\Routing\Attribute\Route;
 final class AccueilController extends AbstractController
 {
     #[Route('/', name: 'app_accueil', methods: ['GET'])]
+    #[Route('/espace/accueil/edition', name: 'app_accueil_edition', methods: ['GET'])]
     // Prépare les sections de l’accueil public en tenant compte de leurs réglages de visibilité.
-    public function index(Connection $connection, \App\Service\VisibiliteAccueil $reglages): Response
+    public function index(Request $request, Connection $connection, \App\Service\VisibiliteAccueil $reglages, OrdreAccueil $ordre): Response
     {
+        $edition = $request->attributes->get('_route') === 'app_accueil_edition';
+        if ($edition) {
+            $this->denyAccessUnlessGranted('ROLE_USER');
+            if ((int) $this->getUser()->getId() !== (int) $connection->fetchOne('SELECT MIN(id) FROM utilisateur')) {
+                throw $this->createAccessDeniedException();
+            }
+        }
         // Charge les réglages qui déterminent quelles sections peuvent apparaître publiquement.
         $visibilite = $reglages->publique();
         // Les 5 livres dont la dernière lecture terminée et notée
@@ -60,11 +71,50 @@ final class AccueilController extends AbstractController
         );
 
         return $this->render('accueil/index.html.twig', [
-            'livres' => $livres,
+            'edition' => $edition,
+            'livres' => $ordre->appliquer($livres, 'favoris'),
             'auteurs' => $auteurs,
-            'wishlist' => $wishlist,
+            'wishlist' => $ordre->appliquer($wishlist, 'wishlist'),
             'visibilite' => $visibilite,
         ]);
+    }
+
+    #[Route('/espace/accueil/ordre', name: 'app_accueil_ordre', methods: ['POST'])]
+    // Sauvegarde les deux sélections publiques sans modifier les notes, les souhaits ni la visibilité.
+    public function enregistrerOrdre(Request $request, Connection $connection): JsonResponse
+    {
+        $this->denyAccessUnlessGranted('ROLE_USER');
+        $id = (int) $this->getUser()->getId();
+        if ($id !== (int) $connection->fetchOne('SELECT MIN(id) FROM utilisateur')) throw $this->createAccessDeniedException();
+        if (!$this->isCsrfTokenValid('ordre_accueil', $request->request->getString('_token'))) {
+            return $this->json(['success' => false, 'message' => 'Session expirée. Actualise la page.'], 403);
+        }
+        $ordre = json_decode($request->request->getString('ordre'), true);
+        if (!is_array($ordre) || array_diff(array_keys($ordre), ['favoris', 'wishlist'])) {
+            return $this->json(['success' => false, 'message' => 'Ordre invalide.'], 422);
+        }
+        $autorises = [
+            'favoris' => array_column($this->chargerLivresFavoris($connection, 5), 'id'),
+            'wishlist' => $connection->fetchFirstColumn("SELECT l.id FROM souhait sh JOIN livre l ON l.id = sh.livre_id WHERE sh.statut = 'souhaité' AND sh.publique = 1 ORDER BY sh.date_ajout DESC, sh.id DESC LIMIT 5"),
+        ];
+        foreach (['favoris', 'wishlist'] as $section) {
+            $ids = $ordre[$section] ?? [];
+            if (!is_array($ids) || count($ids) > 5 || count($ids) !== count(array_unique($ids, SORT_REGULAR))) {
+                return $this->json(['success' => false, 'message' => 'Sélection invalide.'], 422);
+            }
+            foreach ($ids as $livreId) {
+                if (!is_int($livreId) || !in_array($livreId, array_map('intval', $autorises[$section]), true)) {
+                    return $this->json(['success' => false, 'message' => 'Les livres visibles ont changé. Recharge le mode édition.'], 409);
+                }
+            }
+            $ordre[$section] = $ids;
+        }
+        // Crée les réglages si nécessaire et préserve les interrupteurs de visibilité déjà enregistrés.
+        $connection->executeStatement(
+            'INSERT INTO parametre_confidentialite (utilisateur_id, afficher_wishlist, afficher_auteurs_favoris, afficher_livres_favoris, date_modification, ordre_accueil) VALUES (?, 1, 1, 1, NOW(), ?) ON DUPLICATE KEY UPDATE ordre_accueil = VALUES(ordre_accueil), date_modification = NOW()',
+            [$id, json_encode($ordre, JSON_THROW_ON_ERROR)]
+        );
+        return $this->json(['success' => true]);
     }
 
     #[Route('/mes-livres-mieux-notes', name: 'app_livres_mieux_notes', methods: ['GET'])]

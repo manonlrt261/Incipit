@@ -15,6 +15,11 @@ initialiserPage((ecouter) => {
             document.getElementById(onglet.getAttribute('aria-controls')).hidden = !actif;
         });
     }
+    // Revient directement à Visibilité après la réorganisation de l’accueil.
+    if (window.location.hash === '#visibilite') {
+        const onglet = document.getElementById('profil-tab-visibilite');
+        if (onglet) choisirOnglet(onglet);
+    }
     // Permet de changer d’onglet au clic ou avec les flèches du clavier.
     onglets.forEach((bouton, index) => {
         ecouter(bouton, 'click', () => choisirOnglet(bouton));

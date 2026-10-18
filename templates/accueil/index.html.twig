@@ -3,7 +3,14 @@
 {% block title %}Accueil - Incipit{% endblock %}
 
 {% block body %}
-<div class="accueil accueil-public">
+<div class="accueil accueil-public" {% if edition|default(false) %}id="edition-accueil" data-url="{{ path('app_accueil_ordre') }}" data-token="{{ csrf_token('ordre_accueil') }}" data-retour="{{ path('app_espace_profil') }}#visibilite"{% endif %}>
+    {% if edition|default(false) %}
+        <aside class="accueil-edition-commandes">
+            <p>Maintenez un livre appuyé puis faites-le glisser dans sa section. Au clavier : sélectionnez sa carte puis utilisez les flèches.</p>
+            <button type="button" id="quitter-edition-accueil">Quitter le mode édition</button>
+            <p id="edition-accueil-message" role="status" aria-live="polite"></p>
+        </aside>
+    {% endif %}
 
     {# Réutilise l’en-tête public et son lien de connexion. #}
     {% include 'accueil/_entete.html.twig' only %}
@@ -45,7 +52,7 @@
                         Aucun livre noté 5 étoiles pour le moment.
                     </p>
                 {% else %}
-                    <div class="accueil-grille-livres">
+                    <div class="accueil-grille-livres" {% if edition|default(false) %}data-ordre-section="favoris"{% endif %}>
                         {% for livre in livres %}
                             {# Réutilise la carte commune en affichant la note du livre favori. #}
                             {% include 'accueil/_carte_livre.html.twig' with {livre: livre, note: livre.note} only %}
@@ -115,7 +122,7 @@
                         Aucun livre dans ma wishlist pour le moment.
                     </p>
                 {% else %}
-                    <div class="accueil-grille-livres">
+                    <div class="accueil-grille-livres" {% if edition|default(false) %}data-ordre-section="wishlist"{% endif %}>
                         {% for livre in wishlist %}
                             {# Réutilise la carte commune sans étoiles pour les livres souhaités. #}
                             {% include 'accueil/_carte_livre.html.twig' with {livre: livre, note: null} only %}

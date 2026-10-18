@@ -8,6 +8,20 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: ParametreConfidentialiteRepository::class)]
 class ParametreConfidentialite
 {
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $ordreAccueil = null;
+
+    public function getOrdreAccueil(): ?array
+    {
+        return $this->ordreAccueil;
+    }
+
+    public function setOrdreAccueil(?array $ordre): static
+    {
+        $this->ordreAccueil = $ordre;
+        return $this;
+    }
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

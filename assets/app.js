@@ -65,3 +65,5 @@ import './styles/profil.css';
 import './navigation.js';
 
 import './tableau-de-bord.js';
+
+import './edition-accueil.js';
