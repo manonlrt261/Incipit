@@ -275,39 +275,6 @@
     font-size: 14px;
 }
 
-.bibliotheque-badge {
-    display: inline-block;
-    padding: 6px 12px;
-    border-radius: 7px;
-    font-size: 13px;
-    font-weight: 600;
-}
-
-.badge-en-cours {
-    background: var(--primary, #d8e8ff);
-    color: #174ca2;
-}
-
-.badge-en-pause {
-    background: var(--encadre, #e9dcf7);
-    color: #624395;
-}
-
-.badge-termine {
-    background: var(--secondary, var(--color-terra));
-    color: #fff;
-}
-
-.badge-a-lire {
-    background: #fff0c9;
-    color: #77501b;
-}
-
-.badge-pas-commence {
-    background: #e9e5df;
-    color: #62564b;
-}
-
 .bibliotheque-livres.vue-liste {
     display: flex;
     flex-direction: column;

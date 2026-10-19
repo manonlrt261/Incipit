@@ -1,5 +1,6 @@
 // Gère l’ajout et la modification des livres, la recherche ISBN et le choix de leur couverture.
 import './components/sagas.js';
+import { creerBadgeLecture } from './components/badge-lecture.js';
 import { initialiserPage } from './components/initialisation-page.js';
 
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
@@ -1251,19 +1252,7 @@ initialiserPage(ecouter => {
         auteur.className = 'bibliotheque-auteur';
         auteur.textContent = auteurs || 'Auteur non renseigné';
 
-        const badge = document.createElement('span');
-
-        const classesStatuts = {
-            'Pas commencé': 'pas-commence',
-            'En cours': 'en-cours',
-            'En pause': 'en-pause',
-            Terminé: 'termine',
-            'À lire': 'a-lire'
-        };
-
-        badge.className = `bibliotheque-badge badge-${classesStatuts[statut] || 'pas-commence'}`;
-
-        badge.textContent = statut;
+        const badge = creerBadgeLecture(statut);
 
         informations.append(titre, auteur, badge);
         article.appendChild(informations);

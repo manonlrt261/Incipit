@@ -1,4 +1,5 @@
 // Affiche la fiche d’un livre et gère ses lectures, sa couverture et les actions sur la collection.
+import { creerBadgeLecture } from './components/badge-lecture.js';
 import { initialiserPage } from './components/initialisation-page.js';
 
 initialiserPage(ecouter => {
@@ -80,9 +81,7 @@ initialiserPage(ecouter => {
             const entete = document.createElement('div');
             entete.className = 'details-lecture-entete';
 
-            const statut = document.createElement('strong');
-            statut.className = 'details-lecture-statut';
-            statut.textContent = lecture.statut || 'Statut non renseigné';
+            const statut = creerBadgeLecture(lecture.statut);
 
             entete.appendChild(statut);
             const actions = document.createElement('div');

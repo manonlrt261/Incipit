@@ -1,6 +1,6 @@
 {# Associe le statut de lecture à sa classe de couleur, en acceptant les variantes sans accents. #}
 {% set statut = statut|default('Pas commencé')|trim %}
-{% set statutNormalise = statut|lower %}
+{% set statutNormalise = statut|lower|replace({'é': 'e'}) %}
 
 {% set classe = 'pas-commence' %}
 
@@ -8,9 +8,9 @@
     {% set classe = 'en-cours' %}
 {% elseif statutNormalise == 'en pause' %}
     {% set classe = 'en-pause' %}
-{% elseif statutNormalise in ['terminé', 'termine'] %}
+{% elseif statutNormalise in ['termine', 'termines'] %}
     {% set classe = 'termine' %}
-{% elseif statutNormalise in ['abandonné', 'abandonne'] %}
+{% elseif statutNormalise in ['abandonne', 'abandonnes'] %}
     {% set classe = 'abandonne' %}
 {% endif %}
 

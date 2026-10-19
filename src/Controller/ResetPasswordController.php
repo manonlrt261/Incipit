@@ -149,7 +149,7 @@ class ResetPasswordController extends AbstractController
                 ->htmlTemplate('reset_password/email.html.twig')
                 ->context(['resetToken' => $resetToken])
                 // Joint le logo au message pour qu’il ne dépende pas du chargement d’une image distante.
-                ->embedFromPath($this->getParameter('kernel.project_dir').'/assets/images/incipit.png', 'incipit-logo', 'image/png');
+                ->embedFromPath($this->getParameter('kernel.project_dir').'/assets/images/incipitbeige.png', 'incipit-logo', 'image/png');
 
             // Initialise le transport uniquement à l’envoi : une configuration SMTP incorrecte ne bloque pas le formulaire.
             ($this->mailer)()->send($email);
