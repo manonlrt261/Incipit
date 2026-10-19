@@ -132,6 +132,8 @@ final class AuteurController extends AbstractController
         return $this->render('auteur/saga_modifier.html.twig', [
             'auteur' => NomsAuteur::presenter($auteur), 'cleSaga' => $cle, 'nomSaga' => $nom,
             'livres' => $livres, 'livreId' => $livreId, 'tome' => $tome, 'erreur' => $erreur,
+            'sagaEnregistree' => $tomes[0]->getSaga(),
+            'genres' => $connexion->fetchAllAssociative('SELECT id, nom FROM genre ORDER BY nom ASC'),
         ]);
     }
 

@@ -1,21 +1,4 @@
-{% extends 'base.html.twig' %}
-{% block title %}{{ auteur.nom_affichage }} — Lectures {{ annee }} | Incipit{% endblock %}
-{% block body %}
-<div class="accueil">
-    {% include 'accueil/_entete.html.twig' only %}
-    <main class="accueil-main">
-        <section class="accueil-section">
-            <div class="accueil-section-entete">
-                <img class="accueil-section-icone" src="{{ asset('images/autors.png') }}" alt="">
-                <div class="accueil-section-titres">
-                    <h2>{{ auteur.nom_affichage }}</h2>
-                    <p>Mes lectures terminées en {{ annee }}.</p>
-                </div>
-                <a class="accueil-lien" href="{{ path('app_accueil') }}">← Retour à l’accueil</a>
-            </div>
-            {# Chaque relecture conserve la note et l’avis propres à sa session de cette année. #}
-            <div class="accueil-grille-livres">
-                {% for lecture in lectures %}
+{# Préserve la note de zéro et masque entièrement les commentaires vides. #}
                     <article class="accueil-carte-livre">
                         <div class="accueil-couverture">
                             {% if lecture.image_couverture %}
@@ -32,11 +15,3 @@
                             <div class="accueil-lecture-avis"><h4>Commentaire</h4><p>{{ lecture.avis|nl2br }}</p></div>
                         {% endif %}
                     </article>
-                {% else %}
-                    <p class="accueil-vide">Aucune lecture terminée cette année pour cet auteur.</p>
-                {% endfor %}
-            </div>
-        </section>
-    </main>
-</div>
-{% endblock %}

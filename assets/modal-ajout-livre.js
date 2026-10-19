@@ -1330,6 +1330,11 @@ initialiserPage(ecouter => {
     ecouter(boutonOuvrir, 'click', () => {
         if (modal.open) return;
         reinitialiserFormulaire();
+        // Depuis une saga, prépare le même ajout de livre avec son auteur et son nom déjà renseignés.
+        if (document.getElementById('page-saga-modifier')) {
+            form.elements.namedItem('saga').value = boutonOuvrir.dataset.saga;
+            afficherChampsAuteurs([boutonOuvrir.dataset.auteur]);
+        }
         modal.showModal();
     });
 
@@ -1438,6 +1443,9 @@ initialiserPage(ecouter => {
             } else if (modeModification || modeWishlist) {
                 // Actualise les autres pages après une modification ou un ajout à la wishlist.
                 window.location.reload();
+            } else if (document.getElementById('page-saga-modifier')) {
+                // Actualise les choix sans effacer une éventuelle modification du nom de la saga en cours.
+                document.dispatchEvent(new CustomEvent('saga:livre-ajoute', { detail: resultat.livre }));
             } else {
                 ajouterLivreDansBibliotheque(resultat.livre);
             }

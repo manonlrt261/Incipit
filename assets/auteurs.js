@@ -49,6 +49,30 @@ initialiserPage(ecouter => {
             filtrer();
         });
     }
+    const sagaRecherche = document.getElementById('saga-recherche-livre');
+    if (sagaRecherche) {
+        const choix = document.getElementById('saga-livre');
+        const options = [...choix.options];
+        const normaliser = texte => texte.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('fr').trim();
+        // Reconstruit les options plutôt que de les masquer : Safari doit aussi filtrer les choix natifs.
+        function rechercherLivre() {
+            const selection = choix.value;
+            const texte = normaliser(sagaRecherche.value);
+            choix.replaceChildren(...options.filter(option => !option.value || option.value === selection || normaliser(option.textContent).includes(texte)));
+            choix.value = selection;
+        }
+        ecouter(sagaRecherche, 'input', rechercherLivre);
+        // Un livre créé devient immédiatement disponible sans perdre les changements du formulaire de saga.
+        ecouter(document, 'saga:livre-ajoute', event => {
+            const livre = event.detail;
+            const option = new Option(`${livre.titre}${livre.saga ? ` — ${livre.saga}` : ''}`, String(livre.id));
+            options.push(option);
+            rechercherLivre();
+            const succes = document.getElementById('saga-ajout-succes');
+            succes.textContent = `« ${livre.titre} » a été ajouté à la bibliothèque${livre.saga ? ` dans la saga « ${livre.saga} »` : ''}.`;
+            succes.hidden = false;
+        });
+    }
     const fiche = document.getElementById('page-auteur-fiche');
     if (!fiche) return;
     // Filtre les cartes déjà triées par tome sans requête ni changement d’onglet.

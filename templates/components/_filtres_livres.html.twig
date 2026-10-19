@@ -65,9 +65,9 @@
                 <span class="sr-only">Note</span>
                 <select id="{{ prefixe }}filtre-note" data-filtre-note>
                     <option value="">Note</option>
-                    <option value="asc">Note : ordre croissant</option>
-                    <option value="desc">Note : ordre décroissant</option>
-                    {% for note in 0..5 %}<option value="{{ note }}">{{ note == 5 ? '5/5' : note ~ ' à ' ~ note ~ ',99/5' }}</option>{% endfor %}
+                    <option value="asc">Ordre croissant</option>
+                    <option value="desc">Ordre décroissant</option>
+                    {% for note in 0..5 %}<option value="{{ note }}">{{ note }}*</option>{% endfor %}
                 </select>
             </label>
     </div>

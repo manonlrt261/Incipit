@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+{% block title %}Mes auteurs — Lectures {{ annee }} | Incipit{% endblock %}
+{% block body %}
+<div class="accueil" {% if edition %}id="edition-accueil" data-url="{{ path('app_accueil_ordre') }}" data-token="{{ csrf_token('ordre_accueil') }}" data-retour="{{ path('app_espace_profil') }}#visibilite"{% endif %}>
+    {% include 'accueil/_edition_commandes.html.twig' %}
+    {% include 'accueil/_entete.html.twig' only %}
+    <main class="accueil-main">
+        <section class="accueil-section">
+            <div class="accueil-section-entete">
+                <img class="accueil-section-icone" src="{{ asset('images/autors.png') }}" alt="">
+                <div class="accueil-section-titres">
+                    <h2>Mes auteurs lus en {{ annee }}</h2>
+                    <p>Les livres que j’ai lus cette année, regroupés par auteur.</p>
+                </div>
+                <a class="accueil-lien" {% if edition %}data-edition-navigation{% endif %} href="{{ path(edition ? 'app_accueil_edition' : 'app_accueil') }}">← Retour à l’accueil</a>
+            </div>
+            {# Présente tous les auteurs lus cette année, au-delà des cinq affichés sur l’accueil. #}
+            {% for auteur in auteurs %}
+                <section class="accueil-auteur-lectures" id="auteur-{{ auteur.id }}" aria-labelledby="auteur-titre-{{ auteur.id }}">
+                    <h3 id="auteur-titre-{{ auteur.id }}">{{ auteur.nom_affichage }}</h3>
+                    <p>{{ auteur.nombre_lectures }} {{ auteur.nombre_lectures == 1 ? 'lecture' : 'lectures' }}</p>
+                    <div class="accueil-grille-livres">
+                        {% for lecture in lecturesParAuteur[auteur.id]|default([]) %}
+                            {% include 'accueil/_lecture_auteur.html.twig' with {auteur: auteur, lecture: lecture} only %}
+                        {% endfor %}
+                    </div>
+                </section>
+            {% else %}
+                <p class="accueil-vide">Aucune lecture terminée cette année.</p>
+            {% endfor %}
+        </section>
+    </main>
+</div>
+{% endblock %}

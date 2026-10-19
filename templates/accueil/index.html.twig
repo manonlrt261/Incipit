@@ -68,6 +68,7 @@
                         <h2>Mes 5 auteurs les plus lus de l’année</h2>
                         <p>Les auteurs que j’ai le plus lus cette année.</p>
                     </div>
+                    <a class="accueil-lien" {% if edition %}data-edition-navigation{% endif %} href="{{ path('app_accueil_auteurs_lectures', edition ? {edition: 1} : {}) }}">Voir les auteurs</a>
                 </div>
 
                 {# Prévoit un message lorsqu’aucune lecture terminée ne permet de classer les auteurs. #}
@@ -80,10 +81,10 @@
                     <div class="accueil-grille-auteurs">
                         {% for auteur in auteurs %}
                             <div class="accueil-auteur">
-                                <a class="accueil-auteur-lien" {% if edition %}aria-disabled="true" tabindex="-1"{% else %}href="{{ path('app_accueil_auteur_lectures', {id: auteur.id}) }}"{% endif %}>
+                                <div>
                                     <h3>{{ auteur.nom_affichage }}</h3>
                                     <p>{{ auteur.nombre_lectures }} {{ auteur.nombre_lectures == 1 ? 'lecture' : 'lectures' }}</p>
-                                </a>
+                                </div>
                                 {% if edition %}
                                     {# Propose uniquement les auteurs ayant le même nombre de lectures à cette place. #}
                                     <label class="accueil-choix-auteur">Auteur à la position {{ loop.index }}

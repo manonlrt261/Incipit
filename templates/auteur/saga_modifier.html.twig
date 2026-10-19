@@ -3,7 +3,7 @@
 {% block body %}
 <div class="espace-layout">
     {% include 'components/_sidebar.html.twig' %}
-    <main class="espace-contenu bibliotheque page-auteurs">
+    <main id="page-saga-modifier" class="espace-contenu bibliotheque page-auteurs">
         <header class="bibliotheque-header">
             <a class="auteurs-retour" href="{{ path('app_auteur_fiche', {id: auteur.id, saga: cleSaga}) }}">← Fiche de l’auteur</a>
             <img src="{{ asset('images/incipit.png') }}" alt="Incipit" class="bibliotheque-logo">
@@ -14,11 +14,14 @@
             <input type="hidden" name="_token" value="{{ csrf_token('modifier_saga_' ~ auteur.id ~ '_' ~ cleSaga) }}">
             <label for="saga-nom">Nom de la saga</label>
             <input id="saga-nom" name="nom" value="{{ nomSaga }}" maxlength="255" required>
-            <label for="saga-livre">Ajouter un livre de cet auteur (facultatif)</label>
+            <h2>Ajouter un livre existant</h2>
+            <label for="saga-recherche-livre">Rechercher parmi les livres de cet auteur</label>
+            <input id="saga-recherche-livre" type="search" placeholder="Un titre ou une saga…" aria-controls="saga-livre">
+            <label for="saga-livre">Choisir un livre (facultatif)</label>
             <select id="saga-livre" name="livre">
                 <option value="">Ne pas ajouter de livre</option>
                 {% for livre in livres %}
-                    <option value="{{ livre.id }}" {{ livreId == livre.id ? 'selected' : '' }}>{{ livre.titre }}{% if livre.saga %} — {{ livre.saga }}{% endif %}</option>
+                    <option value="{{ livre.id }}" data-saga="{{ livre.saga }}" {{ livreId == livre.id ? 'selected' : '' }}>{{ livre.titre }}{% if livre.saga %} — {{ livre.saga }}{% endif %}</option>
                 {% endfor %}
             </select>
             <p>Le livre sélectionné sera rattaché à cette saga et quittera son ancienne saga s’il en avait une.</p>
@@ -30,6 +33,14 @@
                 <button type="submit">Enregistrer</button>
             </div>
         </form>
+        {# Réutilise toutes les fonctions du formulaire de Mes lectures avec le contexte de la saga. #}
+        <section class="auteur-formulaire saga-nouveau-livre">
+            <h2>Ajouter un nouveau livre</h2>
+            <p>Créez un livre avec le formulaire habituel. Il sera enregistré dans cette saga. Vous pourrez y préciser son numéro de tome.</p>
+            <button type="button" id="ouvrir-ajout" class="bibliotheque-ajouter" data-saga="{{ sagaEnregistree }}" data-auteur="{{ auteur.affichage }}">Ajouter un livre</button>
+            <p id="saga-ajout-succes" role="status" hidden></p>
+        </section>
     </main>
 </div>
+{% include 'livre/_modal_ajout.html.twig' %}
 {% endblock %}

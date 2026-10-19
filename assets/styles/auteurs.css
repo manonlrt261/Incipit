@@ -327,3 +327,13 @@
     font: inherit;
     font-size: 16px;
 }
+
+/* Sépare la création d’un livre de la modification des tomes déjà enregistrés. */
+.saga-nouveau-livre {
+    margin-top: 24px;
+}
+
+.saga-nouveau-livre h2,
+#page-saga-modifier .auteur-formulaire h2 {
+    color: var(--color-secondary);
+}

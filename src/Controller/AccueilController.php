@@ -64,26 +64,35 @@ final class AccueilController extends AbstractController
         ]);
     }
 
-    #[Route('/auteurs/{id}/lectures', name: 'app_accueil_auteur_lectures', requirements: ['id' => '\d+'], methods: ['GET'])]
-    // Partage uniquement les lectures terminées cette année, en respectant la visibilité du classement public.
-    public function lecturesAuteur(int $id, Connection $connection, \App\Service\VisibiliteAccueil $reglages): Response
+    #[Route('/auteurs/lectures', name: 'app_accueil_auteurs_lectures', methods: ['GET'])]
+    // Regroupe sur une seule page les lectures de l’année, auteur par auteur, dans l’ordre du classement public.
+    public function lecturesAuteurs(Request $request, Connection $connection, \App\Service\VisibiliteAccueil $reglages, ClassementAuteursAccueil $classement): Response
     {
+        $edition = $this->modeEdition($request, $connection);
         if (!$reglages->publique()['auteurs']) throw $this->createNotFoundException();
-        $auteur = $connection->fetchAssociative('SELECT id, nom_affichage FROM auteur WHERE id = ?', [$id]);
-        if (!$auteur) throw $this->createNotFoundException('Auteur introuvable.');
+        $auteurs = $classement->charger();
         $lectures = $connection->fetchAllAssociative(
-            "SELECT l.id, l.titre, l.image_couverture, s.note, s.avis, s.date_fin
+            "SELECT la.auteur_id, l.id, l.titre, l.image_couverture, s.note, s.avis, s.date_fin
              FROM session_lecture s
              JOIN livre l ON l.id = s.livre_id
              JOIN livre_auteur la ON la.livre_id = l.id
-             WHERE la.auteur_id = :auteur AND s.statut = :statut
-               AND s.date_fin >= :debut AND s.date_fin < :fin
+             WHERE s.statut = :statut AND s.date_fin >= :debut AND s.date_fin < :fin
              ORDER BY s.date_fin ASC, s.id ASC",
-            ['auteur' => $id, 'statut' => 'terminé', 'debut' => date('Y-01-01'), 'fin' => (date('Y') + 1).'-01-01']
+            ['statut' => 'terminé', 'debut' => date('Y-01-01'), 'fin' => (date('Y') + 1).'-01-01']
         );
-        return $this->render('accueil/auteur_lectures.html.twig', [
-            'auteur' => $auteur, 'lectures' => $lectures, 'annee' => date('Y'),
+        $parAuteur = [];
+        foreach ($lectures as $lecture) $parAuteur[$lecture['auteur_id']][] = $lecture;
+        return $this->render('accueil/auteurs_lectures.html.twig', [
+            'auteurs' => $auteurs, 'lecturesParAuteur' => $parAuteur, 'annee' => date('Y'), 'edition' => $edition,
         ]);
+    }
+
+    #[Route('/auteurs/{id}/lectures', name: 'app_accueil_auteur_lectures', requirements: ['id' => '\d+'], methods: ['GET'])]
+    // Les anciens liens rejoignent désormais la page commune, directement à la section de l’auteur.
+    public function lecturesAuteur(int $id, \App\Service\VisibiliteAccueil $reglages): Response
+    {
+        if (!$reglages->publique()['auteurs']) throw $this->createNotFoundException();
+        return $this->redirectToRoute('app_accueil_auteurs_lectures', ['_fragment' => 'auteur-'.$id]);
     }
 
     #[Route('/espace/accueil/ordre', name: 'app_accueil_ordre', methods: ['POST'])]
