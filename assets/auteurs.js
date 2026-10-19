@@ -51,6 +51,13 @@ initialiserPage(ecouter => {
     }
     const fiche = document.getElementById('page-auteur-fiche');
     if (!fiche) return;
+    // Filtre les cartes déjà triées par tome sans requête ni changement d’onglet.
+    const filtreSaga = document.getElementById('auteur-saga');
+    ecouter(filtreSaga, 'change', () => {
+        fiche.querySelectorAll('[data-saga]').forEach(carte => {
+            carte.hidden = filtreSaga.value !== '' && carte.dataset.saga !== filtreSaga.value;
+        });
+    });
     let numeroFiche = 0;
     let requeteFiche;
     // Charge la fiche complète seulement au clic, sans changer la page ou l’onglet actif.
@@ -90,7 +97,7 @@ initialiserPage(ecouter => {
         }
     });
     const onglets = [...fiche.querySelectorAll('[role="tab"]')];
-    // Garde un seul panneau visible et conserve les repères accessibles des quatre catégories.
+    // Garde un seul panneau visible et conserve les repères accessibles des catégories.
     function choisir(choix) {
         onglets.forEach(onglet => {
             const actif = onglet === choix;

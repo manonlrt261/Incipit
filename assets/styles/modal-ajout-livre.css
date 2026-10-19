@@ -827,3 +827,8 @@ dialog#modal-ajout-livre {
     flex: 0 0 18px;
     accent-color: var(--color-terra);
 }
+
+/* Ancre les suggestions de saga sous le champ sans déplacer les autres informations. */
+#modal-ajout-livre .modal-saga-zone {
+    position: relative;
+}

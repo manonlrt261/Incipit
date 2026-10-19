@@ -38,7 +38,7 @@ final class AuteurController extends AbstractController
         $auteur = $connexion->fetchAssociative("SELECT id, prenom, nom, nom_affichage FROM auteur WHERE id = ?", [$id]);
         if (!$auteur) throw $this->createNotFoundException('Auteur introuvable.');
         $auteur = NomsAuteur::presenter($auteur);
-        $livres = $connexion->fetchAllAssociative("SELECT l.id, l.titre, l.image_couverture,
+        $livres = $connexion->fetchAllAssociative("SELECT l.id, l.titre, l.image_couverture, l.saga, l.tome,
             EXISTS(SELECT 1 FROM exemplaire e WHERE e.livre_id = l.id AND e.date_retrait IS NULL) AS possede,
             EXISTS(SELECT 1 FROM souhait s WHERE s.livre_id = l.id AND s.statut = 'souhaité') AS souhaite,
             EXISTS(SELECT 1 FROM pret p JOIN exemplaire e ON e.id = p.exemplaire_id WHERE e.livre_id = l.id AND p.statut = 'En cours' AND p.date_retour_effective IS NULL) AS prete,
@@ -59,7 +59,24 @@ final class AuteurController extends AbstractController
             if ($livre['prete']) $onglets['pretes']['livres'][] = $livre;
             if ($livre['retire'] && !$livre['possede']) $onglets['retires']['livres'][] = $livre;
         }
-        return $this->render('auteur/fiche.html.twig', ['auteur' => $auteur, 'onglets' => $onglets]);
+        // Les sagas réutilisent les champs enregistrés sur les livres et leurs liens d’auteur existants.
+        $sagas = [];
+        $livresSagas = [];
+        foreach ($livres as $livre) {
+            $nomSaga = preg_replace('/\s+/u', ' ', trim($livre['saga'] ?? ''));
+            if ($nomSaga === '') continue;
+            $cleSaga = mb_strtolower($nomSaga);
+            $sagas[$cleSaga] ??= $nomSaga;
+            $livre['cle_saga'] = $cleSaga;
+            $livresSagas[] = $livre;
+        }
+        natcasesort($sagas);
+        // Classe numériquement les tomes : 2 précède 10, et les tomes non renseignés viennent en dernier.
+        usort($livresSagas, static fn (array $a, array $b): int => strnatcasecmp($a['cle_saga'], $b['cle_saga'])
+            ?: ($a['tome'] === null ? PHP_INT_MAX : (int) $a['tome']) <=> ($b['tome'] === null ? PHP_INT_MAX : (int) $b['tome'])
+            ?: strnatcasecmp($a['titre'], $b['titre']) ?: $a['id'] <=> $b['id']);
+        $onglets['sagas'] = ['titre' => 'Saga', 'livres' => $livresSagas];
+        return $this->render('auteur/fiche.html.twig', ['auteur' => $auteur, 'onglets' => $onglets, 'sagas' => $sagas]);
     }
     #[Route('/espace/mes-auteurs/{id}/modifier', name: 'app_auteur_modifier', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
     // Renomme la fiche existante : tous ses livres et les suggestions conservent le même identifiant d’auteur.

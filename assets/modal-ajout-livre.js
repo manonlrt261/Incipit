@@ -1,4 +1,5 @@
 // Gère l’ajout et la modification des livres, la recherche ISBN et le choix de leur couverture.
+import './components/sagas.js';
 import { initialiserPage } from './components/initialisation-page.js';
 
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
@@ -322,6 +323,8 @@ initialiserPage(ecouter => {
     function choisirAuteur(option) {
         if (!champAuteurActif || !option) return;
         champAuteurActif.value = option.textContent;
+        // Invalide les suggestions de saga lors du choix d’un autre auteur.
+        champAuteurActif.dispatchEvent(new Event('change', { bubbles: true }));
         champAuteurActif.focus();
         annulerSuggestionsAuteurs();
     }

@@ -276,3 +276,29 @@
     font: inherit;
     color: var(--color-secondary);
 }
+
+/* Sélection des sagas de l’auteur ; les tomes restent classés par numéro. */
+.auteur-filtre-saga {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    color: var(--color-secondary);
+}
+
+.auteur-filtre-saga select {
+    min-width: 0;
+    max-width: 100%;
+    padding: 12px;
+    border: 1px solid var(--color-encadre);
+    border-radius: 8px;
+    background: var(--color-white);
+    color: var(--color-secondary);
+    font: inherit;
+    font-size: 16px;
+}
+
+.auteur-livre[hidden] {
+    display: none;
+}

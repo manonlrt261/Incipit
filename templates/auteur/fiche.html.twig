@@ -12,7 +12,7 @@
             <div><h1 class="titre-page">{{ auteur.affichage }}</h1><p class="sous-titre-page">Tous vos livres de cet auteur.</p></div>
             <a class="auteurs-modifier" href="{{ path('app_auteur_modifier', {id: auteur.id}) }}"><img src="{{ asset('images/modifier.png') }}" alt="">Modifier l’auteur</a>
         </div>
-        {# Les quatre onglets utilisent les associations existantes, sans déplacer ni modifier les livres. #}
+        {# Les onglets utilisent les associations existantes, sans déplacer ni modifier les livres. #}
         <div class="auteurs-onglets" role="tablist" aria-label="Livres de cet auteur">
             {% for cle, onglet in onglets %}
                 <button type="button" role="tab" id="auteur-tab-{{ cle }}" aria-controls="auteur-panel-{{ cle }}" aria-selected="{{ loop.first ? 'true' : 'false' }}" tabindex="{{ loop.first ? '0' : '-1' }}">{{ onglet.titre }} ({{ onglet.livres|length }})</button>
@@ -20,9 +20,15 @@
         </div>
         {% for cle, onglet in onglets %}
             <section role="tabpanel" id="auteur-panel-{{ cle }}" aria-labelledby="auteur-tab-{{ cle }}" {{ not loop.first ? 'hidden' : '' }} tabindex="0">
+                {% if cle == 'sagas' %}
+                    {# Filtre les sagas de cet auteur en conservant l’ordre numérique des tomes. #}
+                    <label class="auteur-filtre-saga" for="auteur-saga">Saga
+                        <select id="auteur-saga"><option value="">Toutes les sagas</option>{% for valeur, nomSaga in sagas %}<option value="{{ valeur }}">{{ nomSaga }}</option>{% endfor %}</select>
+                    </label>
+                {% endif %}
                 <div class="auteur-livres-grille">
                     {% for livre in onglet.livres %}
-                        <article class="auteur-livre" data-livre-id="{{ livre.id }}" data-details-url="{{ path('app_auteur_livre_details', {id: auteur.id, livreId: livre.id}) }}" tabindex="0" role="button" aria-label="Voir les détails de {{ livre.titre }}">
+                        <article class="auteur-livre" data-livre-id="{{ livre.id }}" {% if cle == 'sagas' %}data-saga="{{ livre.cle_saga|e('html_attr') }}"{% endif %} data-details-url="{{ path('app_auteur_livre_details', {id: auteur.id, livreId: livre.id}) }}" tabindex="0" role="button" aria-label="Voir les détails de {{ livre.titre }}">
                             <div class="auteur-couverture">
                                 {% if livre.image_couverture %}
                                     <img src="{{ livre.image_couverture starts with 'http' or livre.image_couverture starts with '/' ? livre.image_couverture : '/' ~ livre.image_couverture }}" alt="Couverture de {{ livre.titre }}">
@@ -30,6 +36,7 @@
                             </div>
                             <h2>{{ livre.titre }}</h2>
                             <p>{{ auteur.affichage }}</p>
+                            {% if livre.saga %}<p class="auteur-livre-saga">{{ livre.saga }}{% if livre.tome is not null %} · Tome {{ livre.tome }}{% endif %}</p>{% endif %}
                             {% if cle == 'possedes' %}
                                 {% include 'components/_badge_lecture.html.twig' with {statut: livre.statut} only %}
                             {% endif %}

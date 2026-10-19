@@ -24,6 +24,7 @@
         id="form-ajout-livre"
         action="{{ path(wishlist_mode ? 'app_wishlist_ajouter' : 'app_livre_modal_ajouter') }}"
         data-recherche-couvertures="{{ path('app_livre_recherche_couvertures') }}"
+        data-recherche-sagas="{{ path('app_livre_recherche_sagas') }}"
         data-recherche-auteurs="{{ path('app_livre_recherche_auteurs') }}"
         data-recherche-isbn="{{ path('app_livre_recherche_isbn') }}"
         data-wishlist="{{ wishlist_mode ? '1' : '0' }}"
@@ -241,9 +242,10 @@
                     </div>
 
                     <div class="modal-deux-colonnes">
-                        <div class="modal-champ">
+                        <div class="modal-champ modal-saga-zone">
                             <label for="modal-saga">Saga</label>
-                            <input type="text" id="modal-saga" name="saga">
+                            <input type="text" id="modal-saga" name="saga" maxlength="255" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="modal-suggestions-sagas" aria-expanded="false">
+                            <div id="modal-suggestions-sagas" class="modal-suggestions-auteurs" role="listbox" aria-label="Sagas des auteurs saisis" hidden></div>
                         </div>
                         <div class="modal-champ">
                             <label for="modal-tome">Tome</label>
