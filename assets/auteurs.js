@@ -52,21 +52,39 @@ initialiserPage(ecouter => {
     const sagaRecherche = document.getElementById('saga-recherche-livre');
     if (sagaRecherche) {
         const choix = document.getElementById('saga-livre');
-        const options = [...choix.options];
+        const resultats = document.getElementById('saga-resultats-livres');
+        const vide = document.getElementById('saga-recherche-vide');
         const normaliser = texte => texte.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('fr').trim();
-        // Reconstruit les options plutôt que de les masquer : Safari doit aussi filtrer les choix natifs.
+        // Propose les livres correspondants directement sous la saisie, sans menu de sélection supplémentaire.
         function rechercherLivre() {
-            const selection = choix.value;
             const texte = normaliser(sagaRecherche.value);
-            choix.replaceChildren(...options.filter(option => !option.value || option.value === selection || normaliser(option.textContent).includes(texte)));
-            choix.value = selection;
+            resultats.hidden = !texte;
+            let nombre = 0;
+            resultats.querySelectorAll('[data-saga-livre-id]').forEach(bouton => {
+                bouton.hidden = !normaliser(`${bouton.dataset.titre} ${bouton.dataset.saga || ''}`).includes(texte);
+                if (!bouton.hidden) nombre++;
+            });
+            vide.hidden = nombre !== 0;
         }
-        ecouter(sagaRecherche, 'input', rechercherLivre);
+        ecouter(sagaRecherche, 'input', () => { choix.value = ''; rechercherLivre(); });
+        ecouter(sagaRecherche, 'focus', rechercherLivre);
+        ecouter(resultats, 'click', event => {
+            const bouton = event.target.closest('[data-saga-livre-id]');
+            if (!bouton) return;
+            choix.value = bouton.dataset.sagaLivreId;
+            sagaRecherche.value = bouton.dataset.titre;
+            resultats.hidden = true;
+        });
         // Un livre créé devient immédiatement disponible sans perdre les changements du formulaire de saga.
         ecouter(document, 'saga:livre-ajoute', event => {
             const livre = event.detail;
-            const option = new Option(`${livre.titre}${livre.saga ? ` — ${livre.saga}` : ''}`, String(livre.id));
-            options.push(option);
+            const bouton = document.createElement('button');
+            bouton.type = 'button';
+            bouton.dataset.sagaLivreId = String(livre.id);
+            bouton.dataset.titre = livre.titre;
+            bouton.dataset.saga = livre.saga || '';
+            bouton.textContent = `${livre.titre}${livre.saga ? ` — ${livre.saga}` : ''}`;
+            resultats.insertBefore(bouton, vide);
             rechercherLivre();
             const succes = document.getElementById('saga-ajout-succes');
             succes.textContent = `« ${livre.titre} » a été ajouté à la bibliothèque${livre.saga ? ` dans la saga « ${livre.saga} »` : ''}.`;

@@ -16,15 +16,18 @@
             <input id="saga-nom" name="nom" value="{{ nomSaga }}" maxlength="255" required>
             <h2>Ajouter un livre existant</h2>
             <label for="saga-recherche-livre">Rechercher parmi les livres de cet auteur</label>
-            <input id="saga-recherche-livre" type="search" placeholder="Un titre ou une saga…" aria-controls="saga-livre">
-            <label for="saga-livre">Choisir un livre (facultatif)</label>
-            <select id="saga-livre" name="livre">
-                <option value="">Ne pas ajouter de livre</option>
+            <input id="saga-recherche-livre" type="search" placeholder="Un titre ou une saga…" aria-controls="saga-resultats-livres" autocomplete="off" value="{% for livre in livres %}{% if livreId == livre.id %}{{ livre.titre }}{% endif %}{% endfor %}">
+            <input type="hidden" id="saga-livre" name="livre" value="{{ livreId }}">
+            {# Les livres existants se choisissent directement dans les résultats de recherche. #}
+            <div id="saga-resultats-livres" hidden>
                 {% for livre in livres %}
-                    <option value="{{ livre.id }}" data-saga="{{ livre.saga }}" {{ livreId == livre.id ? 'selected' : '' }}>{{ livre.titre }}{% if livre.saga %} — {{ livre.saga }}{% endif %}</option>
+                    <button type="button" data-saga-livre-id="{{ livre.id }}" data-titre="{{ livre.titre }}" data-saga="{{ livre.saga }}">{{ livre.titre }}{% if livre.saga %} — {{ livre.saga }}{% endif %}</button>
                 {% endfor %}
-            </select>
-            <p>Le livre sélectionné sera rattaché à cette saga et quittera son ancienne saga s’il en avait une.</p>
+                <p id="saga-recherche-vide" hidden>Aucun livre trouvé.</p>
+            </div>
+            <button type="button" id="ouvrir-ajout" class="bibliotheque-ajouter" data-saga="{{ sagaEnregistree }}" data-auteur="{{ auteur.affichage }}">Ajouter un nouveau livre</button>
+            <p>Créez un livre avec le formulaire habituel. Il sera enregistré dans cette saga. Vous pourrez y préciser son numéro de tome.</p>
+            <p id="saga-ajout-succes" role="status" hidden></p>
             <label for="saga-tome">Numéro du tome du livre ajouté (facultatif)</label>
             <input id="saga-tome" name="tome" type="number" min="1" max="100000" step="1" value="{{ tome }}">
             {% if erreur %}<p role="alert">{{ erreur }}</p>{% endif %}
@@ -33,13 +36,6 @@
                 <button type="submit">Enregistrer</button>
             </div>
         </form>
-        {# Réutilise toutes les fonctions du formulaire de Mes lectures avec le contexte de la saga. #}
-        <section class="auteur-formulaire saga-nouveau-livre">
-            <h2>Ajouter un nouveau livre</h2>
-            <p>Créez un livre avec le formulaire habituel. Il sera enregistré dans cette saga. Vous pourrez y préciser son numéro de tome.</p>
-            <button type="button" id="ouvrir-ajout" class="bibliotheque-ajouter" data-saga="{{ sagaEnregistree }}" data-auteur="{{ auteur.affichage }}">Ajouter un livre</button>
-            <p id="saga-ajout-succes" role="status" hidden></p>
-        </section>
     </main>
 </div>
 {% include 'livre/_modal_ajout.html.twig' %}

@@ -328,12 +328,28 @@
     font-size: 16px;
 }
 
-/* Sépare la création d’un livre de la modification des tomes déjà enregistrés. */
-.saga-nouveau-livre {
-    margin-top: 24px;
-}
-
-.saga-nouveau-livre h2,
 #page-saga-modifier .auteur-formulaire h2 {
     color: var(--color-secondary);
+}
+
+/* Résultats de recherche des livres existants à rattacher à une saga. */
+#saga-resultats-livres {
+    display: grid;
+    gap: 8px;
+}
+
+#saga-resultats-livres[hidden],
+#saga-resultats-livres [hidden] {
+    display: none;
+}
+
+#saga-resultats-livres button {
+    padding: 10px 12px;
+    border: 1px solid var(--color-encadre);
+    border-radius: 8px;
+    background: white;
+    color: var(--color-terra);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
 }

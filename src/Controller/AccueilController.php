@@ -70,15 +70,17 @@ final class AccueilController extends AbstractController
     {
         $edition = $this->modeEdition($request, $connection);
         if (!$reglages->publique()['auteurs']) throw $this->createNotFoundException();
-        $auteurs = $classement->charger();
+        $auteurs = array_slice($classement->charger(), 0, 5);
         $lectures = $connection->fetchAllAssociative(
             "SELECT la.auteur_id, l.id, l.titre, l.image_couverture, s.note, s.avis, s.date_fin
              FROM session_lecture s
              JOIN livre l ON l.id = s.livre_id
              JOIN livre_auteur la ON la.livre_id = l.id
              WHERE s.statut = :statut AND s.date_fin >= :debut AND s.date_fin < :fin
+               AND la.auteur_id IN (:auteurs)
              ORDER BY s.date_fin ASC, s.id ASC",
-            ['statut' => 'terminé', 'debut' => date('Y-01-01'), 'fin' => (date('Y') + 1).'-01-01']
+            ['statut' => 'terminé', 'debut' => date('Y-01-01'), 'fin' => (date('Y') + 1).'-01-01', 'auteurs' => array_column($auteurs, 'id')],
+            ['auteurs' => \Doctrine\DBAL\ArrayParameterType::INTEGER]
         );
         $parAuteur = [];
         foreach ($lectures as $lecture) $parAuteur[$lecture['auteur_id']][] = $lecture;
