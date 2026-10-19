@@ -4,7 +4,7 @@
 {% block title %}Mot de passe oublié | Incipit{% endblock %}
 
 {% block body %}
-<main class="login-page">
+<main class="login-page reset-password-page">
     <div class="login-container">
 
         <img src="{{ asset('images/livre2.png') }}"
@@ -24,8 +24,12 @@
                 un lien pour réinitialiser votre mot de passe.
             </p>
 
+            {% for erreur in app.flashes('reset_password_error') %}
+                <p class="profil-erreur" role="alert">{{ erreur }}</p>
+            {% endfor %}
+
             {# Symfony génère le formulaire, son jeton CSRF et les erreurs de validation de l’adresse. #}
-            {{ form_start(requestForm) }}
+            {{ form_start(requestForm, {attr: {'data-turbo': 'false'}}) }}
 
                 <div class="login-field">
                     {{ form_label(requestForm.email) }}

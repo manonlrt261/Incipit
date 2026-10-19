@@ -1,13 +1,16 @@
 {% extends 'base.html.twig' %}
-
-{% block title %}Password Reset Email Sent{% endblock %}
-
+{% block title %}Demande de réinitialisation | Incipit{% endblock %}
 {% block body %}
-    {# Confirme la demande sans révéler si l’adresse correspond à un compte et indique la durée de validité du lien. #}
-    <p>
-        If an account matching your email exists, then an email was just sent that contains a link that you can use to reset your password.
-        This link will expire in {{ resetToken.expirationMessageKey|trans(resetToken.expirationMessageData, 'ResetPasswordBundle') }}.
-    </p>
-    {# Permet de renouveler la demande si le message n’a pas été reçu. #}
-    <p>If you don't receive an email please check your spam folder or <a href="{{ path('app_forgot_password_request') }}">try again</a>.</p>
+<main class="login-page reset-password-page">
+    <div class="login-container">
+        <img src="{{ asset('images/livre2.png') }}" alt="" class="login-logo">
+        <h1>Consultez votre messagerie</h1>
+        <div class="login-card">
+            {# Garde une confirmation identique pour les adresses connues ou inconnues. #}
+            <p class="forgot-password-description">Si un compte correspond à cette adresse, vous recevrez un courriel contenant un lien de réinitialisation valable 15 minutes.</p>
+            <p class="forgot-password-description">Vérifiez aussi vos courriers indésirables. Si vous ne recevez rien, <a href="{{ path('app_forgot_password_request') }}">faites une nouvelle demande</a>.</p>
+            <a class="forgot-password-back" href="{{ path('app_login') }}">← Retour à la connexion</a>
+        </div>
+    </div>
+</main>
 {% endblock %}

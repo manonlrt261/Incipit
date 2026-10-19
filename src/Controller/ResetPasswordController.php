@@ -3,6 +3,9 @@
 namespace App\Controller;
 
 use App\Entity\Utilisateur;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\DependencyInjection\Attribute\AutowireServiceClosure;
 use App\Form\ChangePasswordFormType;
 use App\Form\ResetPasswordRequestFormType;
 use Doctrine\ORM\EntityManagerInterface;
@@ -15,7 +18,6 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Contracts\Translation\TranslatorInterface;
 use SymfonyCasts\Bundle\ResetPassword\Controller\ResetPasswordControllerTrait;
 use SymfonyCasts\Bundle\ResetPassword\Exception\ResetPasswordExceptionInterface;
 use SymfonyCasts\Bundle\ResetPassword\ResetPasswordHelperInterface;
@@ -28,13 +30,16 @@ class ResetPasswordController extends AbstractController
     // Reçoit les services nécessaires à la création des liens de réinitialisation et à la mise à jour du compte.
     public function __construct(
         private ResetPasswordHelperInterface $resetPasswordHelper,
-        private EntityManagerInterface $entityManager
+        private EntityManagerInterface $entityManager,
+        #[AutowireServiceClosure(MailerInterface::class)] private \Closure $mailer,
+        private LoggerInterface $logger,
+        #[Autowire('%env(default::MAILER_FROM)%')] private ?string $adresseExpediteur
     ) {
     }
 
     #[Route('', name: 'app_forgot_password_request')]
     // Traite la demande de lien de réinitialisation du mot de passe.
-    public function request(Request $request, MailerInterface $mailer): Response
+    public function request(Request $request): Response
     {
         $form = $this->createForm(ResetPasswordRequestFormType::class);
         $form->handleRequest($request);
@@ -43,7 +48,7 @@ class ResetPasswordController extends AbstractController
             /** @var string $email */
             $email = $form->get('email')->getData();
 
-            return $this->processSendingPasswordResetEmail($email, $mailer);
+            return $this->processSendingPasswordResetEmail($email);
         }
 
         return $this->render('reset_password/request.html.twig', [
@@ -67,7 +72,7 @@ class ResetPasswordController extends AbstractController
 
     #[Route('/reset/{token}', name: 'app_reset_password')]
     // Vérifie le lien de réinitialisation et traite le formulaire du nouveau mot de passe.
-    public function reset(Request $request, UserPasswordHasherInterface $passwordHasher, TranslatorInterface $translator, ?string $token = null): Response
+    public function reset(Request $request, UserPasswordHasherInterface $passwordHasher, ?string $token = null): Response
     {
         if ($token) {
             // Conserve le jeton en session puis le retire de l’URL pour limiter son exposition aux scripts de la page.
@@ -78,18 +83,15 @@ class ResetPasswordController extends AbstractController
 
         $token = $this->getTokenFromSession();
         if (null === $token) {
-            throw $this->createNotFoundException('No reset password token found in the URL or in the session.');
+            $this->addFlash('reset_password_error', 'Le lien est absent ou a expiré. Demandez un nouveau lien.');
+            return $this->redirectToRoute('app_forgot_password_request');
         }
 
         try {
             /** @var Utilisateur $user */
             $user = $this->resetPasswordHelper->validateTokenAndFetchUser($token);
         } catch (ResetPasswordExceptionInterface $e) {
-            $this->addFlash('reset_password_error', sprintf(
-                '%s - %s',
-                $translator->trans(ResetPasswordExceptionInterface::MESSAGE_PROBLEM_VALIDATE, [], 'ResetPasswordBundle'),
-                $translator->trans($e->getReason(), [], 'ResetPasswordBundle')
-            ));
+            $this->addFlash('reset_password_error', 'Ce lien est invalide, a déjà été utilisé ou a expiré. Demandez un nouveau lien.');
 
             return $this->redirectToRoute('app_forgot_password_request');
         }
@@ -121,10 +123,10 @@ class ResetPasswordController extends AbstractController
     }
 
     // Prépare et envoie le lien de réinitialisation en gardant une réponse identique pour les adresses inconnues.
-    private function processSendingPasswordResetEmail(string $emailFormData, MailerInterface $mailer): RedirectResponse
+    private function processSendingPasswordResetEmail(string $emailFormData): RedirectResponse
     {
         $user = $this->entityManager->getRepository(Utilisateur::class)->findOneBy([
-            'email' => $emailFormData,
+            'email' => trim($emailFormData),
         ]);
 
         // Renvoie la même confirmation pour une adresse inconnue que pour une adresse enregistrée.
@@ -139,18 +141,24 @@ class ResetPasswordController extends AbstractController
             return $this->redirectToRoute('app_check_email');
         }
 
-        
-        $email = (new TemplatedEmail())
-            ->from(new Address('incipitbibliothequevirtuelle@gmail.com', 'Incipit'))
-            ->to((string) $user->getEmail())
-            ->subject('Incipit - Réinitialisation de votre mot de passe')
-            ->htmlTemplate('reset_password/email.html.twig')
-            ->context([
-                'resetToken' => $resetToken,
-            ]);
+        try {
+            $email = (new TemplatedEmail())
+                ->from(new Address($this->adresseExpediteur ?: 'incipitbibliothequevirtuelle@gmail.com', 'Incipit'))
+                ->to((string) $user->getEmail())
+                ->subject('Incipit - Réinitialisation de votre mot de passe')
+                ->htmlTemplate('reset_password/email.html.twig')
+                ->context(['resetToken' => $resetToken])
+                // Joint le logo au message pour qu’il ne dépende pas du chargement d’une image distante.
+                ->embedFromPath($this->getParameter('kernel.project_dir').'/assets/images/incipit.png', 'incipit-logo', 'image/png');
 
-
-        $mailer->send($email);
+            // Initialise le transport uniquement à l’envoi : une configuration SMTP incorrecte ne bloque pas le formulaire.
+            ($this->mailer)()->send($email);
+        } catch (\Throwable $e) {
+            // Permet une nouvelle tentative et ne journalise ni clé SMTP, ni adresse, ni lien de réinitialisation.
+            $this->resetPasswordHelper->removeResetRequest($resetToken->getToken());
+            $this->logger->error('[INCIPIT - RESET PASSWORD] Envoi du courriel impossible.', ['type' => get_class($e)]);
+            return $this->redirectToRoute('app_check_email');
+        }
 
         // Transmet la durée de validité du lien à la page de confirmation via la session.
         $this->setTokenObjectInSession($resetToken);

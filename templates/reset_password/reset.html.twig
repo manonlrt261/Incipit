@@ -1,13 +1,35 @@
 {% extends 'base.html.twig' %}
-
-{% block title %}Reset your password{% endblock %}
-
+{% block title %}Nouveau mot de passe | Incipit{% endblock %}
 {% block body %}
-    <h1>Reset your password</h1>
-
-    {# Affiche les champs et erreurs du nouveau mot de passe ; le contrôleur a déjà vérifié le jeton reçu. #}
-    {{ form_start(resetForm) }}
-        {{ form_row(resetForm.plainPassword) }}
-        <button class="btn btn-primary">Reset password</button>
-    {{ form_end(resetForm) }}
+<main class="login-page reset-password-page">
+    <div class="login-container">
+        <img src="{{ asset('images/livre2.png') }}" alt="" class="login-logo">
+        <h1>Nouveau mot de passe</h1>
+        <p class="login-subtitle">Choisissez un nouveau mot de passe pour votre bibliothèque.</p>
+        <div class="login-card">
+            {# Le contrôleur valide le jeton avant d’afficher ce formulaire. #}
+            {{ form_start(resetForm, {attr: {'data-turbo': 'false'}}) }}
+                {{ form_errors(resetForm.plainPassword) }}
+                {% for champ in [resetForm.plainPassword.first, resetForm.plainPassword.second] %}
+                    <div class="login-field">
+                        {{ form_label(champ) }}
+                        <div class="login-input-wrapper">
+                            <img src="{{ asset('images/cadenas2.png') }}" alt="">
+                            {{ form_widget(champ, {attr: {placeholder: loop.first ? 'Votre nouveau mot de passe' : 'Confirmez votre mot de passe', 'aria-describedby': 'reset-password-aide'}}) }}
+                            <button type="button" class="login-password-toggle" data-reset-password-toggle="{{ champ.vars.id }}" aria-label="Afficher le mot de passe" aria-pressed="false">
+                                <img src="{{ asset('images/afficher2.png') }}" data-image-afficher="{{ asset('images/afficher2.png') }}" data-image-masquer="{{ asset('images/masquer2.png') }}" alt="">
+                            </button>
+                        </div>
+                        {{ form_errors(champ) }}
+                    </div>
+                {% endfor %}
+                <p id="reset-password-aide" class="forgot-password-description">Au moins 12 caractères. Utilisez un mot de passe long et difficile à deviner.</p>
+                <button type="submit" class="btn-primary login-submit">Enregistrer mon mot de passe</button>
+            {{ form_end(resetForm) }}
+            <a class="forgot-password-back" href="{{ path('app_login') }}">← Retour à la connexion</a>
+        </div>
+    </div>
+</main>
 {% endblock %}
+
+{% block importmap %}{{ importmap(['app', 'reset-password']) }}{% endblock %}
