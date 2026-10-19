@@ -469,3 +469,45 @@
     line-height: 1.2;
     white-space: nowrap;
 }
+
+/* =======================================
+   FILTRES DES LECTURES ET NOTES
+   ======================================= */
+
+/* Réunit les cinq critères sur une ligne et les actions en dessous, alignées à gauche. */
+#lectures-filtres {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+#lectures-filtres .bibliotheque-selects {
+    flex: none;
+    width: 100%;
+    max-width: 100%;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.lectures-filtres-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+}
+
+@media (max-width: 700px) {
+    #lectures-filtres .bibliotheque-selects {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* Consultation des fiches retirées au clic et au clavier. */
+.bibliotheque-livre-retire[data-retire-details-url] {
+    cursor: pointer;
+}
+
+.bibliotheque-livre-retire[data-retire-details-url]:focus-visible {
+    outline: 2px solid var(--color-terra);
+    outline-offset: 3px;
+}

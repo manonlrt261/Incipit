@@ -503,3 +503,57 @@
     cursor: grabbing;
     opacity: 0.75;
 }
+
+/* =======================================
+   LECTURES PUBLIQUES PAR AUTEUR
+   ======================================= */
+
+/* Rend les auteurs du classement accessibles au clic et au clavier. */
+.accueil-auteur-lien {
+    text-decoration: none;
+    color: inherit;
+}
+
+.accueil-auteur-lien:focus-visible {
+    outline: 2px solid var(--color-terra);
+    outline-offset: 4px;
+}
+
+/* Préserve la lisibilité des avis longs sans élargir les cartes sur mobile. */
+.accueil-lecture-avis {
+    overflow-wrap: anywhere;
+    color: var(--color-secondary);
+}
+
+.accueil-lecture-note,
+.accueil-lecture-avis h4 {
+    color: var(--color-terra);
+}
+
+/* =======================================
+   CHOIX DES AUTEURS À ÉGALITÉ
+   ======================================= */
+
+/* Garde le choix des ex æquo lisible et utilisable au clavier comme sur téléphone. */
+.accueil-choix-auteur {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 14px;
+    color: var(--color-secondary);
+    font-size: 14px;
+}
+
+.accueil-choix-auteur select {
+    box-sizing: border-box;
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+    padding: 10px;
+    border: 1px solid var(--color-encadre);
+    border-radius: 8px;
+    background: white;
+    color: var(--color-secondary);
+    font: inherit;
+    font-size: 16px;
+}

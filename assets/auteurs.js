@@ -14,7 +14,7 @@ initialiserPage(ecouter => {
         function filtrer() {
             let nombre = 0;
             cartes.forEach(carte => {
-                carte.hidden = !normaliser(carte.dataset.auteurNom).includes(normaliser(recherche.value));
+                carte.hidden = !normaliser(`${carte.dataset.auteurNom} ${carte.dataset.sagas || ''}`).includes(normaliser(recherche.value));
                 if (!carte.hidden) nombre++;
             });
             // Le dernier menu choisi pilote le tri sans effacer la recherche.
@@ -53,11 +53,23 @@ initialiserPage(ecouter => {
     if (!fiche) return;
     // Filtre les cartes déjà triées par tome sans requête ni changement d’onglet.
     const filtreSaga = document.getElementById('auteur-saga');
-    ecouter(filtreSaga, 'change', () => {
+    function afficherSaga() {
         fiche.querySelectorAll('[data-saga]').forEach(carte => {
             carte.hidden = filtreSaga.value !== '' && carte.dataset.saga !== filtreSaga.value;
         });
-    });
+        const actions = document.getElementById('auteur-saga-actions');
+        actions.hidden = !filtreSaga.value;
+        document.getElementById('auteur-saga-modifier').href = `${actions.dataset.modifierUrl}?saga=${encodeURIComponent(filtreSaga.value)}`;
+        // Compte une note par livre : la dernière note renseignée, y compris un zéro.
+        const notes = [...fiche.querySelectorAll('[data-saga]')]
+            .filter(carte => carte.dataset.saga === filtreSaga.value && carte.dataset.note !== '')
+            .map(carte => Number(carte.dataset.note)).filter(Number.isFinite);
+        document.getElementById('auteur-saga-moyenne').textContent = notes.length
+            ? `Note moyenne : ${(notes.reduce((total, note) => total + note, 0) / notes.length).toLocaleString('fr-FR', { maximumFractionDigits: 2 })}/5 (${notes.length} livre${notes.length > 1 ? 's' : ''} noté${notes.length > 1 ? 's' : ''})`
+            : 'Aucun livre noté dans cette saga.';
+    }
+    ecouter(filtreSaga, 'change', afficherSaga);
+    afficherSaga();
     let numeroFiche = 0;
     let requeteFiche;
     // Charge la fiche complète seulement au clic, sans changer la page ou l’onglet actif.
@@ -106,6 +118,7 @@ initialiserPage(ecouter => {
             document.getElementById(onglet.getAttribute('aria-controls')).hidden = !actif;
         });
     }
+    if (filtreSaga.value) choisir(document.getElementById('auteur-tab-sagas'));
     onglets.forEach((onglet, index) => {
         ecouter(onglet, 'click', () => choisir(onglet));
         ecouter(onglet, 'keydown', event => {

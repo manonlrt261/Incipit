@@ -20,6 +20,7 @@ final class NavigationController extends AbstractController
             l.pile_a_lire,
             l.id,
             l.titre,
+            l.saga,
             l.image_couverture,
             l.date_creation,
             COALESCE((SELECT GROUP_CONCAT(g.nom SEPARATOR '|')

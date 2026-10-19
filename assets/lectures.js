@@ -69,6 +69,45 @@ initialiserPage((ecouter) => {
         document.getElementById('chevron-retires').textContent = ouvert ? '⌄' : '⌃';
     });
 
+    // Consulte les livres retirés avec leur historique, indépendamment de la grille des livres possédés.
+    let requeteRetire;
+    let numeroRetire = 0;
+    async function ouvrirLivreRetire(carte) {
+        const numero = ++numeroRetire;
+        requeteRetire?.abort();
+        requeteRetire = new AbortController();
+        const erreur = document.getElementById('lectures-retire-erreur');
+        erreur.hidden = true;
+        try {
+            const reponse = await fetch(carte.dataset.retireDetailsUrl, { signal: requeteRetire.signal, headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+            if (!reponse.ok || reponse.redirected) throw new Error('Impossible de charger les détails du livre. Réessayez.');
+            const html = await reponse.text();
+            if (numero !== numeroRetire || !page.isConnected) return;
+            const zone = document.getElementById('lectures-retire-details');
+            zone.innerHTML = html;
+            const modale = zone.querySelector('dialog');
+            // La fermeture rend le focus au livre sélectionné pour continuer la navigation au clavier.
+            ecouter(zone.querySelector('#auteur-details-fermer'), 'click', () => modale.close());
+            ecouter(modale, 'close', () => carte.focus({ preventScroll: true }));
+            modale.showModal();
+        } catch (e) {
+            if (e.name === 'AbortError' || numero !== numeroRetire || !page.isConnected) return;
+            erreur.textContent = e.message;
+            erreur.hidden = false;
+        }
+    }
+    const livresRetires = document.getElementById('contenu-retires');
+    ecouter(livresRetires, 'click', event => {
+        const carte = event.target.closest('[data-retire-details-url]');
+        if (carte) ouvrirLivreRetire(carte);
+    });
+    ecouter(livresRetires, 'keydown', event => {
+        const carte = event.target.closest('[data-retire-details-url]');
+        if (!carte || !['Enter', ' '].includes(event.key)) return;
+        event.preventDefault();
+        ouvrirLivreRetire(carte);
+    });
+
     const statuts = {
         'en-cours': 'En cours', 'termine': 'Terminé', 'en-pause': 'En pause',
         'abandonne': 'Abandonné', 'pas-commence': 'Pas commencé', 'tous': ''

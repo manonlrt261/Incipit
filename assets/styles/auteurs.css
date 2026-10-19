@@ -302,3 +302,28 @@
 .auteur-livre[hidden] {
     display: none;
 }
+
+/* =======================================
+   MODIFICATION ET NOTE DES SAGAS
+   ======================================= */
+
+/* Aligne les actions de la saga sans déborder sur téléphone. */
+#auteur-saga-actions {
+    margin-bottom: 20px;
+    color: var(--color-terra);
+}
+
+/* Harmonise le choix d’un livre avec les autres champs du formulaire. */
+.auteur-formulaire select {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    padding: 12px;
+    border: 1px solid var(--color-encadre);
+    border-radius: 8px;
+    background: white;
+    color: var(--color-secondary);
+    font: inherit;
+    font-size: 16px;
+}

@@ -193,13 +193,13 @@
                     <div class="dashboard-genres">
                         {% for genre in genresFavoris %}
                             {# Le rang choisit la colonne, la hauteur et la couleur de la marche du podium. #}
-                            <div class="dashboard-genre dashboard-genre--{{ loop.index }}">
-                                <div class="dashboard-genre-marche">
+                            <button type="button" class="dashboard-genre dashboard-genre--{{ loop.index }}" data-genre-url="{{ path('app_dashboard_genre_lectures', {id: genre.id}) }}" aria-haspopup="dialog" aria-label="Voir les livres lus : {{ genre.nom }}">
+                                <span class="dashboard-genre-marche">
                                     <strong>{{ loop.index }}</strong>
                                     <small>{{ genre.nombre }} livre{{ genre.nombre > 1 ? 's' : '' }}</small>
-                                </div>
+                                </span>
                                 <span class="dashboard-genre-nom">{{ genre.nom }}</span>
-                            </div>
+                            </button>
                         {% endfor %}
                     </div>
                 {% else %}
@@ -234,4 +234,9 @@
         </div>
     </main>
 </div>
+    {# Charge les livres du genre choisi sans quitter le tableau de bord. #}
+    <dialog id="dashboard-genre-modal" class="dashboard-genre-modal" aria-labelledby="dashboard-genre-titre">
+        <header><h2 id="dashboard-genre-titre">Livres lus</h2><button type="button" id="dashboard-genre-fermer" aria-label="Fermer">×</button></header>
+        <div id="dashboard-genre-contenu" aria-live="polite"></div>
+    </dialog>
 {% endblock %}

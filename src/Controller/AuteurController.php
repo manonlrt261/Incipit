@@ -23,8 +23,9 @@ final class AuteurController extends AbstractController
     {
         $auteurs = $connexion->fetchAllAssociative("SELECT a.id, a.prenom, a.nom AS nom_famille, a.nom_affichage,
             COALESCE(NULLIF(a.nom_affichage, ''), CONCAT_WS(' ', a.prenom, a.nom)) AS nom,
-            COUNT(DISTINCT la.livre_id) AS nombre
+            COUNT(DISTINCT la.livre_id) AS nombre, GROUP_CONCAT(DISTINCT l.saga SEPARATOR ' | ') AS sagas
             FROM auteur a INNER JOIN livre_auteur la ON la.auteur_id = a.id
+            INNER JOIN livre l ON l.id = la.livre_id
             GROUP BY a.id, a.nom_affichage, a.prenom, a.nom
             ORDER BY nom ASC, a.id ASC");
         $auteurs = array_map(static fn (array $auteur) => NomsAuteur::presenter([...$auteur, 'nom' => $auteur['nom_famille']]), $auteurs);
@@ -33,12 +34,13 @@ final class AuteurController extends AbstractController
 
     #[Route('/espace/mes-auteurs/{id}', name: 'app_auteur_fiche', requirements: ['id' => '\d+'], methods: ['GET'])]
     // Répartit les livres liés à cette fiche sans dupliquer les éditions ou les exemplaires dans un même onglet.
-    public function fiche(int $id, Connection $connexion): Response
+    public function fiche(int $id, Connection $connexion, Request $request): Response
     {
         $auteur = $connexion->fetchAssociative("SELECT id, prenom, nom, nom_affichage FROM auteur WHERE id = ?", [$id]);
         if (!$auteur) throw $this->createNotFoundException('Auteur introuvable.');
         $auteur = NomsAuteur::presenter($auteur);
         $livres = $connexion->fetchAllAssociative("SELECT l.id, l.titre, l.image_couverture, l.saga, l.tome,
+            (SELECT sl.note FROM session_lecture sl WHERE sl.livre_id = l.id AND sl.note IS NOT NULL ORDER BY sl.date_modification DESC, sl.id DESC LIMIT 1) AS note,
             EXISTS(SELECT 1 FROM exemplaire e WHERE e.livre_id = l.id AND e.date_retrait IS NULL) AS possede,
             EXISTS(SELECT 1 FROM souhait s WHERE s.livre_id = l.id AND s.statut = 'souhaité') AS souhaite,
             EXISTS(SELECT 1 FROM pret p JOIN exemplaire e ON e.id = p.exemplaire_id WHERE e.livre_id = l.id AND p.statut = 'En cours' AND p.date_retour_effective IS NULL) AS prete,
@@ -76,8 +78,63 @@ final class AuteurController extends AbstractController
             ?: ($a['tome'] === null ? PHP_INT_MAX : (int) $a['tome']) <=> ($b['tome'] === null ? PHP_INT_MAX : (int) $b['tome'])
             ?: strnatcasecmp($a['titre'], $b['titre']) ?: $a['id'] <=> $b['id']);
         $onglets['sagas'] = ['titre' => 'Saga', 'livres' => $livresSagas];
-        return $this->render('auteur/fiche.html.twig', ['auteur' => $auteur, 'onglets' => $onglets, 'sagas' => $sagas]);
+        return $this->render('auteur/fiche.html.twig', ['auteur' => $auteur, 'onglets' => $onglets, 'sagas' => $sagas, 'sagaSelectionnee' => $request->query->getString('saga')]);
     }
+    #[Route('/espace/mes-auteurs/{id}/saga/modifier', name: 'app_auteur_saga_modifier', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
+    // Renomme tous les tomes de cette saga et rattache seulement un livre déjà lié à cet auteur.
+    public function modifierSaga(int $id, Request $request, Connection $connexion, EntityManagerInterface $em): Response
+    {
+        $auteur = $connexion->fetchAssociative('SELECT id, prenom, nom, nom_affichage FROM auteur WHERE id = ?', [$id]);
+        if (!$auteur) throw $this->createNotFoundException('Auteur introuvable.');
+        $livres = $em->createQuery('SELECT l FROM App\Entity\Livre l JOIN l.auteurs a WHERE a.id = :id')->setParameter('id', $id)->getResult();
+        $normaliser = static fn (?string $nom): string => mb_strtolower(preg_replace('/\s+/u', ' ', trim($nom ?? '')));
+        $cle = $request->query->getString('saga');
+        $tomes = array_values(array_filter($livres, static fn (Livre $livre): bool => $normaliser($livre->getSaga()) === $cle && $cle !== ''));
+        if (!$tomes) throw $this->createNotFoundException('Saga introuvable pour cet auteur.');
+        $nom = $tomes[0]->getSaga();
+        $erreur = null;
+        $livreId = '';
+        $tome = '';
+        if ($request->isMethod('POST')) {
+            $nom = preg_replace('/\s+/u', ' ', trim($request->request->getString('nom')));
+            $livreId = $request->request->getString('livre');
+            $tome = $request->request->getString('tome');
+            $ajout = null;
+            foreach ($livres as $livre) {
+                if ((string) $livre->getId() === $livreId) $ajout = $livre;
+            }
+            if (!$this->isCsrfTokenValid('modifier_saga_'.$id.'_'.$cle, $request->request->getString('_token'))) {
+                $erreur = 'Session expirée. Actualise la page.';
+            } elseif ($nom === '' || mb_strlen($nom) > 255) {
+                $erreur = 'Renseignez un nom de saga de 255 caractères maximum.';
+            } elseif ($livreId !== '' && !$ajout) {
+                $erreur = 'Choisissez un livre de cet auteur.';
+            } elseif ($tome !== '' && (!ctype_digit($tome) || (int) $tome < 1 || (int) $tome > 100000)) {
+                $erreur = 'Le numéro du tome doit être compris entre 1 et 100000.';
+            } else {
+                foreach ($livres as $livre) {
+                    if ($normaliser($livre->getSaga()) === $normaliser($nom) && $normaliser($nom) !== $cle) {
+                        $erreur = 'Une saga porte déjà ce nom pour cet auteur.';
+                        break;
+                    }
+                }
+            }
+            if ($erreur === null) {
+                foreach ($tomes as $livre) $livre->setSaga($nom);
+                if ($ajout) {
+                    $ajout->setSaga($nom);
+                    if ($tome !== '') $ajout->setTome((int) $tome);
+                }
+                $em->flush();
+                return $this->redirectToRoute('app_auteur_fiche', ['id' => $id, 'saga' => $normaliser($nom), '_fragment' => 'auteur-panel-sagas']);
+            }
+        }
+        return $this->render('auteur/saga_modifier.html.twig', [
+            'auteur' => NomsAuteur::presenter($auteur), 'cleSaga' => $cle, 'nomSaga' => $nom,
+            'livres' => $livres, 'livreId' => $livreId, 'tome' => $tome, 'erreur' => $erreur,
+        ]);
+    }
+
     #[Route('/espace/mes-auteurs/{id}/modifier', name: 'app_auteur_modifier', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
     // Renomme la fiche existante : tous ses livres et les suggestions conservent le même identifiant d’auteur.
     public function modifier(int $id, Request $request, EntityManagerInterface $em): Response

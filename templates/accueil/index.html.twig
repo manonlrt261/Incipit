@@ -76,14 +76,26 @@
                         Aucune lecture terminée cette année.
                     </p>
                 {% else %}
+                    {% if edition %}<p class="accueil-auteurs-explication">En cas d’égalité, choisissez les auteurs à afficher. Les changements seront enregistrés en quittant le mode édition.</p>{% endif %}
                     <div class="accueil-grille-auteurs">
                         {% for auteur in auteurs %}
                             <div class="accueil-auteur">
-                                <h3>{{ auteur.nom_affichage }}</h3>
-                                <p>
-                                    {{ auteur.nombre_lectures }}
-                                    {{ auteur.nombre_lectures == 1 ? 'lecture' : 'lectures' }}
-                                </p>
+                                <a class="accueil-auteur-lien" {% if edition %}aria-disabled="true" tabindex="-1"{% else %}href="{{ path('app_accueil_auteur_lectures', {id: auteur.id}) }}"{% endif %}>
+                                    <h3>{{ auteur.nom_affichage }}</h3>
+                                    <p>{{ auteur.nombre_lectures }} {{ auteur.nombre_lectures == 1 ? 'lecture' : 'lectures' }}</p>
+                                </a>
+                                {% if edition %}
+                                    {# Propose uniquement les auteurs ayant le même nombre de lectures à cette place. #}
+                                    <label class="accueil-choix-auteur">Auteur à la position {{ loop.index }}
+                                        <select data-choix-auteur>
+                                            {% for candidat in auteursAnnuels %}
+                                                {% if candidat.nombre_lectures == auteur.nombre_lectures %}
+                                                    <option value="{{ candidat.id }}" {{ candidat.id == auteur.id ? 'selected' : '' }}>{{ candidat.nom_affichage }}</option>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </select>
+                                    </label>
+                                {% endif %}
                             </div>
                         {% endfor %}
                     </div>

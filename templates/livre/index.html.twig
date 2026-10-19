@@ -16,7 +16,7 @@
                 <input
                     type="search"
                     id="recherche-livre"
-                    placeholder="Rechercher un titre, un auteur, un ISBN..."
+                    placeholder="Rechercher un titre, un auteur, une saga, un ISBN..."
                     aria-label="Rechercher un livre"
                 >
                 <button type="submit" aria-label="Lancer la recherche" class="bouton-rechercher">
@@ -95,7 +95,7 @@
                         data-livre-id="{{ livre.id }}"
                         data-auteurs="{{ livre.auteurs|e('html_attr') }}"
                         data-date-ajout="{{ livre.date_creation ? livre.date_creation|date('U') : '' }}"
-                        data-recherche="{{ (livre.titre ~ ' ' ~ livre.sous_titre ~ ' ' ~ livre.auteurs ~ ' ' ~ livre.isbn13 ~ ' ' ~ livre.isbn10)|lower|e('html_attr') }}"
+                        data-recherche="{{ (livre.titre ~ ' ' ~ livre.saga ~ ' ' ~ livre.sous_titre ~ ' ' ~ livre.auteurs ~ ' ' ~ livre.isbn13 ~ ' ' ~ livre.isbn10)|lower|e('html_attr') }}"
                         data-genres="{{ livre.genres|e('html_attr') }}"
                         data-statut="{{ livre.statut|e('html_attr') }}"
                     >
@@ -148,10 +148,10 @@
         <button type="button" id="fermer-selection-pile" aria-label="Fermer">×</button>
     </header>
     <label for="pile-recherche-selection">Rechercher parmi mes livres</label>
-    <input id="pile-recherche-selection" type="search" placeholder="Un titre ou un auteur…">
+    <input id="pile-recherche-selection" type="search" placeholder="Un titre, un auteur ou une saga…">
     <div class="pile-selection-liste">
         {% for livre in livresDisponibles %}
-            <article data-selection-recherche="{{ (livre.titre ~ ' ' ~ livre.auteurs)|lower|e('html_attr') }}">
+            <article data-selection-recherche="{{ (livre.titre ~ ' ' ~ livre.auteurs ~ ' ' ~ livre.saga)|lower|e('html_attr') }}">
                 <div><h3>{{ livre.titre }}</h3><p>{{ livre.auteurs ?: 'Auteur non renseigné' }}</p></div>
                 <button type="button" data-pile-action="ajouter" data-livre-id="{{ livre.id }}">Ajouter à ma pile à lire</button>
             </article>

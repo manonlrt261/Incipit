@@ -94,6 +94,15 @@
     cursor: pointer;
 }
 
+/* Réduit les deux actions du compte en conservant une cible tactile confortable. */
+.profil-carte button[data-ouvrir-profil] {
+    width: fit-content;
+    max-width: 100%;
+    min-height: 40px;
+    padding: 8px 12px;
+    font-size: 14px;
+}
+
 .profil-carte form[data-profil-form] {
     display: grid;
     gap: 12px;
@@ -179,6 +188,34 @@
 .profil-visibilite-ligne span:not(.profil-etat) {
     color: #74675d;
     font-size: 14px;
+}
+
+/* Accès à l’édition dans un encadré distinct des réglages de visibilité. */
+.profil-mode-edition {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    color: var(--color-secondary);
+    text-decoration: none;
+}
+
+.profil-mode-edition img {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+}
+
+.profil-mode-edition span {
+    min-width: 0;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.profil-mode-edition:focus-visible {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 3px;
 }
 
 /* Interrupteurs de visibilité */

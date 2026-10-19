@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use Doctrine\DBAL\Connection;
 use App\Service\OrdreAccueil;
+use App\Service\ClassementAuteursAccueil;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -15,7 +16,7 @@ final class AccueilController extends AbstractController
     #[Route('/', name: 'app_accueil', methods: ['GET'])]
     #[Route('/espace/accueil/edition', name: 'app_accueil_edition', methods: ['GET'])]
     // Prépare les sections de l’accueil public en tenant compte de leurs réglages de visibilité.
-    public function index(Request $request, Connection $connection, \App\Service\VisibiliteAccueil $reglages, OrdreAccueil $ordre): Response
+    public function index(Request $request, Connection $connection, \App\Service\VisibiliteAccueil $reglages, OrdreAccueil $ordre, ClassementAuteursAccueil $classement): Response
     {
         $edition = $request->attributes->get('_route') === 'app_accueil_edition';
         if ($edition) {
@@ -30,26 +31,9 @@ final class AccueilController extends AbstractController
         // a obtenu la note maximale.
         $livres = $this->chargerLivresFavoris($connection);
 
-        // Les 5 auteurs ayant le plus de lectures terminées
-        // pendant l'année civile en cours.
-        $auteurs = $connection->fetchAllAssociative(
-            "SELECT a.id, a.nom_affichage,
-                    COUNT(DISTINCT s.id) AS nombre_lectures
-             FROM auteur a
-             INNER JOIN livre_auteur la ON la.auteur_id = a.id
-             INNER JOIN session_lecture s ON s.livre_id = la.livre_id
-             WHERE s.statut = :statut
-               AND s.date_fin >= :debut
-               AND s.date_fin < :fin
-             GROUP BY a.id, a.nom_affichage
-             ORDER BY nombre_lectures DESC, a.nom_affichage ASC
-             LIMIT 5",
-            [
-                'statut' => 'terminé',
-                'debut' => date('Y-01-01'),
-                'fin' => (date('Y') + 1) . '-01-01',
-            ]
-        );
+        // Prépare aussi les auteurs hors du top cinq pour pouvoir choisir parmi tous les ex æquo.
+        $auteursAnnuels = $classement->charger();
+        $auteurs = array_slice($auteursAnnuels, 0, 5);
 
         // Retient les cinq souhaits publics les plus récents, en excluant les achats et les souhaits privés.
         $wishlist = $connection->fetchAllAssociative(
@@ -74,14 +58,37 @@ final class AccueilController extends AbstractController
             'edition' => $edition,
             'livres' => array_slice($ordre->appliquer($livres, 'favoris'), 0, 5),
             'auteurs' => $auteurs,
+            'auteursAnnuels' => $edition ? $auteursAnnuels : [],
             'wishlist' => array_slice($ordre->appliquer($wishlist, 'wishlist'), 0, 5),
             'visibilite' => $visibilite,
         ]);
     }
 
+    #[Route('/auteurs/{id}/lectures', name: 'app_accueil_auteur_lectures', requirements: ['id' => '\d+'], methods: ['GET'])]
+    // Partage uniquement les lectures terminées cette année, en respectant la visibilité du classement public.
+    public function lecturesAuteur(int $id, Connection $connection, \App\Service\VisibiliteAccueil $reglages): Response
+    {
+        if (!$reglages->publique()['auteurs']) throw $this->createNotFoundException();
+        $auteur = $connection->fetchAssociative('SELECT id, nom_affichage FROM auteur WHERE id = ?', [$id]);
+        if (!$auteur) throw $this->createNotFoundException('Auteur introuvable.');
+        $lectures = $connection->fetchAllAssociative(
+            "SELECT l.id, l.titre, l.image_couverture, s.note, s.avis, s.date_fin
+             FROM session_lecture s
+             JOIN livre l ON l.id = s.livre_id
+             JOIN livre_auteur la ON la.livre_id = l.id
+             WHERE la.auteur_id = :auteur AND s.statut = :statut
+               AND s.date_fin >= :debut AND s.date_fin < :fin
+             ORDER BY s.date_fin ASC, s.id ASC",
+            ['auteur' => $id, 'statut' => 'terminé', 'debut' => date('Y-01-01'), 'fin' => (date('Y') + 1).'-01-01']
+        );
+        return $this->render('accueil/auteur_lectures.html.twig', [
+            'auteur' => $auteur, 'lectures' => $lectures, 'annee' => date('Y'),
+        ]);
+    }
+
     #[Route('/espace/accueil/ordre', name: 'app_accueil_ordre', methods: ['POST'])]
     // Sauvegarde les deux sélections publiques sans modifier les notes, les souhaits ni la visibilité.
-    public function enregistrerOrdre(Request $request, Connection $connection): JsonResponse
+    public function enregistrerOrdre(Request $request, Connection $connection, ClassementAuteursAccueil $classement): JsonResponse
     {
         $this->denyAccessUnlessGranted('ROLE_USER');
         $id = (int) $this->getUser()->getId();
@@ -90,10 +97,12 @@ final class AccueilController extends AbstractController
             return $this->json(['success' => false, 'message' => 'Session expirée. Actualise la page.'], 403);
         }
         $ordre = json_decode($request->request->getString('ordre'), true);
-        if (!is_array($ordre) || array_diff(array_keys($ordre), ['favoris', 'wishlist'])) {
+        if (!is_array($ordre) || array_diff(array_keys($ordre), ['favoris', 'wishlist', 'auteurs'])) {
             return $this->json(['success' => false, 'message' => 'Ordre invalide.'], 422);
         }
+        $auteursAnnuels = $classement->charger();
         $autorises = [
+            'auteurs' => array_column($auteursAnnuels, 'id'),
             'favoris' => array_column($this->chargerLivresFavoris($connection), 'id'),
             'wishlist' => $connection->fetchFirstColumn("SELECT l.id FROM souhait sh JOIN livre l ON l.id = sh.livre_id WHERE sh.statut = 'souhaité' AND sh.publique = 1 ORDER BY sh.date_ajout DESC, sh.id DESC"),
         ];
@@ -108,6 +117,15 @@ final class AccueilController extends AbstractController
             foreach ($ids as $livreId) {
                 if (!is_int($livreId) || !in_array($livreId, array_map('intval', $autorises[$section]), true)) {
                     return $this->json(['success' => false, 'message' => 'Les livres visibles ont changé. Recharge le mode édition.'], 409);
+                }
+            }
+            // Refuse les doublons et les choix qui feraient passer un auteur moins lu devant un autre.
+            if ($section === 'auteurs') {
+                $comptes = array_column($auteursAnnuels, 'nombre_lectures', 'id');
+                $attendus = array_map('intval', array_column(array_slice($auteursAnnuels, 0, 5), 'nombre_lectures'));
+                $choisis = array_map(static fn (int $auteurId): int => (int) $comptes[$auteurId], $ids);
+                if ($choisis !== $attendus) {
+                    return $this->json(['success' => false, 'message' => 'Le classement a changé. Recharge le mode édition pour choisir parmi les auteurs à égalité.'], 409);
                 }
             }
             // Depuis l’accueil, les cinq cartes visibles passent devant sans effacer l’ordre du reste de la liste.

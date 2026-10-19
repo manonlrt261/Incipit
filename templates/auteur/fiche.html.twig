@@ -23,12 +23,17 @@
                 {% if cle == 'sagas' %}
                     {# Filtre les sagas de cet auteur en conservant l’ordre numérique des tomes. #}
                     <label class="auteur-filtre-saga" for="auteur-saga">Saga
-                        <select id="auteur-saga"><option value="">Toutes les sagas</option>{% for valeur, nomSaga in sagas %}<option value="{{ valeur }}">{{ nomSaga }}</option>{% endfor %}</select>
+                        <select id="auteur-saga"><option value="">Toutes les sagas</option>{% for valeur, nomSaga in sagas %}<option value="{{ valeur }}" {{ sagaSelectionnee == valeur ? 'selected' : '' }}>{{ nomSaga }}</option>{% endfor %}</select>
                     </label>
+                    {# Les actions et la moyenne concernent uniquement la saga sélectionnée. #}
+                    <div id="auteur-saga-actions" hidden data-modifier-url="{{ path('app_auteur_saga_modifier', {id: auteur.id}) }}">
+                        <a class="auteurs-modifier" id="auteur-saga-modifier" href="#">Modifier la saga / Ajouter un livre</a>
+                        <p id="auteur-saga-moyenne" aria-live="polite"></p>
+                    </div>
                 {% endif %}
                 <div class="auteur-livres-grille">
                     {% for livre in onglet.livres %}
-                        <article class="auteur-livre" data-livre-id="{{ livre.id }}" {% if cle == 'sagas' %}data-saga="{{ livre.cle_saga|e('html_attr') }}"{% endif %} data-details-url="{{ path('app_auteur_livre_details', {id: auteur.id, livreId: livre.id}) }}" tabindex="0" role="button" aria-label="Voir les détails de {{ livre.titre }}">
+                        <article class="auteur-livre" data-livre-id="{{ livre.id }}" {% if cle == 'sagas' %}data-saga="{{ livre.cle_saga|e('html_attr') }}" data-note="{{ livre.note }}"{% endif %} data-details-url="{{ path('app_auteur_livre_details', {id: auteur.id, livreId: livre.id}) }}" tabindex="0" role="button" aria-label="Voir les détails de {{ livre.titre }}">
                             <div class="auteur-couverture">
                                 {% if livre.image_couverture %}
                                     <img src="{{ livre.image_couverture starts with 'http' or livre.image_couverture starts with '/' ? livre.image_couverture : '/' ~ livre.image_couverture }}" alt="Couverture de {{ livre.titre }}">

@@ -1208,6 +1208,7 @@ initialiserPage(ecouter => {
         article.dataset.recherche = [
             livre.titre,
             livre.sousTitre,
+            livre.saga,
             auteurs,
             livre.isbn13,
             livre.isbn10

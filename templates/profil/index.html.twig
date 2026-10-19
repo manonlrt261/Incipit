@@ -247,10 +247,15 @@
                     {% endfor %}
                 </form>
 
-                <p><a class="btn-primary" href="{{ path('app_accueil_edition') }}">Modifier l’emplacement des livres sur l’accueil</a></p>
                 <p id="profil-visibilite-erreur" class="profil-erreur" role="alert" hidden></p>
                 <p id="profil-visibilite-succes" class="profil-succes" role="status" hidden></p>
             </div>
+
+            {# Ouvre l’accueil en édition depuis un encadré entièrement cliquable. #}
+            <a class="profil-carte profil-mode-edition" href="{{ path('app_accueil_edition') }}">
+                <img src="{{ asset('images/modifier.png') }}" alt="">
+                <span>Passer en mode édition</span>
+            </a>
         </section>
 
         {# Envoie la déconnexion hors de Turbo pour laisser Symfony terminer la session et rediriger vers l’accueil public. #}

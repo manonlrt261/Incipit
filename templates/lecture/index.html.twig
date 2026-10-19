@@ -27,7 +27,7 @@
                 <input
                     type="search"
                     id="lectures-recherche"
-                    placeholder="Rechercher un titre ou un auteur..."
+                    placeholder="Rechercher un titre, un auteur ou une saga..."
                     aria-label="Rechercher un livre"
                 >
                 <button type="submit" aria-label="Lancer la recherche" class="bouton-rechercher">Rechercher</button>
@@ -61,7 +61,7 @@
         </div>
 
         {# Reprend les filtres et tris de la bibliothèque, en complément des compteurs par statut. #}
-        {% include 'components/_filtres_livres.html.twig' with {genres: genres, prefixe: 'lectures-'} only %}
+        {% include 'components/_filtres_livres.html.twig' with {genres: genres, prefixe: 'lectures-', avec_note: true} only %}
 
         <section
             class="lectures-statistiques"
@@ -190,10 +190,11 @@
                     data-livre-id="{{ livre.id }}"
                     data-statut="{{ statutFiltre }}"
                     data-statut-lecture="{{ livre.statut }}"
+                    data-note="{{ livre.note }}"
                     data-genres="{{ livre.genres|e('html_attr') }}"
                     data-auteurs="{{ livre.auteurs|e('html_attr') }}"
                     data-date-ajout="{{ livre.date_creation ? livre.date_creation|date('U') : '' }}"
-                    data-recherche="{{ (livre.titre ~ ' ' ~ livre.auteurs)|lower|e('html_attr') }}"
+                    data-recherche="{{ (livre.titre ~ ' ' ~ livre.auteurs ~ ' ' ~ livre.saga)|lower|e('html_attr') }}"
                     tabindex="0"
                     role="button"
                     aria-label="Voir les détails de {{ livre.titre }}"
@@ -283,7 +284,7 @@
 
             <div id="contenu-retires" class="bibliotheque-retires-liste">
                 {% for livre in livresRetires %}
-                    <article class="bibliotheque-livre-retire">
+                    <article class="bibliotheque-livre-retire" data-retire-details-url="{{ path('app_livre_retire_details', {id: livre.id}) }}" tabindex="0" role="button" aria-haspopup="dialog" aria-label="Voir les détails de {{ livre.titre }}">
                         {% if livre.image_couverture %}
                             <img
                                 src="{{ asset(livre.image_couverture) }}"
@@ -305,6 +306,8 @@
                 {% endfor %}
             </div>
         </section>
+        <div id="lectures-retire-details"></div>
+        <p id="lectures-retire-erreur" role="alert" hidden></p>
     </main>
 
 </div>

@@ -181,7 +181,7 @@ initialiserPage((ecouter) => {
             if (pret.dataset.contactId !== String(contact.id)) return;
             pret.dataset.contactPrenom = contact.prenom; pret.dataset.contactNom = contact.nom;
             pret.querySelector('.prets-emprunteur strong').textContent = nomContact(contact);
-            pret.dataset.recherche = `${pret.querySelector('h2').textContent} ${pret.querySelector('.prets-auteur').textContent} ${nomContact(contact)}`;
+            pret.dataset.recherche = `${pret.querySelector('h2').textContent} ${pret.querySelector('.prets-auteur').textContent} ${nomContact(contact)} ${pret.dataset.saga || ''}`;
         });
         if (contactPretId.value === String(contact.id)) saisieContact.value = nomContact(contact);
         filtrerPrets();
@@ -342,7 +342,7 @@ initialiserPage((ecouter) => {
         }
     });
 
-    // Combine la recherche par titre, auteur ou nom complet du contact avec les filtres et les tris existants.
+    // Combine la recherche par titre, saga, auteur ou nom complet du contact avec les filtres et les tris existants.
 
     const filtres = creerFiltresLivres({
         page, conteneur: liste, selecteur: '.prets-carte', recherche, ecouter,
@@ -476,13 +476,13 @@ initialiserPage((ecouter) => {
     const suggestions = document.getElementById('pret-livres-possedes');
     const choixLivres = [...suggestions.querySelectorAll('.prets-suggestion')];
 
-    // Propose les livres possédés dont le titre ou l’auteur correspond à la saisie du prêt.
+    // Propose les livres possédés dont le titre, l’auteur ou la saga correspond à la saisie du prêt.
     function rechercherLivres() {
         const texte = normaliser(titrePret.value);
         suggestions.hidden = !texte;
         let visibles = 0;
         choixLivres.forEach(bouton => {
-            bouton.hidden = !normaliser(`${bouton.dataset.titre} ${bouton.dataset.auteur}`).includes(texte);
+            bouton.hidden = !normaliser(`${bouton.dataset.titre} ${bouton.dataset.auteur} ${bouton.dataset.saga || ''}`).includes(texte);
             if (!bouton.hidden) visibles++;
         });
         document.getElementById('pret-suggestions-vide').hidden = visibles !== 0;

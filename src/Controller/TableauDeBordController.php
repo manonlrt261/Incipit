@@ -122,4 +122,26 @@ class TableauDeBordController extends AbstractController
             'genresFavoris' => $genresFavoris,
         ]);
     }
+    #[Route('/tableau-de-bord/genres/{id}/lectures', name: 'app_dashboard_genre_lectures', requirements: ['id' => '\d+'], methods: ['GET'])]
+    // Utilise le même périmètre que le podium : livres terminés, toutes années confondues, sans doublonner les relectures.
+    public function lecturesGenre(int $id, Connection $connection): Response
+    {
+        $genre = $connection->fetchAssociative('SELECT id, nom FROM genre WHERE id = ?', [$id]);
+        if (!$genre) throw $this->createNotFoundException('Genre introuvable.');
+        $livres = $connection->fetchAllAssociative(
+            "SELECT l.id, l.titre, l.image_couverture,
+                (SELECT GROUP_CONCAT(COALESCE(a.nom_affichage, CONCAT_WS(' ', a.prenom, a.nom)) ORDER BY a.nom_affichage SEPARATOR ', ')
+                 FROM livre_auteur la JOIN auteur a ON a.id = la.auteur_id WHERE la.livre_id = l.id) AS auteurs
+             FROM livre l
+             JOIN livre_genre lg ON lg.livre_id = l.id
+             WHERE lg.genre_id = :genre AND EXISTS (
+                 SELECT 1 FROM session_lecture s WHERE s.livre_id = l.id
+                 AND LOWER(s.statut) IN ('terminé', 'termine', 'terminés', 'termines')
+             )
+             ORDER BY l.titre ASC, l.id ASC",
+            ['genre' => $id]
+        );
+        return $this->render('tableau_de_bord/_lectures_genre.html.twig', ['genre' => $genre, 'livres' => $livres]);
+    }
+
 }

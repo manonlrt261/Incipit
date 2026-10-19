@@ -330,6 +330,7 @@ final class LivreModalController extends AbstractController
                     'id' => $livre->getId(),
                     'titre' => $livre->getTitre(),
                     'sousTitre' => $livre->getSousTitre(),
+                    'saga' => $livre->getSaga(),
                     'isbn13' => $livre->getIsbn13(),
                     'isbn10' => $livre->getIsbn10(),
                     'auteurs' => array_values($auteursNettoyes),

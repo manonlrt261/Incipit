@@ -11,6 +11,23 @@ initialiserPage(ecouter => {
     let depart = null;
     let pointeur = null;
 
+    // Autorise le remplacement uniquement parmi les ex æquo et évite d’afficher deux fois le même auteur.
+    const choixAuteurs = [...page.querySelectorAll('[data-choix-auteur]')];
+    function actualiserAuteurs() {
+        const selection = choixAuteurs.map(champ => champ.value);
+        choixAuteurs.forEach(champ => {
+            [...champ.options].forEach(option => {
+                option.disabled = option.value !== champ.value && selection.includes(option.value);
+            });
+            champ.closest('.accueil-auteur').querySelector('h3').textContent = champ.selectedOptions[0].textContent;
+        });
+    }
+    choixAuteurs.forEach(champ => ecouter(champ, 'change', () => {
+        actualiserAuteurs();
+        message.textContent = 'Auteur modifié. Quittez le mode édition pour enregistrer.';
+    }));
+    actualiserAuteurs();
+
     // Les mêmes cartes se déplacent au clavier ou après un appui prolongé, sans perdre leurs données.
     page.querySelectorAll('[data-ordre-section] [data-ordre-livre]').forEach(carte => {
         carte.tabIndex = 0;
@@ -91,6 +108,8 @@ initialiserPage(ecouter => {
         page.querySelectorAll('[data-ordre-section]').forEach(zone => {
             ordre[zone.dataset.ordreSection] = [...zone.querySelectorAll('[data-ordre-livre]')].map(carte => Number(carte.dataset.livreId));
         });
+        // Les pages de livres n’envoient pas cette section : les choix d’auteurs y sont préservés.
+        if (choixAuteurs.length) ordre.auteurs = choixAuteurs.map(champ => Number(champ.value));
         try {
             const reponse = await fetch(page.dataset.url, {
                 method: 'POST',

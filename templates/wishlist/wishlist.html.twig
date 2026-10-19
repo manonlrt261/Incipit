@@ -15,7 +15,7 @@
                 <input
                     id="wishlist-recherche"
                     type="search"
-                    placeholder="Rechercher un titre, un auteur, un ISBN..."
+                    placeholder="Rechercher un titre, un auteur, une saga, un ISBN..."
                     aria-label="Rechercher dans ma wishlist"
                 >
                 <button type="submit" aria-label="Lancer la recherche" class="bouton-rechercher">Rechercher</button>
@@ -68,7 +68,7 @@
                     data-auteurs="{{ auteurs|join(', ') }}"
                     data-statut-lecture="Pas commencé"
                     data-date-ajout="{{ souhait.dateAjout|date('U') }}"
-                    data-recherche="{{ livre.titre ~ ' ' ~ livre.sousTitre ~ ' ' ~ auteurs|join(' ') ~ ' ' ~ livre.isbn13 ~ ' ' ~ livre.isbn10 }}"
+                    data-recherche="{{ livre.titre ~ ' ' ~ livre.saga ~ ' ' ~ livre.sousTitre ~ ' ' ~ auteurs|join(' ') ~ ' ' ~ livre.isbn13 ~ ' ' ~ livre.isbn10 }}"
                     data-genres="{{ nomsGenres|join('|') }}"
                     data-token="{{ csrf_token('wishlist_' ~ souhait.id) }}"
                     data-acheter="{{ path('app_wishlist_action', {id: souhait.id, action: 'acheter'}) }}"

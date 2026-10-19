@@ -45,6 +45,7 @@ class PretController extends AbstractController
                 'id' => $pret->getId(),
                 'contactId' => $contact?->getId(),
                 'titre' => $livre?->getTitre() ?? 'Titre inconnu',
+                'saga' => $livre?->getSaga() ?? '',
                 'auteur' => $this->obtenirAuteurs($livre),
                 'genres' => $livre ? implode('|', array_map(static fn ($genre) => $genre->getNom(), $livre->getGenres()->toArray())) : '',
                 'prenomContact' => $prenom,

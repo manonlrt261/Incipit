@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+{% block title %}Modifier la saga | Incipit{% endblock %}
+{% block body %}
+<div class="espace-layout">
+    {% include 'components/_sidebar.html.twig' %}
+    <main class="espace-contenu bibliotheque page-auteurs">
+        <header class="bibliotheque-header">
+            <a class="auteurs-retour" href="{{ path('app_auteur_fiche', {id: auteur.id, saga: cleSaga}) }}">← Fiche de l’auteur</a>
+            <img src="{{ asset('images/incipit.png') }}" alt="Incipit" class="bibliotheque-logo">
+        </header>
+        <div class="bibliotheque-introduction"><div><h1 class="titre-page">Modifier la saga</h1><p class="sous-titre-page">{{ auteur.affichage }}</p></div></div>
+        {# Conserve les livres existants et applique le nouveau nom à tous les tomes de la saga. #}
+        <form class="auteur-formulaire" method="post" data-turbo="false">
+            <input type="hidden" name="_token" value="{{ csrf_token('modifier_saga_' ~ auteur.id ~ '_' ~ cleSaga) }}">
+            <label for="saga-nom">Nom de la saga</label>
+            <input id="saga-nom" name="nom" value="{{ nomSaga }}" maxlength="255" required>
+            <label for="saga-livre">Ajouter un livre de cet auteur (facultatif)</label>
+            <select id="saga-livre" name="livre">
+                <option value="">Ne pas ajouter de livre</option>
+                {% for livre in livres %}
+                    <option value="{{ livre.id }}" {{ livreId == livre.id ? 'selected' : '' }}>{{ livre.titre }}{% if livre.saga %} — {{ livre.saga }}{% endif %}</option>
+                {% endfor %}
+            </select>
+            <p>Le livre sélectionné sera rattaché à cette saga et quittera son ancienne saga s’il en avait une.</p>
+            <label for="saga-tome">Numéro du tome du livre ajouté (facultatif)</label>
+            <input id="saga-tome" name="tome" type="number" min="1" max="100000" step="1" value="{{ tome }}">
+            {% if erreur %}<p role="alert">{{ erreur }}</p>{% endif %}
+            <div class="auteur-formulaire-actions">
+                <a href="{{ path('app_auteur_fiche', {id: auteur.id, saga: cleSaga}) }}">Annuler</a>
+                <button type="submit">Enregistrer</button>
+            </div>
+        </form>
+    </main>
+</div>
+{% endblock %}

@@ -2,6 +2,7 @@
 {# Préserve les identifiants de chaque page et indique au JavaScript quelle date utiliser pour le tri. #}
 {% set prefixe = prefixe|default('') %}
 {% set mode_prets = mode_prets|default(false) %}
+{% set avec_note = avec_note|default(false) %}
 <form id="{{ prefixe ? prefixe ~ 'filtres' : 'bibliotheque-filtres' }}" data-filtres-livres data-champ-date="{{ mode_prets ? 'datePret' : 'dateAjout' }}" class="bibliotheque-filtres">
     <div class="bibliotheque-selects">
         <label class="bibliotheque-select">
@@ -58,14 +59,29 @@
             </select>
         </label>
 
+        {% if avec_note %}
+            {# Les tranches regroupent les décimales : 4 inclut toutes les notes de 4 à moins de 5. #}
+            <label class="bibliotheque-select">
+                <span class="sr-only">Note</span>
+                <select id="{{ prefixe }}filtre-note" data-filtre-note>
+                    <option value="">Note</option>
+                    <option value="asc">Note : ordre croissant</option>
+                    <option value="desc">Note : ordre décroissant</option>
+                    {% for note in 0..5 %}<option value="{{ note }}">{{ note == 5 ? '5/5' : note ~ ' à ' ~ note ~ ',99/5' }}</option>{% endfor %}
+                </select>
+            </label>
+    </div>
+    <div class="lectures-filtres-actions">
+        {% endif %}
         <button type="submit" class="bibliotheque-valider">
             Valider
         </button>
-    </div>
+    {% if not avec_note %}</div>{% endif %}
 
     {# Le JavaScript efface la recherche et les critères sans soumettre à nouveau la page. #}
     <button type="button" id="{{ prefixe }}reinitialiser-filtres" data-reinitialiser-filtres class="bibliotheque-reinitialiser">
         <span aria-hidden="true">↻</span>
         Réinitialiser les filtres
     </button>
+    {% if avec_note %}</div>{% endif %}
 </form>

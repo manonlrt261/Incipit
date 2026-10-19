@@ -26,7 +26,7 @@
                 <input
                     type="search"
                     id="prets-recherche"
-                    placeholder="Rechercher un livre, un auteur ou un contact..."
+                    placeholder="Rechercher un livre, une saga, un auteur ou un contact..."
                     aria-label="Rechercher un prêt par livre, auteur ou contact"
                 >
                 <button type="submit" aria-label="Lancer la recherche" class="bouton-rechercher">Rechercher</button>
@@ -78,7 +78,7 @@
                 aria-label="Liste de mes prêts"
             >
 
-                {# Le texte de recherche réunit titre, auteur et nom complet du contact ; son identifiant relie le prêt à la bonne personne. #}
+                {# Le texte de recherche réunit titre, saga, auteur et nom complet du contact ; son identifiant relie le prêt à la bonne personne. #}
                 {% for pret in prets %}
 
                     <article
@@ -90,7 +90,8 @@
                         data-contact-prenom="{{ pret.prenomContact|e('html_attr') }}"
                         data-contact-nom="{{ pret.nomContact|e('html_attr') }}"
                         data-date-pret="{{ pret.datePret }}"
-                        data-recherche="{{ (pret.titre ~ ' ' ~ pret.auteur ~ ' ' ~ pret.emprunteur)|lower|e('html_attr') }}"
+                        data-saga="{{ pret.saga }}"
+                        data-recherche="{{ (pret.titre ~ ' ' ~ pret.saga ~ ' ' ~ pret.auteur ~ ' ' ~ pret.emprunteur)|lower|e('html_attr') }}"
                     >
 
                         <div class="prets-informations">
@@ -282,7 +283,7 @@
             >
             {# Le JavaScript renseigne cet identifiant seulement lorsqu’un livre possédé est sélectionné. #}
             <input type="hidden" id="pret-livre-id" name="livre_id">
-            <small id="pret-recherche-aide">Recherchez un titre ou un auteur dans votre bibliothèque, ou saisissez un autre livre.</small>
+            <small id="pret-recherche-aide">Recherchez un titre, un auteur ou une saga dans votre bibliothèque, ou saisissez un autre livre.</small>
             <div id="pret-livres-possedes" class="prets-suggestions" aria-label="Livres de ma bibliothèque" hidden>
                 {# Prépare les suggestions et leurs noms d’auteurs sans répéter l’assemblage des noms dans chaque bouton. #}
                 {% for livre in livresPossedes %}
@@ -297,6 +298,7 @@
                         data-livre-id="{{ livre.id }}"
                         data-titre="{{ livre.titre }}"
                         data-auteur="{{ nomsAuteurs }}"
+                        data-saga="{{ livre.saga }}"
                     >
                         <strong>{{ livre.titre }}</strong>
                         <span>{{ nomsAuteurs ?: 'Auteur non renseigné' }}</span>
