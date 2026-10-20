@@ -46,8 +46,11 @@
             </button>
         </div>
 
+        {# Donne aux administrateurs accès à l’historique privé de la bibliothèque partagée. #}
+        <p><a href="{{ path('app_journal_activite') }}">Consulter le journal d’activité</a></p>
+
         <section id="profil-compte" role="tabpanel" aria-labelledby="profil-tab-compte">
-            {# Affiche l’adresse actuelle et propose sa modification après confirmation du mot de passe. #}
+            {# Affiche l’adresse de connexion du compte en lecture seule. #}
             <section class="profil-carte">
                 <header>
                     <img src="{{ asset('images/mail.png') }}" alt="">
@@ -57,53 +60,6 @@
                     </div>
                 </header>
 
-                <button
-                    type="button"
-                    data-ouvrir-profil="email"
-                    aria-controls="profil-form-email"
-                    aria-expanded="false"
-                >
-                    Modifier mon adresse e-mail
-                </button>
-
-                {# Le formulaire reste masqué jusqu’à son ouverture et est envoyé sans recharger la page. #}
-                <form
-                    id="profil-form-email"
-                    data-profil-form="email"
-                    action="{{ path('app_profil_email') }}"
-                    method="post"
-                    hidden
-                >
-                    <input type="hidden" name="_token" value="{{ csrf_token('profil_email') }}">
-
-                    <label for="profil-nouvel-email">Nouvelle adresse e-mail</label>
-                    <input
-                        id="profil-nouvel-email"
-                        type="email"
-                        name="email"
-                        autocomplete="email"
-                        maxlength="180"
-                        required
-                    >
-
-                    <label for="profil-email-password">Mot de passe actuel</label>
-                    <input
-                        id="profil-email-password"
-                        type="password"
-                        name="actuel"
-                        autocomplete="current-password"
-                        required
-                    >
-
-                    <div class="profil-actions">
-                        <button type="button" data-annuler-profil="email">Annuler</button>
-                        <button type="submit">Enregistrer</button>
-                    </div>
-                </form>
-
-                {# Affiche le résultat de la modification avec une annonce adaptée aux lecteurs d’écran. #}
-                <p id="profil-erreur-email" class="profil-erreur" role="alert" hidden></p>
-                <p id="profil-succes-email" class="profil-succes" role="status" hidden></p>
             </section>
 
             {# Recueille le mot de passe actuel et la confirmation ; leur vérification est effectuée côté serveur. #}
@@ -262,6 +218,7 @@
         {# Envoie la déconnexion hors de Turbo pour laisser Symfony terminer la session et rediriger vers l’accueil public. #}
         <footer class="profil-deconnexion">
             <form action="{{ path('app_logout') }}" method="post" data-turbo="false">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('logout') }}">
                 <button type="submit" class="bouton-deconnexion">Déconnexion</button>
             </form>
         </footer>

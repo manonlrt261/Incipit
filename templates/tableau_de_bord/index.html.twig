@@ -33,9 +33,11 @@
             </form>
 
             <div class="dashboard-header-actions">
-                <a href="{{ path('app_logout') }}" class="bouton-deconnexion">
-                    Déconnexion
-                </a>
+                {# La déconnexion exige une soumission volontaire avec le jeton de la session. #}
+                <form action="{{ path('app_logout') }}" method="post" data-turbo="false">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('logout') }}">
+                    <button type="submit" class="bouton-deconnexion">Déconnexion</button>
+                </form>
 
                 <img
                     src="{{ asset('images/incipit.png') }}"

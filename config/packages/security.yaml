@@ -27,10 +27,11 @@ security:
             logout:
                 path: app_logout
                 target: app_accueil
+                enable_csrf: true
 
     access_control:
-        - { path: ^/tableau-de-bord, roles: ROLE_USER }
-        - { path: ^/livre, roles: ROLE_USER }
+        # La bibliothèque est partagée entre administrateurs ; tous les parcours de gestion sont privés.
+        - { path: '^/(espace|livre|wishlist|mes-prets|tableau-de-bord)(/|$)', roles: ROLE_ADMIN }
 
 when@test:
     security:

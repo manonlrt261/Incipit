@@ -1,10 +1,8 @@
 <?php
 namespace App\Controller;
 
-use App\Entity\Utilisateur;
 use App\Service\VisibiliteAccueil;
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\{Request, Response, JsonResponse};
@@ -20,37 +18,6 @@ final class ProfilController extends AbstractController
     public function index(VisibiliteAccueil $visibilite): Response
     {
         return $this->render('profil/index.html.twig', ['visibilite' => $visibilite->publique()]);
-    }
-
-    #[Route('/espace/mon-profil/email', name: 'app_profil_email', methods: ['POST'])]
-    // Modifie l’adresse e-mail après validation du mot de passe actuel et de son unicité.
-    public function email(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $hasher): JsonResponse
-    {
-        if (!$this->jetonValide($request, 'profil_email')) return $this->sessionExpiree();
-        $champs = $request->request->all();
-        $email = $champs['email'] ?? '';
-        $motDePasse = $champs['actuel'] ?? '';
-        if (!is_string($email) || mb_strlen(trim($email)) > 180 || !filter_var(trim($email), FILTER_VALIDATE_EMAIL)) {
-            return $this->json(['success' => false, 'message' => 'Saisissez une adresse e-mail valide (180 caractères maximum).'], 422);
-        }
-        $user = $this->getUser();
-        if (!is_string($motDePasse) || $motDePasse === '' || strlen($motDePasse) > 4096 || !$hasher->isPasswordValid($user, $motDePasse)) {
-            return $this->json(['success' => false, 'message' => 'Le mot de passe actuel est incorrect.'], 422);
-        }
-        // Uniformise l’adresse et vérifie qu’aucun autre compte ne l’utilise.
-        $email = mb_strtolower(trim($email));
-        $existant = $em->getRepository(Utilisateur::class)->findOneBy(['email' => $email]);
-        if ($existant && $existant->getId() !== $user->getId()) {
-            return $this->json(['success' => false, 'message' => 'Cette adresse e-mail est déjà utilisée.'], 409);
-        }
-        try {
-            $user->setEmail($email)->setDateModification(new \DateTime());
-            $em->flush();
-            return $this->json(['success' => true, 'email' => $email, 'message' => 'Votre adresse e-mail a été modifiée.']);
-        } catch (UniqueConstraintViolationException) {
-            // La contrainte en base couvre aussi deux modifications concurrentes vers la même adresse.
-            return $this->json(['success' => false, 'message' => 'Cette adresse e-mail est déjà utilisée.'], 409);
-        }
     }
 
     #[Route('/espace/mon-profil/mot-de-passe', name: 'app_profil_mot_de_passe', methods: ['POST'])]

@@ -23,7 +23,7 @@ class SecurityController extends AbstractController
         ]);
     }
 
-    #[Route(path: '/logout', name: 'app_logout')]
+    #[Route(path: '/logout', name: 'app_logout', methods: ['POST'])]
     // Déclare la route de déconnexion ; Symfony Security intercepte la requête et termine la session.
     public function logout(): void
     {

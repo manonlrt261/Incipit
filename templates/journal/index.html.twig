@@ -1,0 +1,36 @@
+{% extends 'base.html.twig' %}
+{% block title %}Journal d’activité | Incipit{% endblock %}
+{% block stylesheets %}<link rel="stylesheet" href="{{ asset('styles/journal.css') }}">{% endblock %}
+{% block body %}
+<div class="espace-layout">
+    {% include 'components/_sidebar.html.twig' %}
+    <main class="espace-contenu journal">
+        <h1 class="titre-page">Journal d’activité</h1>
+        <p class="sous-titre-page">Retrouvez les actions effectuées dans votre bibliothèque.</p>
+        <a href="{{ path('app_espace_profil') }}">← Retour au profil</a>
+        {# Les filtres passent par une route privée ; la consultation ne permet aucune modification du journal. #}
+        <form method="get" class="journal-filtres">
+            <label>Action<select name="action"><option value="">Toutes les actions</option>{% for valeur, libelle in actions %}<option value="{{ valeur }}" {{ filtres.action == valeur ? 'selected' : '' }}>{{ libelle }}</option>{% endfor %}</select></label>
+            <label>Livre<input type="search" name="livre" maxlength="150" value="{{ filtres.livre }}" placeholder="Titre du livre"></label>
+            <label>Du<input type="date" name="debut" value="{{ filtres.debut }}"></label>
+            <label>Au<input type="date" name="fin" value="{{ filtres.fin }}"></label>
+            <button type="submit">Filtrer</button><a href="{{ path('app_journal_activite') }}">Réinitialiser</a>
+        </form>
+        {% if enAttente %}<p role="status">{{ enAttente }} événement(s) en attente de transmission.</p>{% endif %}
+        {% if erreur %}<p role="alert">{{ erreur }}</p>{% else %}
+            {# Le titre est une copie conservée lors de l’action, même si le livre a depuis été supprimé. #}
+            <ol class="journal-evenements">
+                {% for evenement in evenements %}
+                    <li><time datetime="{{ evenement.date|date('c') }}">{{ evenement.date|date('d/m/Y à H:i') }}</time><h2>{{ actions[evenement.action]|default('Action sur un livre') }}</h2><p>{{ evenement.livre.titre }}</p><p class="journal-compte">Par {{ evenement.administrateur.compte }}</p>
+                    {% if evenement.details.statut is defined %}<p>Statut : {{ evenement.details.statut }}{% if evenement.details.note is not null %} · Note : {{ evenement.details.note }}/5{% endif %}</p>{% endif %}</li>
+                {% else %}<li>Aucune activité pour ces critères.</li>{% endfor %}
+            </ol>
+            <nav class="journal-pagination" aria-label="Pagination du journal">
+                {% if page > 1 %}<a href="{{ path('app_journal_activite', filtres|merge({page: page - 1})) }}">← Précédent</a>{% endif %}
+                <span>Page {{ page }}</span>
+                {% if suite and page < 1000 %}<a href="{{ path('app_journal_activite', filtres|merge({page: page + 1})) }}">Suivant →</a>{% endif %}
+            </nav>
+        {% endif %}
+    </main>
+</div>
+{% endblock %}

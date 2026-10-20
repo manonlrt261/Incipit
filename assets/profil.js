@@ -45,13 +45,12 @@ initialiserPage((ecouter) => {
         const bouton = page.querySelector(`[data-ouvrir-profil="${type}"]`);
         bouton.hidden = false; bouton.setAttribute('aria-expanded', 'false');
     }
-    // Ouvre le formulaire demandé et préremplit l’adresse e-mail actuelle.
+    // Ouvre le formulaire de modification du mot de passe et place le focus dans le premier champ.
     page.querySelectorAll('[data-ouvrir-profil]').forEach(bouton => ecouter(bouton, 'click', () => {
         const type = bouton.dataset.ouvrirProfil;
         const form = document.getElementById(`profil-form-${type}`);
         masquerMessages(type); form.reset(); form.hidden = false;
         bouton.hidden = true; bouton.setAttribute('aria-expanded', 'true');
-        if (type === 'email') form.elements.namedItem('email').value = document.getElementById('profil-email-actuel').textContent.trim();
         form.querySelector('input:not([type="hidden"])').focus();
     }));
     // Annule les modifications et replace le focus sur le bouton d’ouverture.
@@ -61,7 +60,7 @@ initialiserPage((ecouter) => {
         fermerFormulaire(type); masquerMessages(type);
         page.querySelector(`[data-ouvrir-profil="${type}"]`).focus();
     }));
-    // Enregistre l’e-mail ou le mot de passe sans recharger la page et évite les doubles soumissions.
+    // Enregistre le mot de passe sans recharger la page et évite les doubles soumissions.
     page.querySelectorAll('[data-profil-form]').forEach(form => ecouter(form, 'submit', async event => {
         event.preventDefault();
         const type = form.dataset.profilForm;
@@ -75,7 +74,6 @@ initialiserPage((ecouter) => {
             const resultat = await reponse.json();
             if (!reponse.ok || !resultat.success) throw new Error(resultat.message || 'Impossible d’enregistrer les modifications.');
             if (!page.isConnected) return;
-            if (type === 'email') document.getElementById('profil-email-actuel').textContent = resultat.email;
             fermerFormulaire(type);
             const message = document.getElementById(`profil-succes-${type}`);
             message.textContent = resultat.message; message.hidden = false;
@@ -121,7 +119,7 @@ initialiserPage((ecouter) => {
     const nettoyer = () => {
         page.querySelectorAll('input[type="password"]').forEach(champ => { champ.value = ''; });
         page.querySelectorAll('button:disabled, input:disabled').forEach(champ => { champ.disabled = false; });
-        ['email', 'password'].forEach(fermerFormulaire);
+        fermerFormulaire('password');
     };
     // Nettoie les formulaires avant leur mise en cache ou le remplacement de la page par Turbo.
     ecouter(document, 'turbo:before-cache', nettoyer);
