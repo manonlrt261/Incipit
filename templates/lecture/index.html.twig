@@ -9,6 +9,7 @@
     {# Réutilise la navigation commune avec l’onglet Lectures actif. #}
     {% include 'components/_sidebar.html.twig' %}
 
+    {# Le jeton autorise les ajouts à la pile à lire depuis les cartes sans rechargement. #}
     <main
         id="page-mes-lectures"
         class="espace-contenu page-lectures"
@@ -164,24 +165,25 @@
             </div>
         </div>
 
+        {# Le JavaScript adapte la vue initiale à l’écran et conserve le choix manuel grille ou liste. #}
         <div id="bibliotheque-liste-zone">
 
-        <section
-            id="bibliotheque-livres"
-            class="lectures-livres vue-grille"
-            aria-label="Livres de ma collection"
-        >
+            <section
+                id="bibliotheque-livres"
+                class="lectures-livres vue-grille"
+                aria-label="Livres de ma collection"
+            >
 
             {# Associe les statuts affichés aux valeurs attendues par les filtres JavaScript. #}
-        {% set statutsFiltres = {
-            'En cours': 'en-cours',
-            'Terminé': 'termine',
-            'En pause': 'en-pause',
-            'Abandonné': 'abandonne'
-        } %}
+            {% set statutsFiltres = {
+                'En cours': 'en-cours',
+                'Terminé': 'termine',
+                'En pause': 'en-pause',
+                'Abandonné': 'abandonne'
+            } %}
 
-        {# Fournit les données de recherche et de statut aux cartes accessibles au clic et au clavier. #}
-        {% for livre in livres %}
+            {# Fournit les données de recherche et de statut aux cartes accessibles au clic et au clavier. #}
+            {% for livre in livres %}
 
                 {% set statutFiltre = statutsFiltres[livre.statut] ?? 'pas-commence' %}
 
@@ -222,7 +224,6 @@
 
                         <h2>{{ livre.titre }}</h2>
 
-
                         <p class="lectures-auteur">
                             {{ livre.auteurs ?: 'Auteur non renseigné' }}
                         </p>
@@ -251,12 +252,12 @@
 
             {% endfor %}
 
-        </section>
+            </section>
 
-        {# Ce message est affiché par le JavaScript lorsqu’aucun livre ne correspond aux filtres. #}
-        <p id="lectures-aucun-resultat" class="lectures-vide" hidden>
-            Aucun livre ne correspond à ce filtre.
-        </p>
+            {# Ce message est affiché par le JavaScript lorsqu’aucun livre ne correspond aux filtres. #}
+            <p id="lectures-aucun-resultat" class="lectures-vide" hidden>
+                Aucun livre ne correspond à ce filtre.
+            </p>
 
         </div>
 
@@ -306,6 +307,7 @@
                 {% endfor %}
             </div>
         </section>
+        {# Reçoit les détails du livre retiré chargé au clic, sans quitter les lectures. #}
         <div id="lectures-retire-details"></div>
         <p id="lectures-retire-erreur" role="alert" hidden></p>
     </main>

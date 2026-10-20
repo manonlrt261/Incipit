@@ -21,6 +21,7 @@
     box-shadow: 0 2px 8px #40261805;
 }
 
+/* Emplacement de couverture et image de remplacement */
 .wishlist-couverture {
     height: 160px;
     margin-bottom: 18px;
@@ -48,6 +49,7 @@
     overflow-wrap: anywhere;
 }
 
+/* Date d’ajout du souhait et son icône */
 .wishlist-date {
     display: flex;
     gap: 9px;
@@ -110,6 +112,7 @@
     display: none;
 }
 
+/* Résultat des actions sur les souhaits */
 #wishlist-message {
     color: #a42828;
 }

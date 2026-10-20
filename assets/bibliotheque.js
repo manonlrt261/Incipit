@@ -1,8 +1,8 @@
-// Gère la recherche, les filtres et le tri des livres de la bibliothèque.
+// Gère la recherche, les filtres et les modes d’affichage de la pile à lire.
 import './components/pile-a-lire.js';
 import { initialiserPage } from './components/initialisation-page.js';
 
-// Active les interactions uniquement lorsque la bibliothèque et ses filtres sont présents.
+// Active les interactions uniquement lorsque la liste de la pile à lire et ses filtres sont présents.
 function initialiserBibliotheque(ecouter) {
     const conteneur = document.getElementById('bibliotheque-livres');
 
@@ -175,12 +175,13 @@ function initialiserBibliotheque(ecouter) {
         window.location.search
     ).get('recherche');
 
+    // Reprend une recherche transmise dans le lien menant à cette page.
     if (rechercheURL) {
         recherche.value = rechercheURL;
     }
 
     // Intègre le livre ajouté dans les filtres, le tri et le compteur actuels.
-    ecouter(document, 
+    ecouter(document,
         'bibliotheque:livre-ajoute',
         appliquerFiltres
     );

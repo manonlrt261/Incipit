@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
     <head>
         {# Définit l’encodage du texte et adapte la largeur de chaque page à l’écran utilisé. #}
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        {# Chaque template enfant peut définir son propre titre dans l’onglet du navigateur. #}
-        <title>{% block title %}Welcome!{% endblock %}</title>
+        {# Chaque page définit son titre ; Incipit sert de titre par défaut. #}
+        <title>{% block title %}Incipit{% endblock %}</title>
 
         {# Affiche le logo Incipit dans l’onglet du navigateur sur toutes les pages. #}
         <link
@@ -16,10 +16,9 @@
         >
 
         {# Point d’extension pour les styles spécifiques ; les styles communs sont importés par app.js. #}
-        {% block stylesheets %}
-        {% endblock %}
+        {% block stylesheets %}{% endblock %}
 
-        {# Charge l’entrée JavaScript commune et conserve les blocs remplaçables par les templates enfants. #}
+        {# Charge app.js via AssetMapper ; les pages peuvent compléter les entrées dans le bloc importmap. #}
         {% block javascripts %}
             {% block importmap %}
                 {{ importmap('app') }}

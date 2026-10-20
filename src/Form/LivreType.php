@@ -15,6 +15,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class LivreType extends AbstractType
 {
+    // Définit les informations bibliographiques du formulaire Symfony classique d’ajout de livre.
     public function buildForm(
         FormBuilderInterface $builder,
         array $options
@@ -66,6 +67,7 @@ class LivreType extends AbstractType
                 ],
             ])
 
+            // Associe les genres existants au livre et autorise une sélection multiple ou vide.
             ->add('genres', EntityType::class, [
                 'class' => Genre::class,
                 'choice_label' => 'nom',
@@ -88,6 +90,7 @@ class LivreType extends AbstractType
                 ],
             ])
 
+            // Utilise un seul champ de date et fournit un objet DateTime à l’entité Livre.
             ->add('datePublication', DateType::class, [
                 'label' => 'Date de publication',
                 'required' => false,
@@ -114,10 +117,10 @@ class LivreType extends AbstractType
             ->add('imageCouverture', TextType::class, [
                 'label' => 'URL de la couverture',
                 'required' => false,
-            ])
-        ;
+            ]);
     }
 
+    // Relie les champs du formulaire aux propriétés de l’entité Livre.
     public function configureOptions(
         OptionsResolver $resolver
     ): void {

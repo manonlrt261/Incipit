@@ -103,6 +103,7 @@
     font-size: 14px;
 }
 
+/* Champs de modification du compte révélés à la demande */
 .profil-carte form[data-profil-form] {
     display: grid;
     gap: 12px;
@@ -143,6 +144,7 @@
     display: none !important;
 }
 
+/* Repères au clavier des réglages du profil */
 .profil button:focus-visible,
 .profil input:focus-visible {
     outline: 2px solid var(--color-secondary);
@@ -277,6 +279,7 @@
     }
 }
 
+/* Disposition verticale du profil et de sa déconnexion */
 .profil {
     display: flex;
     flex-direction: column;

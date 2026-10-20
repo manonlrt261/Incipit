@@ -11,10 +11,12 @@ initialiserPage(ecouter => {
         const alphabet = new Intl.Collator('fr', { sensitivity: 'base', numeric: true });
         // Ignore les accents et les majuscules, comme les autres recherches de livres.
         const normaliser = texte => texte.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('fr').trim();
+        // Combine la recherche par auteur ou saga avec le tri, puis actualise le compteur.
         function filtrer() {
+            const texte = normaliser(recherche.value);
             let nombre = 0;
             cartes.forEach(carte => {
-                carte.hidden = !normaliser(`${carte.dataset.auteurNom} ${carte.dataset.sagas || ''}`).includes(normaliser(recherche.value));
+                carte.hidden = !normaliser(`${carte.dataset.auteurNom} ${carte.dataset.sagas || ''}`).includes(texte);
                 if (!carte.hidden) nombre++;
             });
             // Le dernier menu choisi pilote le tri sans effacer la recherche.
@@ -68,6 +70,11 @@ initialiserPage(ecouter => {
         }
         ecouter(sagaRecherche, 'input', () => { choix.value = ''; rechercherLivre(); });
         ecouter(sagaRecherche, 'focus', rechercherLivre);
+        ecouter(document.getElementById('saga-rechercher-livre'), 'click', rechercherLivre);
+        ecouter(sagaRecherche, 'keydown', event => {
+            if (event.key === 'Enter') { event.preventDefault(); rechercherLivre(); }
+        });
+        // Retient l’identifiant du livre choisi pour le rattacher à la saga lors de l’enregistrement.
         ecouter(resultats, 'click', event => {
             const bouton = event.target.closest('[data-saga-livre-id]');
             if (!bouton) return;

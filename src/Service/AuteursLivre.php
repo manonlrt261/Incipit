@@ -31,8 +31,9 @@ final class AuteursLivre
     public function associer(Livre $livre, array $noms): void
     {
         $livre->getAuteurs()->clear();
+        $repository = $this->entityManager->getRepository(Auteur::class);
         foreach ($noms as $nom) {
-            $auteur = $this->entityManager->getRepository(Auteur::class)->createQueryBuilder('a')
+            $auteur = $repository->createQueryBuilder('a')
                 ->where('LOWER(TRIM(a.nomAffichage)) = :nom')->setParameter('nom', mb_strtolower($nom))
                 ->orderBy('a.id', 'ASC')->setMaxResults(1)->getQuery()->getOneOrNullResult();
             if (!$auteur) {

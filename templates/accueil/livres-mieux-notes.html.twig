@@ -3,6 +3,7 @@
 {% block title %}Livres les mieux notés - Incipit{% endblock %}
 
 {% block body %}
+{# Les attributs d’édition permettent au script de sauvegarder les choix avant de revenir au profil. #}
 <div class="accueil" {% if edition|default(false) %}id="edition-accueil" data-url="{{ path('app_accueil_ordre') }}" data-token="{{ csrf_token('ordre_accueil') }}" data-retour="{{ path('app_espace_profil') }}#visibilite"{% endif %}>
     {% include 'accueil/_edition_commandes.html.twig' %}
 

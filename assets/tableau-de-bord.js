@@ -1,4 +1,4 @@
-// Permet d’afficher ou de masquer les listes du tableau de bord indépendamment.
+// Gère le repli des sections du tableau de bord et la consultation des livres lus par genre.
 import { initialiserPage } from './components/initialisation-page.js';
 
 initialiserPage((ecouter) => {
@@ -14,6 +14,7 @@ initialiserPage((ecouter) => {
         requeteGenre?.abort();
     });
     ecouter(document.getElementById('dashboard-genre-fermer'), 'click', () => modaleGenre.close());
+    // Charge les lectures du genre choisi et ignore les réponses d’une sélection précédente.
     ecouter(page, 'click', async event => {
         const bouton = event.target.closest('[data-genre-url]');
         if (!bouton) return;

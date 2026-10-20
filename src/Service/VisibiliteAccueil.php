@@ -7,6 +7,7 @@ final class VisibiliteAccueil
 {
     public function __construct(private readonly Connection $connexion) {}
 
+    // Lit les réglages du compte ; chaque section reste visible si aucun réglage n’a encore été enregistré.
     public function pourUtilisateur(int $id): array
     {
         $ligne = $this->connexion->fetchAssociative('SELECT afficher_wishlist, afficher_auteurs_favoris, afficher_livres_favoris FROM parametre_confidentialite WHERE utilisateur_id = ?', [$id]);
@@ -17,6 +18,7 @@ final class VisibiliteAccueil
         ];
     }
 
+    // Applique à l’accueil public les réglages du premier compte créé.
     public function publique(): array
     {
         // L’accueil représente la bibliothèque unique du compte propriétaire initial.

@@ -2,7 +2,6 @@
 import { initialiserPage } from './components/initialisation-page.js';
 import { creerFiltresLivres } from './components/filtres-livres.js';
 
-
 initialiserPage((ecouter) => {
     // Les fiches privées et publiques utilisent les mêmes interactions, sans nouvel appel réseau.
     ecouter(document, 'click', event => {

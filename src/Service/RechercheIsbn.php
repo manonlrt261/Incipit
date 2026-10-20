@@ -41,7 +41,7 @@ final class RechercheIsbn
                     $livreRetenu['authors'] = $auteurs;
                 }
                 if ($livreRetenu['authors']) return ['livre' => $livreRetenu, 'source' => $sourceRetenue];
-            } catch (\Symfony\Contracts\HttpClient\Exception\ExceptionInterface | \UnexpectedValueException $exception) {
+            } catch (\Symfony\Contracts\HttpClient\Exception\ExceptionInterface | \UnexpectedValueException) {
                 $erreurs++;
             }
         }
@@ -67,6 +67,7 @@ final class RechercheIsbn
         return $json ? $reponse->toArray() : $reponse->getContent();
     }
 
+    // Récupère la notice Open Library, dont le format sert de référence au formulaire.
     private function openLibrary(string $isbn): ?array
     {
         $donnees = $this->requete('https://openlibrary.org/api/books', [
@@ -135,6 +136,7 @@ final class RechercheIsbn
         if ($xpath->evaluate('count(//srw:diagnostic | //*[local-name()="diagnostic"])') > 0) {
             throw new \UnexpectedValueException('Recherche BnF indisponible.');
         }
+        // Extrait les champs bibliographiques non vides de la réponse Dublin Core.
         $valeurs = static function (string $champ) use ($xpath): array {
             $resultats = [];
             foreach ($xpath->query('//srw:recordData//dc:'.$champ) as $noeud) {

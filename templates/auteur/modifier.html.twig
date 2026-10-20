@@ -16,7 +16,10 @@
             <input id="auteur-prenom" name="prenom" value="{{ auteur.prenom }}" maxlength="255" autocomplete="off">
             <label for="auteur-nom">Nom</label>
             <input id="auteur-nom" name="nom" value="{{ auteur.nom }}" maxlength="255" required autocomplete="off">
-            {% if erreur %}<p role="alert">{{ erreur }}</p>{% endif %}
+            {# Affiche le refus du serveur en conservant les prénom et nom saisis. #}
+            {% if erreur %}
+                <p role="alert">{{ erreur }}</p>
+            {% endif %}
             <div class="auteur-formulaire-actions"><a href="{{ path('app_auteur_fiche', {id: auteur.id}) }}">Annuler</a><button type="submit">Enregistrer</button></div>
         </form>
     </main>

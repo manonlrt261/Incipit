@@ -20,7 +20,7 @@ final class DonneesLecture
             throw new \InvalidArgumentException('La note doit être comprise entre 0 et 5, par demi-étoile.');
         }
         $dates = ['dateDebut' => null, 'dateFin' => null];
-        foreach ($dates as $champ => $_) {
+        foreach (array_keys($dates) as $champ) {
             $texte = trim($request->request->getString($champ));
             // Ignore les dates devenues sans objet après un changement de statut.
             if ($texte === '' || in_array($statut, ['Pas commencé', 'À lire'], true)

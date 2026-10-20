@@ -12,7 +12,7 @@ final class StatistiquesController extends AbstractController
 {
     #[Route('/espace/mes-statistiques', name: 'app_espace_statistiques', methods: ['GET'])]
     // Calcule les statistiques de l’année choisie et renvoie soit la page complète, soit les graphiques actualisés.
-    public function index(Request $request, StatistiquesLecture $statistiques): Response
+    public function index(Request $request, StatistiquesLecture $statistiques, \App\Service\BibliothequePartagee $bibliotheque): Response
     {
         // Encadre le choix de l’année autour de l’année courante dans le fuseau de Paris.
         $courante = (int) (new \DateTimeImmutable('now', new \DateTimeZone('Europe/Paris')))->format('Y');
@@ -20,7 +20,7 @@ final class StatistiquesController extends AbstractController
         if (!is_string($valeur) || !preg_match('/^\d{4}$/', $valeur) || (int) $valeur < 1900 || (int) $valeur > $courante + 1) {
             return $this->json(['success' => false, 'message' => 'Année invalide.'], 400);
         }
-        $donnees = $statistiques->calculer((int) $valeur, $this->getUser()->getId());
+        $donnees = $statistiques->calculer((int) $valeur, $bibliotheque->proprietaireId());
         // Renvoie seulement les graphiques pour permettre le changement d’année sans rechargement.
         if ($request->isXmlHttpRequest()) {
             return $this->json(['success' => true, 'html' => $this->renderView('statistiques/_graphiques.html.twig', $donnees)]);
@@ -28,9 +28,10 @@ final class StatistiquesController extends AbstractController
         return $this->render('statistiques/index.html.twig', $donnees);
     }
     #[Route('/espace/mes-statistiques/objectif', name: 'app_statistiques_objectif', methods: ['POST'])]
-    // Valide et enregistre l’objectif annuel, puis renvoie les graphiques avec la progression mise à jour.
-    public function enregistrerObjectif(Request $request, \Doctrine\DBAL\Connection $connexion, StatistiquesLecture $statistiques): JsonResponse
+    // Enregistre l’objectif annuel partagé, puis renvoie les graphiques avec la progression mise à jour.
+    public function enregistrerObjectif(Request $request, \Doctrine\DBAL\Connection $connexion, StatistiquesLecture $statistiques, \App\Service\BibliothequePartagee $bibliotheque): JsonResponse
     {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
         // Vérifie que la modification de l’objectif provient du formulaire prévu.
         $jeton = $request->request->get('_token');
         if (!is_string($jeton) || !$this->isCsrfTokenValid('modifier_objectif', $jeton)) {
@@ -52,9 +53,9 @@ final class StatistiquesController extends AbstractController
             // La clé utilisateur/année garantit un seul objectif même si deux envois se croisent.
             $connexion->executeStatement(
                 'INSERT INTO objectif_annuel (utilisateur_id, annee, nombre_livres) VALUES (:utilisateur, :annee, :nombre) ON DUPLICATE KEY UPDATE nombre_livres = :nouvelleValeur',
-                ['utilisateur' => $this->getUser()->getId(), 'annee' => (int) $annee, 'nombre' => (int) $nombre, 'nouvelleValeur' => (int) $nombre]
+                ['utilisateur' => $bibliotheque->proprietaireId(), 'annee' => (int) $annee, 'nombre' => (int) $nombre, 'nouvelleValeur' => (int) $nombre]
             );
-            $donnees = $statistiques->calculer((int) $annee, $this->getUser()->getId());
+            $donnees = $statistiques->calculer((int) $annee, $bibliotheque->proprietaireId());
             $html = $this->renderView('statistiques/_graphiques.html.twig', $donnees);
             $connexion->commit();
             return $this->json(['success' => true, 'objectif' => (int) $nombre, 'annee' => (int) $annee, 'html' => $html]);

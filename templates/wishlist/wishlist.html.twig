@@ -8,7 +8,7 @@
     {% include 'components/_sidebar.html.twig' %}
 
     <main id="page-wishlist" class="espace-contenu bibliotheque wishlist">
-        {# Filtre les livres souhaités par titre, auteur ou ISBN sans recharger la page. #}
+        {# Filtre les livres souhaités par titre, auteur, saga ou ISBN sans recharger la page. #}
         <header class="bibliotheque-header">
             <form id="wishlist-recherche-form" class="bibliotheque-recherche" role="search">
                 <img src="{{ asset('images/rechercher.png') }}" alt="">
@@ -46,17 +46,11 @@
                 {% set livre = souhait.livre %}
 
                 {# Prépare les noms d’auteurs pour l’affichage et les noms de genres utilisés par les filtres. #}
-                {% set auteurs = [] %}
-                {% for auteur in livre.auteurs %}
-                    {% set auteurs = auteurs|merge([
-                        auteur.nomAffichage ?: (auteur.prenom ~ ' ' ~ auteur.nom)|trim
-                    ]) %}
-                {% endfor %}
+                {% set auteurs = livre.auteurs
+                    |map(auteur => auteur.nomAffichage ?: (auteur.prenom ~ ' ' ~ auteur.nom)|trim)
+                %}
 
-                {% set nomsGenres = [] %}
-                {% for genre in livre.genres %}
-                    {% set nomsGenres = nomsGenres|merge([genre.nom]) %}
-                {% endfor %}
+                {% set nomsGenres = livre.genres|map(genre => genre.nom) %}
 
                 {# Transmet au JavaScript les données de recherche, le tri, les routes d’action et le jeton du souhait. #}
                 <article

@@ -55,17 +55,21 @@
         </main>
     </div>
 
-    {# Affiche les sessions du mois choisi sans quitter les statistiques. #}
+    {# Affiche les sessions du mois ou de l’année choisie sans quitter les statistiques. #}
     <dialog id="stats-mois-modal" class="stats-mois-modal" aria-labelledby="stats-mois-modal-titre">
-        <header><h2 id="stats-mois-modal-titre">Lectures du mois</h2><button type="button" id="stats-mois-fermer" aria-label="Fermer">×</button></header>
+        <header>
+            <h2 id="stats-mois-modal-titre">Lectures du mois</h2>
+            {% include 'components/_bouton_fermer.html.twig' with {id: 'stats-mois-fermer'} only %}
+        </header>
         <div id="stats-mois-liste"></div>
     </dialog>
 
     {# Fenêtre de consultation de l’objectif de l’année sélectionnée, avec passage en modification au clic sur le crayon. #}
     <dialog id="stats-objectif-modal" class="stats-modale" aria-labelledby="stats-objectif-titre">
-        <h2 id="stats-objectif-titre">
-            Mon objectif pour <span id="stats-objectif-annee"></span>
-        </h2>
+        <header class="stats-modale-entete">
+            <h2 id="stats-objectif-titre">Mon objectif pour <span id="stats-objectif-annee"></span></h2>
+            {% include 'components/_bouton_fermer.html.twig' with {id: 'stats-fermer-objectif'} only %}
+        </header>
         <p id="stats-objectif-description"></p>
         <div id="stats-objectif-affichage" class="stats-objectif-affichage">
             <div>
@@ -107,6 +111,5 @@
         {# Affiche le résultat de l’enregistrement sans fermer la fenêtre ni perdre la saisie. #}
         <p id="stats-objectif-erreur" role="alert" hidden></p>
         <p id="stats-objectif-succes" role="status" hidden></p>
-        <button type="button" id="stats-fermer-objectif">Fermer</button>
     </dialog>
 {% endblock %}

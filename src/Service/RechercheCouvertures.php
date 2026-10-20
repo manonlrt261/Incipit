@@ -42,14 +42,15 @@ final class RechercheCouvertures
                     'timeout' => 10,
                     'max_duration' => 20,
                 ]);
-                if ($reponse->getStatusCode() === 429) {
+                $statut = $reponse->getStatusCode();
+                if ($statut === 429) {
                     throw new \RuntimeException('Le quota de recherche de couvertures est atteint. Réessaie plus tard ou importe une image.', 429);
                 }
-                if ($reponse->getStatusCode() === 401 || $reponse->getStatusCode() === 403) {
+                if ($statut === 401 || $statut === 403) {
                     throw new \RuntimeException('La clé SerpApi doit être vérifiée sur le serveur.', 503);
                 }
                 $donnees = $reponse->toArray();
-            } catch (ExceptionInterface $exception) {
+            } catch (ExceptionInterface) {
                 // Ne transmet jamais une erreur du fournisseur qui pourrait contenir l’URL avec la clé.
                 throw new \RuntimeException('La recherche de couvertures est momentanément indisponible.', 502);
             }
@@ -75,6 +76,7 @@ final class RechercheCouvertures
         });
     }
 
+    // Accepte les URL HTTPS sans identifiant utilisateur et exclut toute URL contenant la clé du fournisseur.
     private function urlImageValide(mixed $url): bool
     {
         return is_string($url) && strlen($url) <= 2048

@@ -213,6 +213,7 @@ initialiserPage(ecouter => {
     // Actualise le résumé des genres lorsqu’une case change.
     ecouter(optionsGenres, 'change', actualiserGenres);
 
+    // Referme le menu des genres lorsque le clic a lieu en dehors de celui-ci.
     ecouter(document, 'click', event => {
         if (event.target instanceof Element && !event.target.closest('.modal-genres-dropdown')) {
             fermerGenres();
@@ -257,6 +258,7 @@ initialiserPage(ecouter => {
         return ligne;
     }
 
+    // Recrée les champs sans supprimer la liste partagée des suggestions qui peut se trouver dans une ligne.
     function afficherChampsAuteurs(noms) {
         if (!listeAuteurs) return;
         const valeurs = noms.length ? noms.slice(0, 50) : [''];
@@ -443,7 +445,7 @@ initialiserPage(ecouter => {
                 renseignerChamp('nombrePages', livre.number_of_pages);
             }
 
-            // Complète les dates partielles avec un mois et un jour pour remplir le champ de date.
+            // Accepte seulement une date complète et valide pour remplir le champ de publication.
             const date = livre.publish_date;
 
             if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
@@ -629,9 +631,7 @@ initialiserPage(ecouter => {
 
             // Corrige aussi le miroir éventuellement appliqué en ligne par la bibliothèque.
             const reglages = scanner.getRunningTrackSettings?.() || {};
-            const mobile = navigator.userAgentData?.mobile
-                || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '')
-                || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+            const mobile = appareilMobile();
             const miroir = !mobile && reglages.facingMode !== 'environment';
             const video = document.querySelector('#modal-lecteur-isbn video');
             if (video) video.style.transform = miroir ? 'scaleX(-1)' : 'none';
@@ -1128,18 +1128,10 @@ initialiserPage(ecouter => {
                 ecouter(bouton, 'click', () => {
                     const urlCouverture = livre.url;
 
-                    if (champImageCouverture) {
-                        champImageCouverture.value = urlCouverture;
-                    }
-
                     couvertureSelectionnee = null;
                     gestionnaireCouverture.afficherURL(urlCouverture, livre.titre);
 
-                    // Une couverture en ligne remplace le fichier local.
-                    if (fichierCouverture) {
-                        fichierCouverture.value = '';
-                    }
-
+                    // Le gestionnaire efface le fichier importé ; efface aussi la capture native du téléphone.
                     if (photoCouverture) {
                         photoCouverture.value = '';
                     }
@@ -1179,6 +1171,7 @@ initialiserPage(ecouter => {
         }
     });
 
+    // Referme le choix de couverture lorsqu’une autre partie du formulaire est activée.
     ecouter(document, 'click', event => {
         if (event.target instanceof Element && !event.target.closest('.modal-couverture-zone')) {
             fermerOptionsCouverture();
@@ -1331,6 +1324,7 @@ initialiserPage(ecouter => {
     ecouter(boutonFermer, 'click', fermer);
     ecouter(boutonAnnuler, 'click', fermer);
 
+    // Réserve la fermeture aux boutons afin d’exécuter le nettoyage des caméras et du formulaire.
     ecouter(modal, 'cancel', event => {
         event.preventDefault();
     });

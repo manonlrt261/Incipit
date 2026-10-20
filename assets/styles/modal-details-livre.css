@@ -44,6 +44,7 @@
     font-weight: 700;
 }
 
+/* Modification de la fiche et retrait de la collection */
 .details-livre-actions {
     display: flex;
     flex-wrap: wrap;
@@ -348,113 +349,9 @@
     position: relative;
 }
 
-/* Menu de modification de la couverture */
-#details-options-couverture {
-    position: absolute;
-    top: calc(100% - 10px);
-    left: 0;
-    z-index: 20;
-    width: 100%;
-    padding: 7px;
-    background: #ffffff;
-    border: 1px solid #e5dcd5;
-    border-radius: 12px;
-    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.12);
-}
-
-#details-options-couverture[hidden] {
-    display: none;
-}
-
-#details-options-couverture button {
-    display: block;
-    width: 100%;
-    padding: 12px 11px;
-    border: none;
-    border-radius: 8px;
-    background: transparent;
-    color: #252525;
-    font: inherit;
-    font-size: 14px;
-    text-align: left;
-    line-height: 1.35;
-    cursor: pointer;
-}
-
-#details-options-couverture button:hover {
-    background: #f5f0eb;
-}
-
-/* Recherche d’une couverture en ligne */
-#details-recherche-couverture-zone {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    width: 100%;
-    margin-top: 6px;
-}
-
-#details-recherche-couverture-zone[hidden] {
-    display: none;
-}
-
-#details-recherche-couverture-zone label {
-    font-size: 14px;
-    font-weight: 600;
-    color: #795039;
-}
-
-#details-recherche-couverture-input {
-    box-sizing: border-box;
-    width: 100%;
-    min-width: 0;
-    padding: 12px;
-    border: 1px solid #dfd5cc;
-    border-radius: 8px;
-    background: #ffffff;
-    font: inherit;
-    font-size: 13px;
-}
-
-#details-recherche-couverture-zone .modal-recherche-couverture-formulaire {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    width: 100%;
-}
-
-#details-lancer-recherche-couverture,
-#details-fermer-recherche-couverture {
-    box-sizing: border-box;
-    width: 100%;
-    padding: 11px 12px;
-    border: 1px solid #946b52;
-    border-radius: 8px;
-    background: #eee1d5;
-    color: #795039;
-    font: inherit;
-    font-size: 14px;
-    cursor: pointer;
-}
-
-#details-lancer-recherche-couverture:hover,
-#details-fermer-recherche-couverture:hover {
-    background: #e5d2c2;
-}
-
-#details-recherche-couverture-message {
-    margin: 4px 0;
-    font-size: 13px;
-    line-height: 1.4;
-}
-
-#details-resultats-couvertures:empty {
-    display: none;
-}
-
-#details-fermer-recherche-couverture {
-    margin-top: 20px;
-}
+/* =======================================
+   AJOUT ET MODIFICATION D’UNE SESSION
+   ======================================= */
 
 /* Ajout d’une session de lecture */
 .details-formulaire-lecture {
@@ -476,6 +373,7 @@
     color: var(--secondary);
 }
 
+/* Disposition des champs d’une session de lecture */
 .details-lecture-grille {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));

@@ -38,7 +38,6 @@
                     <option value="Abandonné">Abandonné</option>
                 </select>
             </label>
-
         {% endif %}
 
         <label class="bibliotheque-select">
@@ -67,21 +66,28 @@
                     <option value="">Note</option>
                     <option value="asc">Ordre croissant</option>
                     <option value="desc">Ordre décroissant</option>
-                    {% for note in 0..5 %}<option value="{{ note }}">{{ note }}*</option>{% endfor %}
+                    {% for note in 0..5 %}
+                        <option value="{{ note }}">{{ note }}*</option>
+                    {% endfor %}
                 </select>
             </label>
+        {# Avec le filtre de note, les deux actions passent ensemble sous les menus. #}
     </div>
     <div class="lectures-filtres-actions">
         {% endif %}
         <button type="submit" class="bibliotheque-valider">
             Valider
         </button>
-    {% if not avec_note %}</div>{% endif %}
+    {% if not avec_note %}
+    </div>
+    {% endif %}
 
     {# Le JavaScript efface la recherche et les critères sans soumettre à nouveau la page. #}
     <button type="button" id="{{ prefixe }}reinitialiser-filtres" data-reinitialiser-filtres class="bibliotheque-reinitialiser">
         <span aria-hidden="true">↻</span>
         Réinitialiser les filtres
     </button>
-    {% if avec_note %}</div>{% endif %}
+    {% if avec_note %}
+    </div>
+    {% endif %}
 </form>

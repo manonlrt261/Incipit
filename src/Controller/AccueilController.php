@@ -20,10 +20,7 @@ final class AccueilController extends AbstractController
     {
         $edition = $request->attributes->get('_route') === 'app_accueil_edition';
         if ($edition) {
-            $this->denyAccessUnlessGranted('ROLE_USER');
-            if ((int) $this->getUser()->getId() !== (int) $connection->fetchOne('SELECT MIN(id) FROM utilisateur')) {
-                throw $this->createAccessDeniedException();
-            }
+            $this->denyAccessUnlessGranted('ROLE_ADMIN');
         }
         // Charge les réglages qui déterminent quelles sections peuvent apparaître publiquement.
         $visibilite = $reglages->publique();
@@ -68,7 +65,7 @@ final class AccueilController extends AbstractController
     // Regroupe sur une seule page les lectures de l’année, auteur par auteur, dans l’ordre du classement public.
     public function lecturesAuteurs(Request $request, Connection $connection, \App\Service\VisibiliteAccueil $reglages, ClassementAuteursAccueil $classement): Response
     {
-        $edition = $this->modeEdition($request, $connection);
+        $edition = $this->modeEdition($request);
         if (!$reglages->publique()['auteurs']) throw $this->createNotFoundException();
         $auteurs = array_slice($classement->charger(), 0, 5);
         $lectures = $connection->fetchAllAssociative(
@@ -99,11 +96,11 @@ final class AccueilController extends AbstractController
 
     #[Route('/espace/accueil/ordre', name: 'app_accueil_ordre', methods: ['POST'])]
     // Sauvegarde les deux sélections publiques sans modifier les notes, les souhaits ni la visibilité.
-    public function enregistrerOrdre(Request $request, Connection $connection, ClassementAuteursAccueil $classement): JsonResponse
+    public function enregistrerOrdre(Request $request, Connection $connection, ClassementAuteursAccueil $classement, \App\Service\BibliothequePartagee $bibliotheque): JsonResponse
     {
-        $this->denyAccessUnlessGranted('ROLE_USER');
-        $id = (int) $this->getUser()->getId();
-        if ($id !== (int) $connection->fetchOne('SELECT MIN(id) FROM utilisateur')) throw $this->createAccessDeniedException();
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        // Tous les administrateurs modifient l’ordre du même accueil public.
+        $id = $bibliotheque->proprietaireId();
         if (!$this->isCsrfTokenValid('ordre_accueil', $request->request->getString('_token'))) {
             return $this->json(['success' => false, 'message' => 'Session expirée. Actualise la page.'], 403);
         }
@@ -155,7 +152,7 @@ final class AccueilController extends AbstractController
     // Affiche les livres favoris lorsque leur section publique est visible.
     public function livresMieuxNotes(Request $request, Connection $connection, \App\Service\VisibiliteAccueil $reglages, OrdreAccueil $ordre): Response
     {
-        $edition = $this->modeEdition($request, $connection);
+        $edition = $this->modeEdition($request);
         if (!$reglages->publique()['favoris']) throw $this->createNotFoundException();
         $livres = $this->chargerLivresFavoris($connection);
 
@@ -169,7 +166,7 @@ final class AccueilController extends AbstractController
     // Affiche la wishlist publique en respectant la visibilité de la section et de chaque souhait.
     public function wishlist(Request $request, Connection $connection, \App\Repository\SouhaitRepository $repository, \App\Service\VisibiliteAccueil $reglages, OrdreAccueil $ordre): Response
     {
-        $edition = $this->modeEdition($request, $connection);
+        $edition = $this->modeEdition($request);
         if (!$reglages->publique()['wishlist']) throw $this->createNotFoundException();
         return $this->render('wishlist/public.html.twig', [
             'souhaits' => $ordre->appliquer($repository->findBy(['statut' => 'souhaité', 'publique' => true], ['dateAjout' => 'DESC', 'id' => 'DESC']), 'wishlist'),
@@ -177,14 +174,11 @@ final class AccueilController extends AbstractController
         ]);
     }
 
-    // L’édition des pages publiques complètes reste réservée au propriétaire de l’accueil.
-    private function modeEdition(Request $request, Connection $connection): bool
+    // Réserve l’édition des pages publiques à tous les comptes administrateurs.
+    private function modeEdition(Request $request): bool
     {
         if (!$request->query->getBoolean('edition')) return false;
-        $this->denyAccessUnlessGranted('ROLE_USER');
-        if ((int) $this->getUser()->getId() !== (int) $connection->fetchOne('SELECT MIN(id) FROM utilisateur')) {
-            throw $this->createAccessDeniedException();
-        }
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
         return true;
     }
 

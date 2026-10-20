@@ -40,7 +40,9 @@
 
             <div class="details-livre-informations">
                 <h3 class="wishlist-details-titre">{{ livre.titre }}</h3>
-                {% if livre.sousTitre %}<p class="wishlist-details-sous-titre">{{ livre.sousTitre }}</p>{% endif %}
+                {% if livre.sousTitre %}
+                    <p class="wishlist-details-sous-titre">{{ livre.sousTitre }}</p>
+                {% endif %}
                 <p class="wishlist-details-auteurs">{{ auteurs|join(', ') ?: 'Auteur non renseigné' }}</p>
 
                 {# Prix et lien complètent uniquement la fiche wishlist, sans modifier celle des lectures. #}
@@ -59,7 +61,9 @@
                         {# Rend cliquables uniquement les liens HTTP ou HTTPS et ouvre la boutique dans un autre onglet. #}
                         {% if souhait.lienAchat and (souhait.lienAchat starts with 'https://' or souhait.lienAchat starts with 'http://') %}
                             <a href="{{ souhait.lienAchat }}" target="_blank" rel="noopener noreferrer">{{ souhait.lienAchat }}</a>
-                        {% else %}—{% endif %}
+                        {% else %}
+                            —
+                        {% endif %}
                     </span></div>
                 </div>
                 <div class="details-livre-resume">

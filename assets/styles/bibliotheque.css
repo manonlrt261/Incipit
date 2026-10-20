@@ -1,5 +1,5 @@
 /* =======================================
-   BIBLIOTHEQUE
+   BIBLIOTHÈQUE ET PILE À LIRE
    ======================================= */
 
 /* Mise en page de la bibliothèque */
@@ -275,6 +275,7 @@
     font-size: 14px;
 }
 
+/* Présentation compacte des mêmes livres en mode liste */
 .bibliotheque-livres.vue-liste {
     display: flex;
     flex-direction: column;
@@ -298,10 +299,15 @@
     display: none !important;
 }
 
+/* Message lorsqu’aucun livre n’est disponible */
 .bibliotheque-vide {
     padding: 18px;
     color: #87766b;
 }
+
+/* =======================================
+   LIVRES RETIRÉS DE LA COLLECTION
+   ======================================= */
 
 /* Livres retirés de la bibliothèque */
 .bibliotheque-retires {
@@ -397,6 +403,7 @@
     font-size: 13px;
 }
 
+/* Libellés accessibles aux lecteurs d’écran sans affichage visuel */
 .sr-only {
     position: absolute;
     width: 1px;
@@ -533,8 +540,6 @@
     }
 }
 
-/* Conserve des menus lisibles sur téléphone en les répartissant sur deux colonnes. */
-
 /* =======================================
    PILE À LIRE
    ======================================= */
@@ -549,7 +554,7 @@
 
 .pile-actions button,
 .pile-ajouter-depuis-lectures,
-.pile-selection button {
+.pile-selection button:not(.modal-bouton-fermer) {
     padding: 10px 12px;
     border: 1px solid var(--color-secondary);
     border-radius: 8px;

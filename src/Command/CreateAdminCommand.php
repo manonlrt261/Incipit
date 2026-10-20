@@ -25,6 +25,7 @@ class CreateAdminCommand extends Command
         parent::__construct();
     }
 
+    // Crée un administrateur après validation interactive de son adresse et de son mot de passe.
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
@@ -32,6 +33,7 @@ class CreateAdminCommand extends Command
 
         $io->title('Création du compte administrateur Incipit');
 
+        // Redemande l’adresse tant que son format est invalide.
         $questionEmail = new Question('Adresse e-mail : ');
         $questionEmail->setValidator(function ($value): string {
             $email = trim((string) $value);
@@ -45,6 +47,7 @@ class CreateAdminCommand extends Command
 
         $email = $helper->ask($input, $output, $questionEmail);
 
+        // Refuse un doublon avant de demander le mot de passe pour préserver le compte existant.
         $utilisateurExistant = $this->entityManager
             ->getRepository(Utilisateur::class)
             ->findOneBy(['email' => $email]);
@@ -55,6 +58,7 @@ class CreateAdminCommand extends Command
             return Command::FAILURE;
         }
 
+        // Masque la saisie et refuse de continuer si le terminal ne peut pas la garder confidentielle.
         $questionMotDePasse = new Question('Mot de passe : ');
         $questionMotDePasse->setHidden(true);
         $questionMotDePasse->setHiddenFallback(false);
@@ -72,6 +76,7 @@ class CreateAdminCommand extends Command
 
         $motDePasse = $helper->ask($input, $output, $questionMotDePasse);
 
+        // Vérifie une seconde saisie masquée avant toute création en base de données.
         $questionConfirmation = new Question('Confirmez le mot de passe : ');
         $questionConfirmation->setHidden(true);
         $questionConfirmation->setHiddenFallback(false);
@@ -84,6 +89,7 @@ class CreateAdminCommand extends Command
             return Command::FAILURE;
         }
 
+        // Attribue le rôle administrateur et enregistre uniquement le mot de passe haché.
         $utilisateur = new Utilisateur();
         $utilisateur->setEmail($email);
         $utilisateur->setRoles(['ROLE_ADMIN']);

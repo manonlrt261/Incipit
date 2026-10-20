@@ -12,9 +12,7 @@ export function creerGestionnaireCouverture({
             return;
         }
 
-        if (urlApercuLocale) {
-            URL.revokeObjectURL(urlApercuLocale);
-        }
+        nettoyer();
 
         urlApercuLocale = URL.createObjectURL(image);
 
@@ -33,10 +31,7 @@ export function creerGestionnaireCouverture({
     function afficherURL(url, titre = 'Livre') {
         if (!url) return;
 
-        if (urlApercuLocale) {
-            URL.revokeObjectURL(urlApercuLocale);
-            urlApercuLocale = null;
-        }
+        nettoyer();
 
         const elementImage = document.createElement('img');
         elementImage.src = url;

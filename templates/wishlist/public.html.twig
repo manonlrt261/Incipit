@@ -30,13 +30,11 @@
                         {% set livre = souhait.livre %}
 
                         {# Prépare les noms affichés en privilégiant le nom d’affichage de chaque auteur. #}
-                        {% set auteurs = [] %}
-                        {% for auteur in livre.auteurs %}
-                            {% set auteurs = auteurs|merge([
-                                auteur.nomAffichage ?: (auteur.prenom ~ ' ' ~ auteur.nom)|trim
-                            ]) %}
-                        {% endfor %}
+                        {% set auteurs = livre.auteurs
+                            |map(auteur => auteur.nomAffichage ?: (auteur.prenom ~ ' ' ~ auteur.nom)|trim)
+                        %}
 
+                        {# En édition, le déplacement remplace l’ouverture de la fiche au clic. #}
                         <article class="wishlist-carte" data-ordre-livre data-livre-id="{{ livre.id }}" tabindex="0" {% if not edition|default(false) %}data-fiche-souhait="fiche-souhait-{{ souhait.id }}"{% endif %} aria-label="Consulter {{ livre.titre }}">
                             {# Conserve les URL distantes et les chemins absolus ; complète les chemins locaux relatifs. #}
                             <div class="wishlist-couverture">

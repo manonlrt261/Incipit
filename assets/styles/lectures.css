@@ -67,7 +67,7 @@
     font-size: 17px;
 }
 
-/* Bouton d’ajout d’une lecture */
+/* Bouton d’ajout d’un livre */
 .lectures-bouton-ajouter {
     padding: 13px 22px;
     border: none;
@@ -231,6 +231,7 @@
     color: var(--color-secondary);
 }
 
+/* Note de lecture affichée sur les cartes */
 .lectures-note {
     margin: auto 0 0;
     padding-top: 14px;
@@ -243,6 +244,7 @@
     font-size: 19px;
 }
 
+/* Message lorsque les filtres ne retiennent aucun livre */
 .lectures-vide {
     padding: 35px;
     text-align: center;
@@ -252,69 +254,6 @@
 .lectures-carte[hidden],
 .lectures-vide[hidden] {
     display: none;
-}
-
-/* Choix d’un livre pour ajouter une session de lecture */
-.lectures-modal-selection {
-    width: min(450px, calc(100% - 32px));
-    box-sizing: border-box;
-    padding: 30px;
-    border: 1px solid var(--color-encadre);
-    border-radius: 14px;
-    background: var(--color-fond);
-    color: var(--color-bgdark);
-}
-
-.lectures-modal-selection::backdrop {
-    background: rgba(0, 0, 0, 0.5);
-}
-
-.lectures-modal-selection h2 {
-    margin: 0 0 10px;
-    font-family: 'Cormorant Garamond', Georgia, serif;
-    font-size: 30px;
-}
-
-.lectures-modal-selection label {
-    display: block;
-    margin: 20px 0 8px;
-    font-weight: 600;
-}
-
-.lectures-modal-selection select {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 12px;
-    border: 1px solid var(--color-primary);
-    border-radius: 8px;
-    background: var(--color-white);
-    color: var(--color-bgdark);
-    font: inherit;
-}
-
-.lectures-selection-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    margin-top: 25px;
-}
-
-.lectures-selection-actions button {
-    padding: 12px 18px;
-    border: none;
-    border-radius: 8px;
-    font: inherit;
-    cursor: pointer;
-}
-
-.lectures-selection-annuler {
-    background: var(--color-primary);
-    color: var(--color-secondary);
-}
-
-.lectures-selection-valider {
-    background: var(--color-secondary);
-    color: var(--color-fond);
 }
 
 /* =======================================

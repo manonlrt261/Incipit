@@ -114,6 +114,7 @@ initialiserPage(ecouter => {
                         const etoile = document.createElement('span');
                         etoile.textContent = '★';
 
+                        // Remplit chaque étoile partiellement pour représenter aussi les notes décimales.
                         const remplissage = Math.max(0, Math.min(1, note - (numero - 1))) * 100;
 
                         etoile.style.background = `linear-gradient(90deg, #e6a33c ${remplissage}%, #d8d8d8 ${remplissage}%)`;
@@ -225,14 +226,13 @@ initialiserPage(ecouter => {
         ouvrirDetails(id);
     });
 
-    // OUVRIR LE FORMULAIRE DE MODIFICATION
+    // Réutilise le formulaire commun pour modifier le livre affiché.
 
     ecouter(boutonModifierLivre, 'click', () => {
         const id = modal.dataset.livreId;
 
         if (!id) return;
 
-        // Prévenir le formulaire d'ajout qu'un livre doit être modifié
         document.dispatchEvent(
             new CustomEvent('livre:modifier', {
                 detail: { id }
@@ -240,7 +240,7 @@ initialiserPage(ecouter => {
         );
     });
 
-    // RETIRER UN LIVRE DE MA COLLECTION
+    // Retire le livre après confirmation en conservant son historique de lecture.
 
     ecouter(boutonRetirerLivre, 'click', async () => {
         const id = modal.dataset.livreId;
@@ -284,7 +284,7 @@ initialiserPage(ecouter => {
         }
     });
 
-    // AJOUTER UNE SESSION DE LECTURE
+    // Prépare les commandes du formulaire partagé entre ajout et modification d’une session.
 
     const boutonAjouterLecture = document.getElementById('ajouter-lecture-details');
     const formulaireLectureZone = document.getElementById('details-formulaire-lecture');
@@ -326,6 +326,7 @@ initialiserPage(ecouter => {
         if (erreurSession) erreurSession.hidden = true;
     }
 
+    // Préremplit la session sélectionnée ou prépare une nouvelle session terminée par défaut.
     function ouvrirFormulaireSession(lecture = null) {
         reinitialiserSession();
         if (!formulaireLecture || !formulaireLectureZone) return;

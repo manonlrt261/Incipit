@@ -15,7 +15,8 @@ export function creerFiltresLivres({ page, conteneur, selecteur, recherche, ecou
     const normaliser = valeur => String(valeur ?? '').normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('fr').trim();
 
-    // Applique les critères combinés et conserve les auteurs absents en fin de classement.
+    // Relit les cartes actuelles pour inclure les livres ajoutés sans rechargement.
+    // Combine la recherche et les filtres, puis applique le tri choisi.
     function appliquer() {
         const cartes = [...conteneur.querySelectorAll(selecteur)];
         const texte = normaliser(recherche?.value);
@@ -24,12 +25,14 @@ export function creerFiltresLivres({ page, conteneur, selecteur, recherche, ecou
         const tranche = note && /^[0-5]$/.test(note.value) ? Number(note.value) : null;
         let visibles = 0;
         cartes.forEach(carte => {
+            const valeurNote = noteCarte(carte);
             carte.hidden = !normaliser(carte.dataset.recherche).includes(texte)
                 || Boolean(genreChoisi && !(carte.dataset.genres || '').split('|').map(normaliser).includes(genreChoisi))
                 || Boolean(statutChoisi && normaliser(carte.dataset.statutLecture) !== statutChoisi)
-                || Boolean(tranche !== null && (noteCarte(carte) === null || Math.floor(noteCarte(carte)) !== tranche));
+                || Boolean(tranche !== null && (valeurNote === null || Math.floor(valeurNote) !== tranche));
             if (!carte.hidden) visibles++;
         });
+        // Départage les dates identiques par identifiant pour conserver un ordre stable.
         const recente = (a, b) => (Number(b.dataset[champDate]) || 0) - (Number(a.dataset[champDate]) || 0)
             || Number(b.dataset.livreId || b.dataset.pretId || b.dataset.id) - Number(a.dataset.livreId || a.dataset.pretId || a.dataset.id);
         cartes.sort((a, b) => {
@@ -63,7 +66,7 @@ export function creerFiltresLivres({ page, conteneur, selecteur, recherche, ecou
         actualiser({ total: cartes.length, visibles, statut: statut?.value || '' });
     }
 
-    // Valide les filtres de genre et de statut sans recharger la liste.
+    // Applique tous les critères du formulaire sans recharger la liste.
     ecouter(formulaire, 'submit', event => { event.preventDefault(); appliquer(); });
     // Le dernier tri sélectionné prend la main sans effacer les filtres de genre et de statut.
     ecouter(auteurs, 'change', () => { effacerTriNote(); date.value = ''; if (contact) contact.value = ''; appliquer(); });
@@ -77,7 +80,7 @@ export function creerFiltresLivres({ page, conteneur, selecteur, recherche, ecou
         }
         appliquer();
     });
-    // Sur les prêts, le contact remplace le filtre de statut et devient un tri alphabétique par prénom.
+    // Trie les prêts par prénom puis par nom du contact, en remplacement du tri par auteur ou date.
     ecouter(contact, 'change', () => { auteurs.value = ''; date.value = ''; appliquer(); });
     // Efface la recherche, les filtres et les tris pour retrouver la liste complète.
     ecouter(formulaire.querySelector('[data-reinitialiser-filtres]'), 'click', () => {

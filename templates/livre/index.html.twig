@@ -4,12 +4,12 @@
 
 {% block body %}
 <div class="espace-layout">
-    {# Réutilise la navigation commune avec l’onglet Bibliothèque actif. #}
+    {# Réutilise la navigation commune avec l’onglet Pile à lire actif. #}
     {% include 'components/_sidebar.html.twig' %}
 
     <main id="page-pile-a-lire" class="espace-contenu bibliotheque" data-pile-token="{{ csrf_token('pile_a_lire') }}">
 
-        {# Recherche par titre, auteur ou ISBN ; les résultats sont filtrés par JavaScript sans rechargement. #}
+        {# Recherche par titre, auteur, saga ou ISBN ; les résultats sont filtrés par JavaScript sans rechargement. #}
         <header class="bibliotheque-header">
             <form id="bibliotheque-recherche" class="bibliotheque-recherche" role="search">
                 <img src="{{ asset('images/rechercher.png') }}" alt="">
@@ -79,7 +79,6 @@
                 </button>
             </div>
 
-
         </div>
 
         <div id="bibliotheque-liste-zone">
@@ -140,15 +139,18 @@
     </main>
 </div>
 
-{# Charge les fenêtres communes d’ajout, de modification et de consultation des livres. #}
 {# Ne propose que des livres possédés ; aucun nouveau livre n’est créé depuis cette sélection. #}
 <dialog id="modal-selection-pile" class="pile-selection">
     <header>
         <h2>Ajouter à ma pile à lire</h2>
-        <button type="button" id="fermer-selection-pile" aria-label="Fermer">×</button>
+        {% include 'components/_bouton_fermer.html.twig' with {id: 'fermer-selection-pile'} only %}
     </header>
     <label for="pile-recherche-selection">Rechercher parmi mes livres</label>
-    <input id="pile-recherche-selection" type="search" placeholder="Un titre, un auteur ou une saga…">
+    <div class="bibliotheque-recherche" role="search">
+        <img src="{{ asset('images/rechercher.png') }}" alt="">
+        <input id="pile-recherche-selection" type="search" placeholder="Un titre, un auteur ou une saga…">
+        <button type="button" id="pile-rechercher-selection" class="bouton-rechercher">Rechercher</button>
+    </div>
     <div class="pile-selection-liste">
         {% for livre in livresDisponibles %}
             <article data-selection-recherche="{{ (livre.titre ~ ' ' ~ livre.auteurs ~ ' ' ~ livre.saga)|lower|e('html_attr') }}">

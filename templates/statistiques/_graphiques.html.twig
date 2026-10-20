@@ -24,23 +24,23 @@
                 {% set x = 44 + (numero - 1) * 52 %}
                 {% set hauteur = nombre / echelle * 160 %}
                 <g data-stats-mois="{{ numero }}" role="button" tabindex="0" aria-label="Voir les {{ nombre }} lectures de {{ nomsMois[numero - 1] }} {{ annee }}">
-                <rect x="{{ x - 8 }}" y="10" width="49" height="210" fill="transparent"/>
-                <rect
-                    x="{{ x }}"
-                    y="{{ 180 - hauteur }}"
-                    width="33"
-                    height="{{ hauteur }}"
-                    rx="2"
-                    class="stats-barre"
-                >
-                    <title>{{ nomsMois[numero - 1] }} : {{ nombre }} lecture(s)</title>
-                </rect>
-                <text x="{{ x + 16.5 }}" y="{{ 172 - hauteur }}" text-anchor="middle" class="stats-valeur">{{ nombre }}</text>
-                <text x="{{ x + 16.5 }}" y="204" text-anchor="middle">{{ nomsMois[numero - 1] }}</text>
+                    <rect x="{{ x - 8 }}" y="10" width="49" height="210" fill="transparent"/>
+                    <rect
+                        x="{{ x }}"
+                        y="{{ 180 - hauteur }}"
+                        width="33"
+                        height="{{ hauteur }}"
+                        rx="2"
+                        class="stats-barre"
+                    >
+                        <title>{{ nomsMois[numero - 1] }} : {{ nombre }} lecture(s)</title>
+                    </rect>
+                    <text x="{{ x + 16.5 }}" y="{{ 172 - hauteur }}" text-anchor="middle" class="stats-valeur">{{ nombre }}</text>
+                    <text x="{{ x + 16.5 }}" y="204" text-anchor="middle">{{ nomsMois[numero - 1] }}</text>
                 </g>
             {% endfor %}
         </svg>
-        {# Les listes restent liées à l’année affichée, même après une actualisation des graphiques. #}
+        {# Les listes restent dans des modèles HTML inactifs jusqu’à leur copie dans la modale par JavaScript. #}
         {% for numero, lectures in detailsMois %}
             <template data-stats-details-mois="{{ numero }}" data-titre="Lectures de {{ nomsMois[numero - 1] }} {{ annee }}">
                 {% for lecture in lectures %}
@@ -80,8 +80,7 @@
             >
                 <div>
                     <strong>{{ termineesAnnee }}</strong>
-                    <span
-                    >{{ objectif ? 'sur ' ~ objectif : (termineesAnnee > 1 ? 'lectures' : 'lecture') }}</span>
+                    <span>{{ objectif ? 'sur ' ~ objectif : (termineesAnnee > 1 ? 'lectures' : 'lecture') }}</span>
                 </div>
             </div>
             <div class="stats-objectif-texte">
@@ -113,10 +112,7 @@
         {% if genres is empty %}
             <p class="stats-vide">Aucun livre terminé pour cette année.</p>
         {% else %}
-            {% set segments = [] %}
-            {% for genre in genres %}
-                {% set segments = segments|merge([genre.couleur ~ ' ' ~ genre.debut ~ '% ' ~ genre.fin ~ '%']) %}
-            {% endfor %}
+            {% set segments = genres|map(genre => genre.couleur ~ ' ' ~ genre.debut ~ '% ' ~ genre.fin ~ '%') %}
             <div class="stats-genres-contenu">
                 <div
                     class="stats-anneau"
@@ -205,53 +201,54 @@
                 <option value="toutes">Toutes les années</option>
             </select>
         </label>
+        {# Prépare les quatre périodes pour basculer entre elles sans requête ; trois ans sont affichés par défaut. #}
         {% for periode, comparaison in comparaisons %}
-        <div data-stats-comparaison="{{ periode }}" {{ periode != 3 ? 'hidden' : '' }}>
-        {% set maximumAnnuel = max(comparaison) %}
-        {% set largeur = max(680, comparaison|length * 95) %}
-        {% set echelleAn = maximumAnnuel < 4 ? 4 : (maximumAnnuel / 4)|round(0, 'ceil') * 4 %}
-        <div
-            class="stats-defilement"
-            tabindex="0"
-            role="region"
-            aria-label="Graphique des lectures par année"
-        >
-            <svg
-                class="stats-barres stats-annuelles"
-                style="min-width: {{ largeur }}px"
-                viewBox="0 0 {{ largeur }} 220"
-                role="group"
-                aria-labelledby="stats-annees-titre-{{ periode }}"
-            >
-                <title id="stats-annees-titre-{{ periode }}">Comparaison des lectures terminées par année</title>
-                {% for i in 0..4 %}
-                    {% set y = 170 - i * 35 %}
-                    <line x1="35" y1="{{ y }}" x2="{{ largeur - 10 }}" y2="{{ y }}" class="stats-graduation"/>
-                    <text x="25" y="{{ y + 4 }}" text-anchor="end">{{ echelleAn * i / 4 }}</text>
-                {% endfor %}
-                {% set pas = (largeur - 50) / comparaison|length %}
-                {% for an, nombre in comparaison %}
-                    {% set hauteur = nombre / echelleAn * 140 %}
-                    {% set x = 40 + (loop.index0 + 0.2) * pas %}
-                    <g data-stats-annee="{{ an }}" role="button" tabindex="0" aria-label="Voir les {{ nombre }} lectures de {{ an }}">
-                    <rect x="{{ x - pas * 0.1 }}" y="10" width="{{ pas * 0.8 }}" height="200" fill="transparent"/>
-                    <rect
-                        x="{{ x }}"
-                        y="{{ 170 - hauteur }}"
-                        width="{{ pas * 0.6 }}"
-                        height="{{ hauteur }}"
-                        rx="3"
-                        class="stats-barre"
+            <div data-stats-comparaison="{{ periode }}" {{ periode != 3 ? 'hidden' : '' }}>
+                {% set maximumAnnuel = max(comparaison) %}
+                {% set largeur = max(680, comparaison|length * 95) %}
+                {% set echelleAn = maximumAnnuel < 4 ? 4 : (maximumAnnuel / 4)|round(0, 'ceil') * 4 %}
+                <div
+                    class="stats-defilement"
+                    tabindex="0"
+                    role="region"
+                    aria-label="Graphique des lectures par année"
+                >
+                    <svg
+                        class="stats-barres stats-annuelles"
+                        style="min-width: {{ largeur }}px"
+                        viewBox="0 0 {{ largeur }} 220"
+                        role="group"
+                        aria-labelledby="stats-annees-titre-{{ periode }}"
                     >
-                        <title>{{ an }} : {{ nombre }} lecture(s)</title>
-                    </rect>
-                    <text x="{{ x + pas * 0.3 }}" y="{{ 162 - hauteur }}" text-anchor="middle" class="stats-valeur">{{ nombre }}</text>
-                    <text x="{{ x + pas * 0.3 }}" y="196" text-anchor="middle">{{ an }}</text>
-                    </g>
-                {% endfor %}
-            </svg>
-        </div>
-        </div>
+                        <title id="stats-annees-titre-{{ periode }}">Comparaison des lectures terminées par année</title>
+                        {% for i in 0..4 %}
+                            {% set y = 170 - i * 35 %}
+                            <line x1="35" y1="{{ y }}" x2="{{ largeur - 10 }}" y2="{{ y }}" class="stats-graduation"/>
+                            <text x="25" y="{{ y + 4 }}" text-anchor="end">{{ echelleAn * i / 4 }}</text>
+                        {% endfor %}
+                        {% set pas = (largeur - 50) / comparaison|length %}
+                        {% for an, nombre in comparaison %}
+                            {% set hauteur = nombre / echelleAn * 140 %}
+                            {% set x = 40 + (loop.index0 + 0.2) * pas %}
+                            <g data-stats-annee="{{ an }}" role="button" tabindex="0" aria-label="Voir les {{ nombre }} lectures de {{ an }}">
+                                <rect x="{{ x - pas * 0.1 }}" y="10" width="{{ pas * 0.8 }}" height="200" fill="transparent"/>
+                                <rect
+                                    x="{{ x }}"
+                                    y="{{ 170 - hauteur }}"
+                                    width="{{ pas * 0.6 }}"
+                                    height="{{ hauteur }}"
+                                    rx="3"
+                                    class="stats-barre"
+                                >
+                                    <title>{{ an }} : {{ nombre }} lecture(s)</title>
+                                </rect>
+                                <text x="{{ x + pas * 0.3 }}" y="{{ 162 - hauteur }}" text-anchor="middle" class="stats-valeur">{{ nombre }}</text>
+                                <text x="{{ x + pas * 0.3 }}" y="196" text-anchor="middle">{{ an }}</text>
+                            </g>
+                        {% endfor %}
+                    </svg>
+                </div>
+            </div>
         {% endfor %}
     </section>
 </div>

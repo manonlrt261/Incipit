@@ -33,6 +33,7 @@
                 {% endif %}
                 <div class="auteur-livres-grille">
                     {% for livre in onglet.livres %}
+                        {# Le lien de détail sert au chargement à la demande ; les données de saga servent au filtre et à la moyenne. #}
                         <article class="auteur-livre" data-livre-id="{{ livre.id }}" {% if cle == 'sagas' %}data-saga="{{ livre.cle_saga|e('html_attr') }}" data-note="{{ livre.note }}"{% endif %} data-details-url="{{ path('app_auteur_livre_details', {id: auteur.id, livreId: livre.id}) }}" tabindex="0" role="button" aria-label="Voir les détails de {{ livre.titre }}">
                             <div class="auteur-couverture">
                                 {% if livre.image_couverture %}
@@ -52,6 +53,7 @@
                 </div>
             </section>
         {% endfor %}
+        {# Reçoit la fiche détaillée chargée au clic sans quitter la catégorie consultée. #}
         <div id="auteur-detail-conteneur"></div>
         <p id="auteur-detail-erreur" role="alert" hidden></p>
     </main>

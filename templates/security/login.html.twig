@@ -1,4 +1,3 @@
-
 {% extends 'base.html.twig' %}
 
 {% block title %}Connexion | Incipit{% endblock %}
@@ -51,7 +50,7 @@
                         required
                     >
 
-                    {# Le JavaScript permet d’afficher ou de masquer le mot de passe et adapte l’icône du bouton. #}
+                    {# Le script bascule la visibilité du mot de passe et synchronise l’icône avec le libellé accessible. #}
                     <button
                         type="button"
                         id="toggle-password"
@@ -87,10 +86,10 @@
 
             {# Affiche le message d’échec traduit renvoyé par Symfony Security. #}
             {% if error %}
-    <p class="login-error" role="alert">
-        {{ error.messageKey|trans(error.messageData, 'security') }}
-    </p>
-{% endif %}
+                <p class="login-error" role="alert">
+                    {{ error.messageKey|trans(error.messageData, 'security') }}
+                </p>
+            {% endif %}
         </form>
     </div>
 </main>

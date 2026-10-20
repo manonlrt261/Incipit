@@ -16,7 +16,7 @@
 
         <header class="bibliotheque-header">
 
-            {# Filtre les prêts par titre, auteur ou emprunteur sans recharger la page. #}
+            {# Filtre les prêts par titre, saga, auteur ou emprunteur sans recharger la page. #}
             <form id="prets-formulaire-recherche" class="bibliotheque-recherche" role="search">
                 <img
                     src="{{ asset('images/rechercher.png') }}"
@@ -169,6 +169,7 @@
                 <button type="button" id="ouvrir-ajout-contact" class="prets-bouton-ajouter">Ajouter un contact</button>
             </div>
             <p id="prets-contacts-message" role="status" hidden></p>
+            {# Les identifiants et routes servent aux actions des contacts ; les images sont reprises pour les cartes créées sans rechargement. #}
             <div id="prets-contacts" class="prets-contacts" data-image-modifier="{{ asset('images/modifier.png') }}" data-image-supprimer="{{ asset('images/poubelle.png') }}">
                 {% for contact in contacts %}
                     <article class="prets-contact"
@@ -253,14 +254,7 @@
             Ajouter un prêt
         </h2>
 
-        <button
-            type="button"
-            id="fermer-ajout-pret"
-            class="prets-modale-fermer"
-            aria-label="Fermer"
-        >
-            &times;
-        </button>
+        {% include 'components/_bouton_fermer.html.twig' with {id: 'fermer-ajout-pret'} only %}
 
     </div>
 
@@ -285,13 +279,12 @@
             <input type="hidden" id="pret-livre-id" name="livre_id">
             <small id="pret-recherche-aide">Recherchez un titre, un auteur ou une saga dans votre bibliothèque, ou saisissez un autre livre.</small>
             <div id="pret-livres-possedes" class="prets-suggestions" aria-label="Livres de ma bibliothèque" hidden>
-                {# Prépare les suggestions et leurs noms d’auteurs sans répéter l’assemblage des noms dans chaque bouton. #}
+                {# Prépare les livres suggérés avec leurs auteurs, en utilisant prénom et nom si le nom d’affichage manque. #}
                 {% for livre in livresPossedes %}
-                    {% set auteurs = [] %}
-                    {% for auteur in livre.auteurs %}
-                        {% set auteurs = auteurs|merge([auteur.nomAffichage ?: (auteur.prenom ~ ' ' ~ auteur.nom)|trim]) %}
-                    {% endfor %}
-                    {% set nomsAuteurs = auteurs|join(', ') %}
+                    {% set nomsAuteurs = livre.auteurs
+                        |map(auteur => auteur.nomAffichage ?: (auteur.prenom ~ ' ' ~ auteur.nom)|trim)
+                        |join(', ')
+                    %}
                     <button
                         type="button"
                         class="prets-suggestion"
@@ -333,7 +326,7 @@
 <dialog id="modal-contact" class="prets-modale" aria-labelledby="contact-titre">
     <div class="prets-modale-entete">
         <h2 id="contact-titre">Ajouter un contact</h2>
-        <button type="button" data-fermer-contact class="prets-modale-fermer" aria-label="Fermer">×</button>
+        <button type="button" data-fermer-contact class="modal-bouton-fermer" aria-label="Fermer">×</button>
     </div>
     <form id="form-contact" action="{{ path('app_prets_contact_ajouter') }}" method="post">
         <input type="hidden" name="_token" value="{{ csrf_token('gerer_contacts') }}">

@@ -7,9 +7,11 @@ final class StatistiquesLecture
 {
     public function __construct(private readonly Connection $connexion) {}
 
+    // Prépare les graphiques de l’année choisie, l’historique annuel et la progression par genre.
     public function calculer(int $annee, int $utilisateurId): array
     {
         $lectures = $this->connexion->fetchAllAssociative('SELECT sl.id, sl.livre_id, sl.statut, sl.date_fin, l.titre FROM session_lecture sl JOIN livre l ON l.id = sl.livre_id');
+        // Indexe genres et auteurs par livre pour les réutiliser sans requête dans chaque boucle.
         $genresParLivre = [];
         foreach ($this->connexion->fetchAllAssociative('SELECT lg.livre_id, g.id, g.nom FROM livre_genre lg JOIN genre g ON g.id = lg.genre_id') as $ligne) {
             $genresParLivre[(int) $ligne['livre_id']][(int) $ligne['id']] = $ligne['nom'];
@@ -27,6 +29,7 @@ final class StatistiquesLecture
         $livresLus = [];
         $auteurs = [];
         $sansDate = 0;
+        // Les compteurs portent sur toutes les sessions ; les graphiques datés retiennent les lectures terminées.
         foreach ($lectures as $lecture) {
             $statut = mb_strtolower(trim($lecture['statut']));
             if (array_key_exists($statut, $compteurs)) $compteurs[$statut]++;
@@ -38,18 +41,15 @@ final class StatistiquesLecture
             $parAnnee[$an] = ($parAnnee[$an] ?? 0) + 1;
             $numeroMois = (int) $date->format('n');
             // Conserve le détail de toutes les années, indépendamment de l’année du graphique mensuel.
-            $detailsAnnees[$an][$numeroMois][] = [
+            $detail = [
                 'titre' => $lecture['titre'],
                 'auteurs' => implode(', ', $auteursParLivre[(int) $lecture['livre_id']] ?? []),
                 'date' => $lecture['date_fin'],
             ];
+            $detailsAnnees[$an][$numeroMois][] = $detail;
             if ($an !== $annee) continue;
             $mois[$numeroMois]++;
-            $detailsMois[$numeroMois][] = [
-                'titre' => $lecture['titre'],
-                'auteurs' => implode(', ', $auteursParLivre[(int) $lecture['livre_id']] ?? []),
-                'date' => $lecture['date_fin'],
-            ];
+            $detailsMois[$numeroMois][] = $detail;
             $livreId = (int) $lecture['livre_id'];
             $livresLus[$livreId] = true;
             foreach ($auteursParLivre[$livreId] ?? [] as $id => $nom) {
@@ -57,6 +57,7 @@ final class StatistiquesLecture
                 $auteurs[$id]['nombre']++;
             }
         }
+        // Compte chaque livre une fois par genre, même s’il a été relu dans l’année.
         $genres = [];
         foreach (array_keys($livresLus) as $id) {
             foreach ($genresParLivre[$id] ?? [0 => 'Sans genre renseigné'] as $genreId => $nom) {
@@ -67,6 +68,7 @@ final class StatistiquesLecture
         $trier = static fn(array $a, array $b): int => $b['nombre'] <=> $a['nombre'] ?: strnatcasecmp($a['nom'], $b['nom']);
         usort($genres, $trier);
         usort($auteurs, $trier);
+        // Calcule les portions et les angles cumulés nécessaires au graphique circulaire.
         $totalGenres = array_sum(array_column($genres, 'nombre'));
         $couleurs = ['#925537', '#e39767', '#e9bb66', '#8f9b8c', '#ad96b4', '#c7b9aa', '#a97660', '#8c93aa'];
         $position = 0;
@@ -81,7 +83,7 @@ final class StatistiquesLecture
         $courante = (int) (new \DateTimeImmutable('now', new \DateTimeZone('Europe/Paris')))->format('Y');
         $annees = array_unique([...array_keys($parAnnee), $courante, $annee]);
         rsort($annees, SORT_NUMERIC);
-        // Inclure les années sans lecture entre la première année connue et aujourd’hui.
+        // Inclut les années sans lecture jusqu’à la plus récente année connue, courante ou sélectionnée.
         $comparaison = [];
         for ($an = min($annees); $an <= max($annees); $an++) $comparaison[$an] = $parAnnee[$an] ?? 0;
         // Les périodes courtes incluent les années sans lecture ; toutes les années conserve l’historique complet.
@@ -109,6 +111,7 @@ final class StatistiquesLecture
         }
         unset($genre);
         usort($genresCollection, static fn (array $a, array $b): int => strnatcasecmp($a['nom'], $b['nom']));
+        // Dans une liste mensuelle, les lectures les plus récentes apparaissent en premier.
         foreach ($detailsMois as &$details) {
             usort($details, static fn (array $a, array $b): int => strcmp($b['date'], $a['date']) ?: strnatcasecmp($a['titre'], $b['titre']));
         }
@@ -122,6 +125,7 @@ final class StatistiquesLecture
             unset($lecturesMois);
         }
         unset($moisAnnee);
+        // Un objectif absent reste distinct d’un objectif chiffré pour les messages et la progression.
         $objectif = $this->connexion->fetchOne('SELECT nombre_livres FROM objectif_annuel WHERE utilisateur_id = :id AND annee = :annee', ['id' => $utilisateurId, 'annee' => $annee]);
         $objectif = $objectif !== false && (int) $objectif > 0 ? (int) $objectif : null;
         $termineesAnnee = array_sum($mois);

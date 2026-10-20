@@ -12,6 +12,7 @@ initialiserPage(ecouter => {
     let controleur;
     let numero = 0;
     let selection = -1;
+    // Transmet les auteurs saisis sans doublons ni espaces superflus pour limiter les suggestions.
     const nomsAuteurs = () => [...new Set([...auteurs.querySelectorAll('input[name="auteurs[]"]')]
         .map(input => input.value.trim().replace(/\s+/g, ' ')).filter(Boolean))];
 
@@ -26,6 +27,7 @@ initialiserPage(ecouter => {
         champ.setAttribute('aria-expanded', 'false');
         champ.removeAttribute('aria-activedescendant');
     }
+    // Attend une pause de saisie avant de rechercher les sagas des auteurs du formulaire.
     function proposer() {
         fermer();
         const texte = champ.value.trim();
@@ -42,6 +44,7 @@ initialiserPage(ecouter => {
                 const reponse = await fetch(url, { signal: controleur.signal, headers: { Accept: 'application/json' } });
                 if (!reponse.ok) return;
                 const resultat = await reponse.json();
+                // Ignore une réponse devenue obsolète après une autre saisie ou la fermeture du formulaire.
                 if (requete !== numero || !modal.open || !form.isConnected || champ.value.trim() !== texte
                     || contexte !== JSON.stringify(nomsAuteurs()) || document.activeElement !== champ) return;
                 const propositions = [...new Set(resultat.sagas || [])];
@@ -61,6 +64,7 @@ initialiserPage(ecouter => {
             }
         }, 250);
     }
+    // Recopie la saga choisie et rend le champ disponible pour poursuivre la saisie.
     function choisir(option) {
         if (!option) return;
         champ.value = option.textContent;
@@ -70,8 +74,10 @@ initialiserPage(ecouter => {
     ecouter(champ, 'input', proposer);
     ecouter(champ, 'focus', proposer);
     ecouter(champ, 'blur', fermer);
+    // Conserve le focus jusqu’au clic pour éviter que la liste se ferme avant la sélection.
     ecouter(liste, 'pointerdown', event => event.preventDefault());
     ecouter(liste, 'click', event => choisir(event.target.closest('[role="option"]')));
+    // Invalide les suggestions dès que les auteurs changent ou que le formulaire est quitté.
     ecouter(auteurs, 'input', fermer);
     ecouter(auteurs, 'change', fermer);
     ecouter(auteurs, 'click', event => { if (event.target.closest('button')) fermer(); });

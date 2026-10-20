@@ -19,7 +19,7 @@ final class ProfilController extends AbstractController
     // Affiche le compte et les réglages de visibilité de l’utilisateur connecté.
     public function index(VisibiliteAccueil $visibilite): Response
     {
-        return $this->render('profil/index.html.twig', ['visibilite' => $visibilite->pourUtilisateur($this->getUser()->getId())]);
+        return $this->render('profil/index.html.twig', ['visibilite' => $visibilite->publique()]);
     }
 
     #[Route('/espace/mon-profil/email', name: 'app_profil_email', methods: ['POST'])]
@@ -81,9 +81,10 @@ final class ProfilController extends AbstractController
     }
 
     #[Route('/espace/mon-profil/visibilite', name: 'app_profil_visibilite', methods: ['POST'])]
-    // Enregistre la visibilité d’une section publique sans modifier les autres réglages.
-    public function visibilite(Request $request, Connection $connexion): JsonResponse
+    // Enregistre la visibilité commune aux administrateurs, sans modifier les autres sections.
+    public function visibilite(Request $request, Connection $connexion, \App\Service\BibliothequePartagee $bibliotheque): JsonResponse
     {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
         if (!$this->jetonValide($request, 'profil_visibilite')) return $this->sessionExpiree();
         // Limite les réglages aux sections autorisées avant de choisir la colonne à mettre à jour.
         $colonnes = ['wishlist' => 'afficher_wishlist', 'auteurs' => 'afficher_auteurs_favoris', 'favoris' => 'afficher_livres_favoris'];
@@ -99,7 +100,7 @@ final class ProfilController extends AbstractController
         $colonne = $colonnes[$section];
         $connexion->executeStatement(
             "INSERT INTO parametre_confidentialite (utilisateur_id, afficher_wishlist, afficher_auteurs_favoris, afficher_livres_favoris, date_modification) VALUES (:id, :wishlist, :auteurs, :favoris, :date) ON DUPLICATE KEY UPDATE $colonne = :visible, date_modification = :modification",
-            [...$valeurs, 'id' => $this->getUser()->getId(), 'date' => date('Y-m-d H:i:s'), 'visible' => (int) $visible, 'modification' => date('Y-m-d H:i:s')]
+            [...$valeurs, 'id' => $bibliotheque->proprietaireId(), 'date' => date('Y-m-d H:i:s'), 'visible' => (int) $visible, 'modification' => date('Y-m-d H:i:s')]
         );
         return $this->json(['success' => true, 'visible' => $visible === '1']);
     }

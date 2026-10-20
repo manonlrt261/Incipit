@@ -1,6 +1,7 @@
 {% extends 'base.html.twig' %}
 {% block title %}Mes auteurs — Lectures {{ annee }} | Incipit{% endblock %}
 {% block body %}
+{# Les attributs d’édition permettent au script de sauvegarder les choix avant de revenir au profil. #}
 <div class="accueil" {% if edition %}id="edition-accueil" data-url="{{ path('app_accueil_ordre') }}" data-token="{{ csrf_token('ordre_accueil') }}" data-retour="{{ path('app_espace_profil') }}#visibilite"{% endif %}>
     {% include 'accueil/_edition_commandes.html.twig' %}
     {% include 'accueil/_entete.html.twig' only %}
@@ -20,6 +21,7 @@
                     <h3 id="auteur-titre-{{ auteur.id }}">{{ auteur.nom_affichage }}</h3>
                     <p>{{ auteur.nombre_lectures }} {{ auteur.nombre_lectures == 1 ? 'lecture' : 'lectures' }}</p>
                     <div class="accueil-grille-livres">
+                        {# Le contrôleur limite ces lectures à l’année courante et aux auteurs du classement public. #}
                         {% for lecture in lecturesParAuteur[auteur.id]|default([]) %}
                             {% include 'accueil/_lecture_auteur.html.twig' with {auteur: auteur, lecture: lecture} only %}
                         {% endfor %}

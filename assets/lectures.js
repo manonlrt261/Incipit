@@ -2,7 +2,6 @@
 import { initialiserPage } from './components/initialisation-page.js';
 import { creerFiltresLivres } from './components/filtres-livres.js';
 
-
 initialiserPage((ecouter) => {
     const page = document.getElementById('page-mes-lectures');
 

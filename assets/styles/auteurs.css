@@ -10,6 +10,7 @@
     gap: 18px;
 }
 
+/* Encadrés des auteurs et de leurs livres */
 .auteurs-carte,
 .auteur-livre {
     min-width: 0;
@@ -34,12 +35,6 @@
     border-color: var(--color-secondary);
 }
 
-.auteurs-carte > img {
-    width: 40px;
-    height: 40px;
-    object-fit: contain;
-}
-
 .auteurs-carte h2,
 .auteur-livre p {
     font-family: Inter, sans-serif;
@@ -62,6 +57,10 @@
 .auteurs-carte span {
     color: var(--color-terra);
 }
+
+/* =======================================
+   LIVRES ET SAGAS DE L’AUTEUR
+   ======================================= */
 
 /* Catégories de livres à l’intérieur de la fiche. */
 .auteurs-onglets {
@@ -92,6 +91,7 @@
     display: none;
 }
 
+/* Retour à la liste des auteurs */
 .auteurs-retour {
     color: var(--color-secondary);
 }
@@ -180,6 +180,7 @@
     font-size: 16px;
 }
 
+/* Formulaire de modification de l’auteur ou de la saga */
 .auteur-formulaire {
     display: grid;
     gap: 12px;
@@ -199,6 +200,7 @@
     margin-top: 12px;
 }
 
+/* Actions de modification et d’enregistrement */
 .auteurs-modifier,
 .auteur-formulaire button {
     display: inline-flex;
@@ -219,7 +221,7 @@
     height: 18px;
 }
 
-/* Ouverture des fiches détaillées depuis les quatre catégories. */
+/* Ouverture des fiches détaillées depuis les catégories de livres. */
 .auteur-livre[data-details-url] {
     cursor: pointer;
 }
@@ -229,6 +231,7 @@
     outline-offset: 3px;
 }
 
+/* Informations bibliographiques de la fiche en consultation */
 .auteur-details-titre-livre {
     font-family: 'Cormorant Garamond', Georgia, serif;
     font-size: 30px;
@@ -242,6 +245,7 @@
     color: var(--color-secondary);
 }
 
+/* Historique de lecture conservé dans la fiche auteur */
 .auteur-details-session {
     padding: 16px 0;
     border-bottom: 1px solid var(--color-encadre);
@@ -311,21 +315,6 @@
 #auteur-saga-actions {
     margin-bottom: 20px;
     color: var(--color-terra);
-}
-
-/* Harmonise le choix d’un livre avec les autres champs du formulaire. */
-.auteur-formulaire select {
-    box-sizing: border-box;
-    width: 100%;
-    min-width: 0;
-    max-width: 100%;
-    padding: 12px;
-    border: 1px solid var(--color-encadre);
-    border-radius: 8px;
-    background: white;
-    color: var(--color-secondary);
-    font: inherit;
-    font-size: 16px;
 }
 
 #page-saga-modifier .auteur-formulaire h2 {

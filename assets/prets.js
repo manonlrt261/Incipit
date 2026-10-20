@@ -2,7 +2,6 @@
 import { initialiserPage } from './components/initialisation-page.js';
 import { creerFiltresLivres } from './components/filtres-livres.js';
 
-
 initialiserPage((ecouter) => {
     const page = document.getElementById('page-mes-prets');
 
@@ -363,7 +362,7 @@ initialiserPage((ecouter) => {
         filtrerPrets();
     });
 
-    // 2. OUVERTURE DE LA CONFIRMATION DE SUPPRESSION
+    // Prépare la confirmation avec le titre et les données du prêt sélectionné.
 
     ecouter(liste, 'click', event => {
         if (!(event.target instanceof Element) || boutonConfirmer.disabled) return;
@@ -387,7 +386,7 @@ initialiserPage((ecouter) => {
         modalSuppression.showModal();
     });
 
-    // 3. ANNULATION DE LA SUPPRESSION
+    // Annule la suppression et conserve le prêt dans la liste.
 
     ecouter(boutonAnnuler, 'click', () => {
         modalSuppression.close();
@@ -403,7 +402,7 @@ initialiserPage((ecouter) => {
         if (boutonConfirmer.disabled) event.preventDefault();
     });
 
-    // 4. SUPPRESSION DU PRÊT EN BASE DE DONNÉES
+    // Supprime le prêt confirmé, puis actualise le contact associé et les compteurs.
 
     ecouter(boutonConfirmer, 'click', async () => {
         if (!pretASupprimer || boutonConfirmer.disabled) return;
@@ -492,7 +491,6 @@ initialiserPage((ecouter) => {
         livreId.value = '';
         rechercherLivres();
     });
-    // Recherche les livres possédés sans imposer leur sélection pour créer un prêt.
     ecouter(titrePret, 'focus', rechercherLivres);
     // Détache le prêt du livre suggéré si l’auteur est modifié manuellement.
     ecouter(auteurPret, 'input', () => { livreId.value = ''; });
@@ -508,7 +506,7 @@ initialiserPage((ecouter) => {
         document.getElementById('pret-emprunteur').focus();
     });
 
-    // 5. OUVERTURE DE LA MODALE D'AJOUT
+    // Ouvre un formulaire de prêt vide et efface les anciennes suggestions et erreurs.
 
     ecouter(document.getElementById('ouvrir-ajout-pret'), 'click', () => {
             if (!modalAjout.open) {
@@ -521,7 +519,7 @@ initialiserPage((ecouter) => {
             }
         });
 
-    // 6. FERMETURE DE LA MODALE D'AJOUT
+    // Ferme le formulaire de prêt uniquement si aucun enregistrement n’est en cours.
 
     function fermerModalAjout() {
         if (modalAjout.open && !ajoutEnCours) {
@@ -579,7 +577,7 @@ initialiserPage((ecouter) => {
         }
     });
 
-    // 7. INITIALISATION
+    // Applique les filtres initiaux et calcule le nombre de prêts affichés.
 
     filtrerPrets();
 });

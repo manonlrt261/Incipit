@@ -126,6 +126,7 @@
     font-size: 24px;
 }
 
+/* Validation et annulation dans les fenêtres de prêt */
 .prets-modale-actions {
     display: flex;
     justify-content: flex-end;
@@ -150,18 +151,12 @@
     color: #fff;
 }
 
+/* Alignement du titre et de la fermeture commune */
 .prets-modale-entete {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
     gap: 16px;
-}
-
-.prets-modale-fermer {
-    border: none;
-    background: transparent;
-    font-size: 28px;
-    cursor: pointer;
 }
 
 /* =======================================
@@ -193,9 +188,10 @@
     overflow-wrap: anywhere;
 }
 
+/* Repères au clavier des actions de prêt */
 .prets-supprimer:focus-visible,
 .prets-bouton-ajouter:focus-visible,
-.prets-modale button:focus-visible {
+.prets-modale button:not(.modal-bouton-fermer):focus-visible {
     outline: 2px solid var(--color-secondary);
     outline-offset: 3px;
 }
@@ -359,6 +355,7 @@
     color: var(--color-secondary);
 }
 
+/* Commandes associées à chaque contact */
 .prets-contact-actions {
     display: flex;
     gap: 8px;

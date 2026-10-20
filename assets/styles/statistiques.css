@@ -153,6 +153,7 @@
     margin: 0;
 }
 
+/* Axes, valeurs et barres des graphiques de lecture */
 .stats-barres {
     display: block;
     width: 100%;
@@ -183,6 +184,7 @@
     fill: #c6a38a;
 }
 
+/* Disposition des graphiques circulaires et de leurs explications */
 .stats-objectif-contenu,
 .stats-genres-contenu {
     display: flex;
@@ -236,7 +238,7 @@
 }
 
 .stats-objectif-texte button,
-.stats-modale button {
+.stats-modale button:not(.modal-bouton-fermer) {
     font: inherit;
     background: var(--color-secondary);
     color: #fff;
@@ -322,6 +324,7 @@
     color: #fff;
 }
 
+/* Comparaison des totaux annuels */
 .stats-comparaison {
     grid-column: 1 / -1;
 }
@@ -334,6 +337,7 @@
     overflow-x: auto;
 }
 
+/* Notes et messages des graphiques sans données */
 .stats-note {
     font-size: 12px;
     line-height: 1.5;
@@ -357,6 +361,10 @@
     margin-bottom: 20px;
 }
 
+/* =======================================
+   OBJECTIF ANNUEL
+   ======================================= */
+
 /* Fenêtre de consultation et de modification de l’objectif */
 .stats-modale {
     box-sizing: border-box;
@@ -375,7 +383,7 @@
     margin: 0 0 16px;
 }
 
-.statistiques button:focus-visible,
+.statistiques button:not(.modal-bouton-fermer):focus-visible,
 .statistiques select:focus-visible {
     outline: 2px solid var(--color-secondary);
     outline-offset: 3px;
@@ -525,6 +533,7 @@
     color: var(--color-bgdark);
 }
 
+/* Validation et annulation de l’objectif annuel */
 .stats-objectif-actions {
     display: flex;
     justify-content: flex-end;
@@ -551,7 +560,7 @@
     color: #476646;
 }
 
-.stats-modale :focus-visible {
+.stats-modale :focus-visible:not(.modal-bouton-fermer) {
     outline: 2px solid var(--color-secondary);
     outline-offset: 3px;
 }
@@ -645,7 +654,7 @@
     color: var(--color-primary);
 }
 
-.stats-mois-modal button,
+.stats-mois-modal button:not(.modal-bouton-fermer),
 .stats-periode-comparaison select {
     padding: 8px 12px;
     border: 1px solid var(--color-encadre);
@@ -702,4 +711,16 @@
     padding-bottom: 8px;
     border-bottom: 2px solid var(--color-primary);
     color: var(--color-secondary);
+}
+
+/* Place la fermeture commune à droite du titre de l’objectif. */
+.stats-modale-entete {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.stats-modale-entete h2 {
+    margin-top: 0;
 }

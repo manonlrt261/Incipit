@@ -1,3 +1,4 @@
+// Permet d’afficher ou masquer chaque mot de passe et synchronise son icône et son libellé.
 import { initialiserPage } from './components/initialisation-page.js';
 
 initialiserPage(ecouter => {

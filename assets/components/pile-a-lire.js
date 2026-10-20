@@ -8,12 +8,14 @@ initialiserPage((ecouter) => {
     const recherche = document.getElementById('pile-recherche-selection');
     const erreur = document.getElementById('pile-erreur');
 
-    // Recherche dans les seuls livres possédés proposés par le serveur.
+    const normaliser = texte => texte.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('fr');
+
+    // Recherche sans tenir compte des accents dans les livres possédés proposés par le serveur.
     function filtrerSelection() {
-        const normaliser = texte => texte.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('fr');
+        const texte = normaliser(recherche.value);
         let visibles = 0;
         modal.querySelectorAll('[data-selection-recherche]').forEach(carte => {
-            carte.hidden = !normaliser(carte.dataset.selectionRecherche).includes(normaliser(recherche.value));
+            carte.hidden = !normaliser(carte.dataset.selectionRecherche).includes(texte);
             if (!carte.hidden) visibles++;
         });
         const message = document.getElementById('pile-selection-vide');
@@ -22,6 +24,7 @@ initialiserPage((ecouter) => {
             ? 'Aucun livre possédé ne correspond à cette recherche.'
             : 'Aucun livre disponible. Ajoutez d’abord un livre dans Mes lectures.';
     }
+    // Réinitialise la recherche à chaque ouverture pour proposer tous les livres disponibles.
     ecouter(document.getElementById('ouvrir-selection-pile'), 'click', () => {
         recherche.value = '';
         filtrerSelection();
@@ -29,6 +32,10 @@ initialiserPage((ecouter) => {
     });
     ecouter(document.getElementById('fermer-selection-pile'), 'click', () => modal.close());
     ecouter(recherche, 'input', filtrerSelection);
+    ecouter(document.getElementById('pile-rechercher-selection'), 'click', filtrerSelection);
+    ecouter(recherche, 'keydown', event => {
+        if (event.key === 'Enter') { event.preventDefault(); filtrerSelection(); }
+    });
 
     // Un seul écouteur gère les cartes et la modale, y compris après une actualisation des lectures.
     ecouter(document, 'click', async event => {
@@ -36,6 +43,7 @@ initialiserPage((ecouter) => {
         if (!bouton || bouton.disabled) return;
         const id = bouton.dataset.livreId;
         const action = bouton.dataset.pileAction;
+        // Bloque les doubles clics pendant l’enregistrement et après un ajout réussi.
         bouton.disabled = true;
         try {
             const reponse = await fetch(`/livre/${encodeURIComponent(id)}/pile/${encodeURIComponent(action)}`, {

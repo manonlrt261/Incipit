@@ -4,14 +4,14 @@ namespace App\Service;
 
 final class NomsAuteur
 {
-    // Les anciens auteurs ont un nom complet unique : le premier mot devient le prénom, le reste le nom.
+    // Sépare un nom complet saisi avec le prénom en premier ; un nom seul reste dans le champ nom.
     public static function separer(string $nomComplet): array
     {
         $mots = preg_split('/\s+/u', trim($nomComplet), 2);
         return count($mots) === 2 ? ['prenom' => $mots[0], 'nom' => $mots[1]] : ['prenom' => '', 'nom' => $mots[0]];
     }
 
-    // Préserve les noms composés dès qu’un prénom et un nom ont été enregistrés séparément.
+    // Prépare le nom affiché et les initiales, en préservant les prénom et nom déjà séparés.
     public static function presenter(array $auteur): array
     {
         $affichage = trim($auteur['nom_affichage'] ?? trim(($auteur['prenom'] ?? '').' '.($auteur['nom'] ?? '')));

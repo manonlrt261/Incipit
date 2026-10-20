@@ -106,7 +106,7 @@
                 <p id="profil-succes-email" class="profil-succes" role="status" hidden></p>
             </section>
 
-            {# Vérifie le mot de passe actuel et demande la confirmation du nouveau mot de passe. #}
+            {# Recueille le mot de passe actuel et la confirmation ; leur vérification est effectuée côté serveur. #}
             <section class="profil-carte">
                 <header>
                     <img src="{{ asset('images/cadenas.png') }}" alt="">
@@ -125,6 +125,7 @@
                     Modifier mon mot de passe
                 </button>
 
+                {# Le JavaScript ouvre et envoie ce formulaire sans rechargement, puis efface les mots de passe à sa fermeture. #}
                 <form
                     id="profil-form-password"
                     data-profil-form="password"
@@ -220,7 +221,7 @@
                         }
                     ] %}
 
-                    {# Utilise le même état pour la case à cocher et son libellé « Visible » ou « Masquée ». #}
+                    {# Synchronise la case et son libellé ; la clé de section relie le réglage à son enregistrement automatique. #}
                     {% for section in sections %}
                         {% set visible = visibilite[section.cle] %}
 

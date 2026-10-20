@@ -10,12 +10,14 @@
             {# Le contrôleur valide le jeton avant d’afficher ce formulaire. #}
             {{ form_start(resetForm, {attr: {'data-turbo': 'false'}}) }}
                 {{ form_errors(resetForm.plainPassword) }}
+                {# Réutilise la même présentation pour le nouveau mot de passe et sa confirmation. #}
                 {% for champ in [resetForm.plainPassword.first, resetForm.plainPassword.second] %}
                     <div class="login-field">
                         {{ form_label(champ) }}
                         <div class="login-input-wrapper">
                             <img src="{{ asset('images/cadenas2.png') }}" alt="">
                             {{ form_widget(champ, {attr: {placeholder: loop.first ? 'Votre nouveau mot de passe' : 'Confirmez votre mot de passe', 'aria-describedby': 'reset-password-aide'}}) }}
+                            {# Relie chaque commande au champ concerné et fournit les deux icônes au script. #}
                             <button type="button" class="login-password-toggle" data-reset-password-toggle="{{ champ.vars.id }}" aria-label="Afficher le mot de passe" aria-pressed="false">
                                 <img src="{{ asset('images/afficher2.png') }}" data-image-afficher="{{ asset('images/afficher2.png') }}" data-image-masquer="{{ asset('images/masquer2.png') }}" alt="">
                             </button>
@@ -32,4 +34,5 @@
 </main>
 {% endblock %}
 
+{# Charge les commandes d’affichage des mots de passe uniquement sur cette page. #}
 {% block importmap %}{{ importmap(['app', 'reset-password']) }}{% endblock %}

@@ -1,6 +1,7 @@
 // Reprend les classes de components.css pour les badges créés sans rechargement de la page.
 export function creerBadgeLecture(statut) {
     const libelle = String(statut ?? '').trim() || 'Pas commencé';
+    // Reconnaît le même statut malgré les accents, les majuscules ou les espaces superflus.
     const normalise = libelle.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
         .toLocaleLowerCase('fr').replace(/\s+/g, ' ');
     const classes = {

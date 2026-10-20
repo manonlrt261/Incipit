@@ -24,6 +24,7 @@
                 un lien pour réinitialiser votre mot de passe.
             </p>
 
+            {# Présente le motif du retour au formulaire après un lien absent, expiré ou déjà utilisé. #}
             {% for erreur in app.flashes('reset_password_error') %}
                 <p class="profil-erreur" role="alert">{{ erreur }}</p>
             {% endfor %}

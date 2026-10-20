@@ -16,7 +16,12 @@
             <input id="saga-nom" name="nom" value="{{ nomSaga }}" maxlength="255" required>
             <h2>Ajouter un livre existant</h2>
             <label for="saga-recherche-livre">Rechercher parmi les livres de cet auteur</label>
-            <input id="saga-recherche-livre" type="search" placeholder="Un titre ou une saga…" aria-controls="saga-resultats-livres" autocomplete="off" value="{% for livre in livres %}{% if livreId == livre.id %}{{ livre.titre }}{% endif %}{% endfor %}">
+            <div class="bibliotheque-recherche" role="search">
+                <img src="{{ asset('images/rechercher.png') }}" alt="">
+                <input id="saga-recherche-livre" type="search" placeholder="Un titre ou une saga…" aria-controls="saga-resultats-livres" autocomplete="off" value="{% for livre in livres %}{% if livreId == livre.id %}{{ livre.titre }}{% endif %}{% endfor %}">
+                <button type="button" id="saga-rechercher-livre" class="bouton-rechercher">Rechercher</button>
+            </div>
+            {# Envoie l’identifiant choisi dans les résultats, indépendamment du texte de recherche. #}
             <input type="hidden" id="saga-livre" name="livre" value="{{ livreId }}">
             {# Les livres existants se choisissent directement dans les résultats de recherche. #}
             <div id="saga-resultats-livres" hidden>
@@ -25,6 +30,7 @@
                 {% endfor %}
                 <p id="saga-recherche-vide" hidden>Aucun livre trouvé.</p>
             </div>
+            {# Préremplit le formulaire commun avec l’auteur et la saga déjà enregistrée. #}
             <button type="button" id="ouvrir-ajout" class="bibliotheque-ajouter" data-saga="{{ sagaEnregistree }}" data-auteur="{{ auteur.affichage }}">Ajouter un nouveau livre</button>
             <p>Créez un livre avec le formulaire habituel. Il sera enregistré dans cette saga. Vous pourrez y préciser son numéro de tome.</p>
             <p id="saga-ajout-succes" role="status" hidden></p>
@@ -38,5 +44,6 @@
         </form>
     </main>
 </div>
+{# Place la modale hors du formulaire de saga pour éviter des formulaires imbriqués. #}
 {% include 'livre/_modal_ajout.html.twig' %}
 {% endblock %}

@@ -1,4 +1,4 @@
-// Réorganise uniquement les cartes de l’accueil en mode édition, puis sauvegarde avant le retour au profil.
+// Réorganise les livres des pages publiques et choisit les auteurs ex æquo en mode édition.
 import { initialiserPage } from './components/initialisation-page.js';
 
 initialiserPage(ecouter => {
@@ -34,6 +34,7 @@ initialiserPage(ecouter => {
         carte.setAttribute('aria-label', `Déplacer ${carte.querySelector('h3, h2').textContent}`);
         carte.querySelectorAll('img').forEach(image => image.draggable = false);
     });
+    // Annule l’appui en attente et libère le pointeur pour permettre un nouveau déplacement.
     function terminerDeplacement() {
         clearTimeout(attente);
         carteActive?.classList.remove('accueil-livre-deplace');

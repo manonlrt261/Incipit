@@ -19,7 +19,7 @@
             <p class="sous-titre-page">Retrouvez votre univers littéraire en un coup d’œil.</p>
         </header>
 
-        {# La recherche de bureau ouvre la bibliothèque en lui transmettant le texte saisi. #}
+        {# La recherche de bureau transmet le texte à la page de pile à lire, qui applique ses filtres. #}
         <header class="dashboard-header">
             <form action="{{ path('app_livre') }}" method="get" class="dashboard-recherche">
                 <img src="{{ asset('images/rechercher.png') }}" alt="">
@@ -130,7 +130,6 @@
                 <div class="dashboard-titre-section">
                     <img src="{{ asset('images/ajout.png') }}" alt="">
                     <h2>Derniers ajouts</h2>
-                    {# Le JavaScript affiche ou masque uniquement la liste associée à cette flèche. #}
                     <button
                         type="button"
                         class="dashboard-basculer"
@@ -192,7 +191,7 @@
                 {% if genresFavoris is not empty %}
                     <div class="dashboard-genres">
                         {% for genre in genresFavoris %}
-                            {# Le rang choisit la colonne, la hauteur et la couleur de la marche du podium. #}
+                            {# Le rang détermine la marche du podium ; la route charge les livres du genre dans la modale. #}
                             <button type="button" class="dashboard-genre dashboard-genre--{{ loop.index }}" data-genre-url="{{ path('app_dashboard_genre_lectures', {id: genre.id}) }}" aria-haspopup="dialog" aria-label="Voir les livres lus : {{ genre.nom }}">
                                 <span class="dashboard-genre-marche">
                                     <strong>{{ loop.index }}</strong>
@@ -234,9 +233,13 @@
         </div>
     </main>
 </div>
-    {# Charge les livres du genre choisi sans quitter le tableau de bord. #}
-    <dialog id="dashboard-genre-modal" class="dashboard-genre-modal" aria-labelledby="dashboard-genre-titre">
-        <header><h2 id="dashboard-genre-titre">Livres lus</h2><button type="button" id="dashboard-genre-fermer" aria-label="Fermer">×</button></header>
-        <div id="dashboard-genre-contenu" aria-live="polite"></div>
-    </dialog>
+
+{# Reçoit la liste chargée au clic sur un genre, ainsi que les messages de chargement ou d’erreur. #}
+<dialog id="dashboard-genre-modal" class="dashboard-genre-modal" aria-labelledby="dashboard-genre-titre">
+    <header>
+        <h2 id="dashboard-genre-titre">Livres lus</h2>
+        {% include 'components/_bouton_fermer.html.twig' with {id: 'dashboard-genre-fermer'} only %}
+    </header>
+    <div id="dashboard-genre-contenu" aria-live="polite"></div>
+</dialog>
 {% endblock %}

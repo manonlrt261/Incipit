@@ -13,7 +13,7 @@
         <header class="details-livre-entete">
             <h2 id="details-livre-titre">Détails du livre</h2>
 
-            {% include 'components/_bouton_fermer.html.twig' with { id: 'fermer-details-livre' } %}
+            {% include 'components/_bouton_fermer.html.twig' with { id: 'fermer-details-livre' } only %}
         </header>
 
         {# Permet de modifier la fiche ou de retirer le livre sans supprimer son historique. #}
@@ -117,7 +117,7 @@
                 </button>
             </div>
 
-            {# Formulaire masqué jusqu’à l’ajout d’une session ; les erreurs restent affichées dans cette zone. #}
+            {# Formulaire partagé entre ajout et modification d’une session ; les erreurs restent dans cette zone. #}
             <div id="details-formulaire-lecture" class="details-formulaire-lecture" hidden>
 
                 <h4 id="details-titre-formulaire-lecture" class="details-formulaire-lecture-titre">
@@ -213,7 +213,7 @@
 
             </div>
 
-            {# Le JavaScript remplace ce contenu par les sessions enregistrées et leurs notes. #}
+            {# Le JavaScript construit les sessions avec leurs dates, notes et boutons de modification ou suppression. #}
             <p id="details-erreur-session" role="alert" hidden></p>
             <div id="details-livre-liste-lectures"
                 data-modifier="{{ asset('images/modifier.png') }}"

@@ -1,8 +1,8 @@
 {# Partage les commandes d’édition entre l’accueil et ses listes complètes. #}
-    {% if edition|default(false) %}
-        <aside class="accueil-edition-commandes">
-            <p>Maintenez un livre appuyé puis faites-le glisser dans sa section. Au clavier : sélectionnez sa carte puis utilisez les flèches.</p>
-            <button type="button" id="quitter-edition-accueil">Quitter le mode édition</button>
-            <p id="edition-accueil-message" role="status" aria-live="polite"></p>
-        </aside>
-    {% endif %}
+{% if edition|default(false) %}
+    <aside class="accueil-edition-commandes">
+        <p>Maintenez un livre appuyé puis faites-le glisser dans sa section. Au clavier : sélectionnez sa carte puis utilisez les flèches.</p>
+        <button type="button" id="quitter-edition-accueil">Quitter le mode édition</button>
+        <p id="edition-accueil-message" role="status" aria-live="polite"></p>
+    </aside>
+{% endif %}

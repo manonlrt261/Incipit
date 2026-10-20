@@ -1,7 +1,10 @@
 {# Consultation complète partagée entre la fiche auteur et les livres retirés. #}
 <dialog id="auteur-details-livre" class="modal-details-livre" aria-labelledby="auteur-details-titre">
     <div class="details-livre-contenu">
-        <header class="details-livre-entete"><h2 id="auteur-details-titre">Détails du livre</h2><button type="button" class="modal-bouton-fermer" id="auteur-details-fermer" aria-label="Fermer">×</button></header>
+        <header class="details-livre-entete">
+            <h2 id="auteur-details-titre">Détails du livre</h2>
+            <button type="button" class="modal-bouton-fermer" id="auteur-details-fermer" aria-label="Fermer">×</button>
+        </header>
         <section class="details-livre-principal">
             <div class="details-livre-couverture-zone"><div class="details-livre-couverture">
                 {% if livre.imageCouverture %}<img src="{{ livre.imageCouverture starts with 'http' or livre.imageCouverture starts with '/' ? livre.imageCouverture : '/' ~ livre.imageCouverture }}" alt="Couverture de {{ livre.titre }}">{% else %}<span>Aucune couverture</span>{% endif %}
@@ -11,6 +14,7 @@
                 {% if livre.sousTitre %}<p>{{ livre.sousTitre }}</p>{% endif %}
                 <p class="auteur-details-noms">{{ livre.auteurs|map(auteur => auteur.nomAffichage)|join(', ') ?: 'Auteur non renseigné' }}</p>
                 <div class="details-livre-metadonnees">
+                    {# Regroupe les métadonnées pour appliquer le même affichage aux valeurs présentes ou manquantes. #}
                     {% set informations = {
                         'Saga': livre.saga, 'Tome': livre.tome,
                         'Genre(s)': livre.genres|map(genre => genre.nom)|join(', '),
@@ -18,7 +22,10 @@
                         'Date de publication': livre.datePublication ? livre.datePublication|date('d/m/Y') : null,
                         'Nombre de pages': livre.nombrePages, 'Langue': livre.langue
                     } %}
-                    {% for libelle, valeur in informations %}<div><strong>{{ libelle }}</strong><span>{{ valeur ?: '—' }}</span></div>{% endfor %}
+                    {% for libelle, valeur in informations %}
+                        <div><strong>{{ libelle }}</strong><span>{{ valeur ?: '—' }}</span></div>
+                    {% endfor %}
+                    {# Réserve les informations d’achat aux livres ayant encore un souhait associé. #}
                     {% if souhait %}
                         <div><strong>Prix</strong><span>{{ souhait.prixEstime is not null ? souhait.prixEstime|number_format(2, ',', ' ') ~ ' €' : '—' }}</span></div>
                         <div><strong>Lien</strong><span>{% if souhait.lienAchat starts with 'https://' or souhait.lienAchat starts with 'http://' %}<a href="{{ souhait.lienAchat }}" target="_blank" rel="noopener noreferrer">{{ souhait.lienAchat }}</a>{% else %}—{% endif %}</span></div>
@@ -37,7 +44,9 @@
                     <p>Note : {{ lecture.note is not null ? lecture.note|number_format(1, ',', ' ') ~ '/5' : 'Non renseignée' }}</p>
                     {% if lecture.avis %}<p>{{ lecture.avis }}</p>{% endif %}
                 </article>
-            {% else %}<p>Aucune session de lecture.</p>{% endfor %}
+            {% else %}
+                <p>Aucune session de lecture.</p>
+            {% endfor %}
         </section>
     </div>
 </dialog>

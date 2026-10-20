@@ -10,13 +10,7 @@
                 {{ wishlist_mode ? 'Complétez les informations pour enrichir votre wishlist.' : 'Complétez les informations pour enrichir votre bibliothèque.' }}
             </p>
         </div>
-        <button
-            type="button"
-            id="fermer-ajout"
-            aria-label="Fermer"
-        >
-            &times;
-        </button>
+        {% include 'components/_bouton_fermer.html.twig' with {id: 'fermer-ajout'} only %}
     </div>
 
     {# Adapte la destination du formulaire au parcours bibliothèque ou wishlist. #}
@@ -32,7 +26,7 @@
         enctype="multipart/form-data"
     >
 
-    {# Le JavaScript renseigne cet identifiant pour passer de l’ajout à la modification. #}
+        {# Le JavaScript renseigne cet identifiant pour passer de l’ajout à la modification. #}
         <input type="hidden" id="modal-livre-id" name="livreId" value="">
 
         <input
@@ -51,17 +45,19 @@
             <div class="modal-recherche-isbn">
                 <label for="modal-isbn-recherche">ISBN-10 ou ISBN-13</label>
                 <div class="modal-recherche-ligne">
-                    <input
-                        type="text"
-                        id="modal-isbn-recherche"
-                        placeholder="Saisir un ISBN..."
-                        maxlength="17"
-                        inputmode="text"
-                    >
-                    <button type="button" id="modal-bouton-recherche-isbn" class="bouton-rechercher">
-                        <img src="{{ asset('images/rechercherbeige.png') }}" alt="">
-                        Rechercher
-                    </button>
+                    <div class="bibliotheque-recherche" role="search">
+                        <img src="{{ asset('images/rechercher.png') }}" alt="">
+                        <input
+                            type="text"
+                            id="modal-isbn-recherche"
+                            placeholder="Saisir un ISBN..."
+                            maxlength="17"
+                            inputmode="text"
+                        >
+                        <button type="button" id="modal-bouton-recherche-isbn" class="bouton-rechercher">
+                            Rechercher
+                        </button>
+                    </div>
                     <button type="button" id="modal-bouton-scanner-isbn">
                         <img src="{{ asset('images/scan.png') }}" alt="">
                         Scanner un ISBN
@@ -78,19 +74,19 @@
                         Autorise la caméra, puis place le code-barres devant elle.
                     </p>
 
-                <button
-                    type="button"
-                    id="modal-arreter-scanner"
-                    class="modal-scanner-primary"
-                >
-                    Arrêter le scan
-                </button>
+                    <button
+                        type="button"
+                        id="modal-arreter-scanner"
+                        class="modal-scanner-primary"
+                    >
+                        Arrêter le scan
+                    </button>
 
-                {# Permet de choisir un objectif net et de zoomer sans rapprocher le livre. #}
-                <select id="modal-camera-isbn" aria-label="Caméra utilisée pour le scan" hidden></select>
-                <input id="modal-zoom-isbn" type="range" aria-label="Zoom du scanner" hidden>
-                <div id="modal-lecteur-isbn"></div>
-                <div id="modal-lecteur-isbn-hd" hidden></div>
+                    {# Permet de choisir un objectif net et de zoomer sans rapprocher le livre. #}
+                    <select id="modal-camera-isbn" aria-label="Caméra utilisée pour le scan" hidden></select>
+                    <input id="modal-zoom-isbn" type="range" aria-label="Zoom du scanner" hidden>
+                    <div id="modal-lecteur-isbn"></div>
+                    <div id="modal-lecteur-isbn-hd" hidden></div>
 
                 </div>
 
@@ -149,55 +145,57 @@
 
                     {# Zone vidéo activée par JavaScript pendant la prise de photo de la couverture. #}
                     <div id="modal-camera-zone" class="modal-camera-zone" hidden>
-    <video id="modal-camera-video" autoplay playsinline muted></video>
+                        <video id="modal-camera-video" autoplay playsinline muted></video>
 
-    <div class="modal-camera-actions">
-        <button type="button" id="modal-camera-capturer">
-            Prendre la photo
-        </button>
+                        <div class="modal-camera-actions">
+                            <button type="button" id="modal-camera-capturer">
+                                Prendre la photo
+                            </button>
 
-        <button type="button" id="modal-camera-annuler">
-            Annuler
-        </button>
-    </div>
+                            <button type="button" id="modal-camera-annuler">
+                                Annuler
+                            </button>
+                        </div>
 
-    <p id="modal-camera-erreur" role="alert" hidden></p>
-</div>
+                        <p id="modal-camera-erreur" role="alert" hidden></p>
+                    </div>
 
+                    {# Conserve l’URL choisie en ligne ; un fichier importé est transmis séparément. #}
                     <input
-    type="hidden"
-    id="modal-image-couverture"
-    name="imageCouverture"
->
+                        type="hidden"
+                        id="modal-image-couverture"
+                        name="imageCouverture"
+                    >
 
-{# Affiche les résultats de recherche de couvertures et permet d’en sélectionner une. #}
-<div id="modal-recherche-couverture-zone" class="modal-recherche-couverture-zone" hidden>
-    <label for="modal-recherche-couverture-input">
-        Rechercher une couverture sur Google Images
-    </label>
+                    {# Affiche les résultats de recherche de couvertures et permet d’en sélectionner une. #}
+                    <div id="modal-recherche-couverture-zone" class="modal-recherche-couverture-zone" hidden>
+                        <label for="modal-recherche-couverture-input">
+                            Rechercher une couverture sur Google Images
+                        </label>
 
-    <div class="modal-recherche-couverture-formulaire">
-        <input
-            type="search"
-            id="modal-recherche-couverture-input"
-            placeholder="Titre du livre ou auteur..."
-        >
+                        <div class="modal-recherche-couverture-formulaire bibliotheque-recherche" role="search">
+                            <img src="{{ asset('images/rechercher.png') }}" alt="">
+                            <input
+                                type="search"
+                                id="modal-recherche-couverture-input"
+                                placeholder="Titre du livre ou auteur..."
+                            >
 
-        <button type="button" id="modal-lancer-recherche-couverture" class="bouton-rechercher">
-            Rechercher
-        </button>
-    </div>
+                            <button type="button" id="modal-lancer-recherche-couverture" class="bouton-rechercher">
+                                Rechercher
+                            </button>
+                        </div>
 
-    <p id="modal-recherche-couverture-message" role="status" aria-live="polite"></p>
+                        <p id="modal-recherche-couverture-message" role="status" aria-live="polite"></p>
 
-    <div id="modal-resultats-couvertures" class="modal-resultats-couvertures"></div>
+                        <div id="modal-resultats-couvertures" class="modal-resultats-couvertures"></div>
 
-    <button type="button" id="modal-fermer-recherche-couverture">
-    Fermer la recherche
-</button>
-</div>
+                        <button type="button" id="modal-fermer-recherche-couverture">
+                            Fermer la recherche
+                        </button>
+                    </div>
 
-</div>
+                </div>
 
                 <div class="modal-champs-livre">
                     <div class="modal-champ">
@@ -242,6 +240,7 @@
                     </div>
 
                     <div class="modal-deux-colonnes">
+                        {# Les suggestions sont limitées aux sagas des auteurs saisis dans ce formulaire. #}
                         <div class="modal-champ modal-saga-zone">
                             <label for="modal-saga">Saga</label>
                             <input type="text" id="modal-saga" name="saga" maxlength="255" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="modal-suggestions-sagas" aria-expanded="false">
@@ -258,39 +257,39 @@
                         </div>
                     </div>
 
-{# Le menu permet de sélectionner plusieurs genres et transmet leurs identifiants au serveur. #}
-<div class="modal-champ">
-    <label id="modal-genres-label">Genre(s)</label>
+                    {# Le menu permet de sélectionner plusieurs genres et transmet leurs identifiants au serveur. #}
+                    <div class="modal-champ">
+                        <label id="modal-genres-label">Genre(s)</label>
 
-    <div class="modal-genres-dropdown">
-        <button
-            type="button"
-            id="modal-genres-bouton"
-            class="modal-genres-bouton"
-            aria-expanded="false"
-            aria-controls="modal-genres-options"
-            aria-labelledby="modal-genres-label modal-genres-texte"
-        >
-            <span id="modal-genres-texte">
-                Sélectionner un ou plusieurs genres
-            </span>
-            <span class="modal-genres-fleche" aria-hidden="true"></span>
-        </button>
+                        <div class="modal-genres-dropdown">
+                            <button
+                                type="button"
+                                id="modal-genres-bouton"
+                                class="modal-genres-bouton"
+                                aria-expanded="false"
+                                aria-controls="modal-genres-options"
+                                aria-labelledby="modal-genres-label modal-genres-texte"
+                            >
+                                <span id="modal-genres-texte">
+                                    Sélectionner un ou plusieurs genres
+                                </span>
+                                <span class="modal-genres-fleche" aria-hidden="true"></span>
+                            </button>
 
-        <div id="modal-genres-options" class="modal-genres-options" hidden>
-            {% for genre in genres %}
-                <label class="modal-genre-option">
-                    <input
-                        type="checkbox"
-                        name="genres[]"
-                        value="{{ genre.id }}"
-                    >
-                    <span>{{ genre.nom }}</span>
-                </label>
-            {% endfor %}
-        </div>
-    </div>
-</div>
+                            <div id="modal-genres-options" class="modal-genres-options" hidden>
+                                {% for genre in genres %}
+                                    <label class="modal-genre-option">
+                                        <input
+                                            type="checkbox"
+                                            name="genres[]"
+                                            value="{{ genre.id }}"
+                                        >
+                                        <span>{{ genre.nom }}</span>
+                                    </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="modal-deux-colonnes">
                         <div class="modal-champ">

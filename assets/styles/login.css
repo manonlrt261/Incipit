@@ -152,6 +152,7 @@
     }
 }
 
+/* Dimensions du logo indépendantes des règles générales sur les images */
 .login-page .login-logo {
     display: block;
     width: 52px;
@@ -162,6 +163,7 @@
     margin: 0 auto 20px;
 }
 
+/* Retour à l’accueil depuis la connexion */
 .login-back-home {
     position: absolute;
     top: 30px;

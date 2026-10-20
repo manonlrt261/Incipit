@@ -13,6 +13,7 @@
     <h3>{{ livre.titre }}</h3>
     <p>{{ livre.auteurs ?: 'Auteur non renseigné' }}</p>
 
+    {# Distingue une demi-étoile d’une étoile pleine et annonce la note une seule fois aux lecteurs d’écran. #}
     {% if note is not null %}
         <div class="accueil-etoiles"
              aria-label="Note : {{ note }} sur 5">

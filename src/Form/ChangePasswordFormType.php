@@ -6,7 +6,6 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\NotCompromisedPassword;
@@ -14,6 +13,7 @@ use Symfony\Component\Validator\Constraints\PasswordStrength;
 
 class ChangePasswordFormType extends AbstractType
 {
+    // Demande deux saisies identiques et valide la robustesse du nouveau mot de passe.
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
@@ -36,6 +36,7 @@ class ChangePasswordFormType extends AbstractType
                             max: 4096,
                         ),
                         new PasswordStrength(message: 'Ce mot de passe est trop faible. Choisissez un mot de passe plus robuste.'),
+                        // Refuse un mot de passe connu dans les fuites de données.
                         new NotCompromisedPassword(message: 'Ce mot de passe figure dans une fuite de données. Choisissez-en un autre.'),
                     ],
                     'label' => 'Nouveau mot de passe',
@@ -46,12 +47,6 @@ class ChangePasswordFormType extends AbstractType
                 'invalid_message' => 'Les deux mots de passe doivent être identiques.',
                 // Le contrôleur hache la saisie avant de l’enregistrer sur le compte.
                 'mapped' => false,
-            ])
-        ;
-    }
-
-    public function configureOptions(OptionsResolver $resolver): void
-    {
-        $resolver->setDefaults([]);
+            ]);
     }
 }
