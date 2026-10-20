@@ -34,7 +34,7 @@ final class JournalController extends AbstractController
                 error_log('[INCIPIT - JOURNAL] '.json_encode($mongo->diagnostic() + [
                     'type' => get_class($exception),
                     'code' => $exception->getCode(),
-                ], JSON_UNESCAPED_SLASHES));
+                ], JSON_UNESCAPED_SLASHES).PHP_EOL, 3, $this->getParameter('kernel.logs_dir').'/journal-mongodb.log');
                 $erreur = 'Le journal est momentanément indisponible. Les nouvelles actions restent conservées en attente de transmission.';
             }
         }
