@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use Doctrine\DBAL\Connection;
+use App\Service\NomsAuteur;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -27,6 +28,8 @@ final class NavigationController extends AbstractController
              WHERE la.livre_id = l.id ORDER BY a.id ASC LIMIT 1) AS auteur_nom,
             (SELECT a.prenom FROM livre_auteur la JOIN auteur a ON a.id = la.auteur_id
              WHERE la.livre_id = l.id ORDER BY a.id ASC LIMIT 1) AS auteur_prenom,
+            (SELECT a.nom_affichage FROM livre_auteur la JOIN auteur a ON a.id = la.auteur_id
+             WHERE la.livre_id = l.id ORDER BY a.id ASC LIMIT 1) AS auteur_affichage,
             COALESCE((SELECT GROUP_CONCAT(g.nom SEPARATOR '|')
                 FROM livre_genre lg INNER JOIN genre g ON g.id = lg.genre_id
                 WHERE lg.livre_id = l.id), '') AS genres,
@@ -71,6 +74,18 @@ final class NavigationController extends AbstractController
 
         ORDER BY l.titre ASC, l.id ASC
     ");
+
+        // Aligne le tri sur les fiches auteurs, y compris les anciennes fiches dont le prénom n’était pas séparé.
+        foreach ($livres as &$livre) {
+            $auteur = NomsAuteur::presenter([
+                'nom' => $livre['auteur_nom'] ?? '',
+                'prenom' => $livre['auteur_prenom'] ?? '',
+                'nom_affichage' => $livre['auteur_affichage'] ?? '',
+            ]);
+            $livre['auteur_nom'] = $auteur['nom'];
+            $livre['auteur_prenom'] = $auteur['prenom'];
+        }
+        unset($livre);
 
         // Conserve les mêmes livres retirés et leur historique, désormais présentés sous les lectures.
         $livresRetires = $connection->fetchAllAssociative("
@@ -123,7 +138,7 @@ final class NavigationController extends AbstractController
             'livresRetires' => $livresRetires,
             'statistiques' => $statistiques,
             'genres' => $connection->fetchAllAssociative(
-                'SELECT id, nom FROM genre ORDER BY id ASC'
+                'SELECT id, nom FROM genre ORDER BY nom ASC, id ASC'
             ),
         ]);
     }

@@ -266,6 +266,14 @@
    ======================================= */
 
 @media (max-width: 700px) {
+    /* Empêche le zoom automatique de Safari à la saisie, y compris dans les recherches des fenêtres modales.
+       La priorité protège cette taille des règles propres à chaque page ; le zoom manuel reste disponible. */
+    :root input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='hidden']):not([type='file']):not([type='submit']):not([type='button']),
+    :root textarea,
+    :root select {
+        font-size: 16px !important;
+    }
+
     :is(.espace-contenu, #modal-ajout-livre, #modal-details-livre, #modal-selection-pile)
         .bibliotheque-recherche,
     .espace-contenu .lectures-recherche,
