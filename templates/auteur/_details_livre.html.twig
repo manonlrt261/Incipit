@@ -48,5 +48,13 @@
                 <p>Aucune session de lecture.</p>
             {% endfor %}
         </section>
+        {% if livreRetire|default(false) %}
+            {# Réintègre la fiche existante sans effacer l’historique conservé lors de son retrait. #}
+            <form class="details-livre-restauration" method="post" action="{{ path('app_livre_rajouter', {id: livre.id}) }}" data-rajouter-livre data-livre-id="{{ livre.id }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('rajouter_livre') }}">
+                <button type="submit">Rajouter à ma collection</button>
+                <p role="alert" data-rajouter-erreur hidden></p>
+            </form>
+        {% endif %}
     </div>
 </dialog>

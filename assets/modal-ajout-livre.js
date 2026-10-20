@@ -571,7 +571,7 @@ initialiserPage(ecouter => {
             });
             scannerISBN = scanner;
 
-            // Après l’autorisation, propose les objectifs disponibles et privilégie la caméra arrière standard.
+            // Sur mobile, privilégie l’objectif arrière ; sur ordinateur, utilise directement la webcam.
             let cameras = [];
             try {
                 cameras = await Html5Qrcode.getCameras();
@@ -582,7 +582,9 @@ initialiserPage(ecouter => {
             const principale = cameras.find(camera =>
                 /back|rear|arrière|environment/i.test(camera.label)
                 && !/ultra|tele|télé|wide angle|grand.angle/i.test(camera.label));
-            const cameraChoisie = cameraId || principale?.id;
+            const mobileCamera = appareilMobile();
+            const cameraChoisie = mobileCamera ? (cameraId || principale?.id) : cameras[0]?.id;
+            const orientationCamera = mobileCamera ? 'environment' : 'user';
             if (choixCameraISBN) {
                 choixCameraISBN.replaceChildren();
                 cameras.forEach((camera, index) => {
@@ -591,7 +593,7 @@ initialiserPage(ecouter => {
                     option.textContent = camera.label || `Caméra ${index + 1}`;
                     choixCameraISBN.appendChild(option);
                 });
-                choixCameraISBN.hidden = cameras.length < 2;
+                choixCameraISBN.hidden = !mobileCamera || cameras.length < 2;
             }
 
             // Partage la validation entre la lecture vidéo et l’analyse des images haute résolution.
@@ -606,14 +608,14 @@ initialiserPage(ecouter => {
             };
 
             await scanner.start(
-                cameraChoisie || { facingMode: 'environment' },
+                cameraChoisie || { facingMode: orientationCamera },
                 {
                     fps: 8,
                     // Sans cadre de découpe, un code éloigné ou décentré reste dans la zone analysée.
                     videoConstraints: {
                         ...(cameraChoisie
                             ? { deviceId: { exact: cameraChoisie } }
-                            : { facingMode: { ideal: 'environment' } }),
+                            : { facingMode: { ideal: orientationCamera } }),
                         width: { ideal: 1920 },
                         height: { ideal: 1080 }
                     }
@@ -912,8 +914,7 @@ initialiserPage(ecouter => {
     // Demande l’accès à la caméra pour photographier la couverture.
     ecouter(boutonPhoto, 'click', async () => {
         fermerOptionsCouverture();
-        if (photoCouverture && (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '')
-            || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1))) {
+        if (photoCouverture && appareilMobile()) {
             photoCouverture.click();
             return;
         }
@@ -937,7 +938,7 @@ initialiserPage(ecouter => {
 
         try {
             fluxCamera = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: 'environment' },
+                video: appareilMobile() ? { facingMode: { ideal: 'environment' } } : true,
                 audio: false
             });
 

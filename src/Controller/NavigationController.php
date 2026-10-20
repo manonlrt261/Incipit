@@ -23,6 +23,10 @@ final class NavigationController extends AbstractController
             l.saga,
             l.image_couverture,
             l.date_creation,
+            (SELECT a.nom FROM livre_auteur la JOIN auteur a ON a.id = la.auteur_id
+             WHERE la.livre_id = l.id ORDER BY a.id ASC LIMIT 1) AS auteur_nom,
+            (SELECT a.prenom FROM livre_auteur la JOIN auteur a ON a.id = la.auteur_id
+             WHERE la.livre_id = l.id ORDER BY a.id ASC LIMIT 1) AS auteur_prenom,
             COALESCE((SELECT GROUP_CONCAT(g.nom SEPARATOR '|')
                 FROM livre_genre lg INNER JOIN genre g ON g.id = lg.genre_id
                 WHERE lg.livre_id = l.id), '') AS genres,

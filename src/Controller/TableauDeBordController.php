@@ -4,15 +4,51 @@ namespace App\Controller;
 
 use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\{Request, Response};
 use Symfony\Component\Routing\Attribute\Route;
 
 class TableauDeBordController extends AbstractController
 {
     #[Route('/tableau-de-bord', name: 'app_tableau_de_bord', methods: ['GET'])]
     // Rassemble les compteurs, les lectures en cours et les derniers ajouts du tableau de bord.
-    public function index(Connection $connection): Response
+    public function index(Connection $connection, Request $request): Response
     {
+        $recherche = mb_substr(trim($request->query->getString('recherche')), 0, 200);
+        $pageRecherche = max(1, min(1000, $request->query->getInt('page', 1)));
+        $resultatsRecherche = [];
+        $nombreResultats = 0;
+        if ($recherche !== '') {
+            // Recherche dans toute la collection possédée, indépendamment de la sélection de la pile à lire.
+            // LOCATE traite les caractères % et _ comme du texte et les paramètres restent liés par DBAL.
+            $condition = "EXISTS (SELECT 1 FROM exemplaire e WHERE e.livre_id = l.id AND e.date_retrait IS NULL)
+                AND (
+                    LOCATE(:texte, COALESCE(l.titre, '')) > 0
+                    OR LOCATE(:texte, COALESCE(l.sous_titre, '')) > 0
+                    OR LOCATE(:texte, COALESCE(l.saga, '')) > 0
+                    OR EXISTS (
+                        SELECT 1 FROM livre_auteur la JOIN auteur a ON a.id = la.auteur_id
+                        WHERE la.livre_id = l.id AND (
+                            LOCATE(:texte, COALESCE(a.nom_affichage, '')) > 0
+                            OR LOCATE(:texte, CONCAT_WS(' ', a.prenom, a.nom)) > 0
+                        )
+                    )
+                    OR (:isbn <> '' AND (
+                        LOCATE(:isbn, REPLACE(REPLACE(COALESCE(l.isbn13, ''), '-', ''), ' ', '')) > 0
+                        OR LOCATE(:isbn, REPLACE(REPLACE(COALESCE(l.isbn10, ''), '-', ''), ' ', '')) > 0
+                    ))
+                )";
+            $parametres = ['texte' => $recherche, 'isbn' => preg_replace('/[\s-]+/u', '', $recherche)];
+            $nombreResultats = (int) $connection->fetchOne('SELECT COUNT(*) FROM livre l WHERE '.$condition, $parametres);
+            $pageRecherche = min($pageRecherche, max(1, (int) ceil($nombreResultats / 30)));
+            $resultatsRecherche = $connection->fetchAllAssociative(
+                "SELECT l.id, l.titre, l.image_couverture, l.saga, l.isbn13, l.isbn10,
+                    (SELECT GROUP_CONCAT(COALESCE(a.nom_affichage, CONCAT_WS(' ', a.prenom, a.nom)) SEPARATOR ', ')
+                     FROM livre_auteur la JOIN auteur a ON a.id = la.auteur_id WHERE la.livre_id = l.id) AS auteurs
+                 FROM livre l WHERE ".$condition." ORDER BY l.titre ASC, l.id ASC LIMIT 30 OFFSET ".(($pageRecherche - 1) * 30),
+                $parametres
+            );
+        }
+
         // Compte les livres distincts plutôt que le nombre d’exemplaires.
         $livresPossedes = (int) $connection->fetchOne(
             'SELECT COUNT(DISTINCT livre_id) FROM exemplaire'
@@ -112,6 +148,10 @@ class TableauDeBordController extends AbstractController
         );
 
         return $this->render('tableau_de_bord/index.html.twig', [
+            'recherche' => $recherche,
+            'resultatsRecherche' => $resultatsRecherche,
+            'nombreResultats' => $nombreResultats,
+            'pageRecherche' => $pageRecherche,
             'livresPossedes' => $livresPossedes,
             'livresTermines' => $livresTermines,
             'livresALire' => $livresALire,

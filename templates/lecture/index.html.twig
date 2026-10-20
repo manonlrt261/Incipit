@@ -62,7 +62,7 @@
         </div>
 
         {# Reprend les filtres et tris de la bibliothèque, en complément des compteurs par statut. #}
-        {% include 'components/_filtres_livres.html.twig' with {genres: genres, prefixe: 'lectures-', avec_note: true} only %}
+        {% include 'components/_filtres_livres.html.twig' with {genres: genres, prefixe: 'lectures-', avec_note: true, tri_auteurs_detaille: true} only %}
 
         <section
             class="lectures-statistiques"
@@ -195,6 +195,8 @@
                     data-note="{{ livre.note }}"
                     data-genres="{{ livre.genres|e('html_attr') }}"
                     data-auteurs="{{ livre.auteurs|e('html_attr') }}"
+                    data-auteur-nom="{{ livre.auteur_nom|e('html_attr') }}"
+                    data-auteur-prenom="{{ livre.auteur_prenom|e('html_attr') }}"
                     data-date-ajout="{{ livre.date_creation ? livre.date_creation|date('U') : '' }}"
                     data-recherche="{{ (livre.titre ~ ' ' ~ livre.auteurs ~ ' ' ~ livre.saga)|lower|e('html_attr') }}"
                     tabindex="0"

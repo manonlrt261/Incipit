@@ -10,7 +10,13 @@ export function creerFiltresLivres({ page, conteneur, selecteur, recherche, ecou
     const note = formulaire.querySelector('[data-filtre-note]');
     // Une note absente reste distincte d’un zéro et se place après les livres notés.
     const noteCarte = carte => carte.dataset.note?.trim() ? Number(carte.dataset.note) : null;
-    const effacerTriNote = () => { if (note && ['asc', 'desc'].includes(note.value)) note.value = ''; };
+    // Le dernier tri choisi est prioritaire ; les autres départagent les égalités sans être effacés.
+    const priorites = ['note', 'contact', 'auteurs', 'date'];
+    function prioriser(cle) {
+        priorites.splice(priorites.indexOf(cle), 1);
+        priorites.unshift(cle);
+        appliquer();
+    }
     const alphabet = new Intl.Collator('fr', { sensitivity: 'base', numeric: true });
     const normaliser = valeur => String(valeur ?? '').normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('fr').trim();
@@ -35,32 +41,33 @@ export function creerFiltresLivres({ page, conteneur, selecteur, recherche, ecou
         // Départage les dates identiques par identifiant pour conserver un ordre stable.
         const recente = (a, b) => (Number(b.dataset[champDate]) || 0) - (Number(a.dataset[champDate]) || 0)
             || Number(b.dataset.livreId || b.dataset.pretId || b.dataset.id) - Number(a.dataset.livreId || a.dataset.pretId || a.dataset.id);
+        const comparerTexte = (a, b, sens) => {
+            if (!a && b) return 1;
+            if (a && !b) return -1;
+            return alphabet.compare(a, b) * (sens.endsWith('desc') ? -1 : 1);
+        };
         cartes.sort((a, b) => {
-            if (note && ['asc', 'desc'].includes(note.value)) {
-                const noteA = noteCarte(a), noteB = noteCarte(b);
-                if (noteA === null && noteB !== null) return 1;
-                if (noteA !== null && noteB === null) return -1;
-                return (noteA === null ? 0 : (noteA - noteB) * (note.value === 'desc' ? -1 : 1)) || recente(a, b);
+            for (const critere of priorites) {
+                let comparaison = 0;
+                if (critere === 'note' && note && ['asc', 'desc'].includes(note.value)) {
+                    const noteA = noteCarte(a), noteB = noteCarte(b);
+                    if (noteA === null && noteB !== null) return 1;
+                    if (noteA !== null && noteB === null) return -1;
+                    comparaison = noteA === null ? 0 : (noteA - noteB) * (note.value === 'desc' ? -1 : 1);
+                } else if (critere === 'contact' && contact?.value) {
+                    comparaison = comparerTexte((a.dataset.contactPrenom || '').trim(), (b.dataset.contactPrenom || '').trim(), contact.value)
+                        || comparerTexte((a.dataset.contactNom || '').trim(), (b.dataset.contactNom || '').trim(), contact.value);
+                } else if (critere === 'auteurs' && auteurs.value) {
+                    const champ = auteurs.value.startsWith('nom-') ? 'auteurNom' : auteurs.value.startsWith('prenom-') ? 'auteurPrenom' : 'auteurs';
+                    const autre = champ === 'auteurNom' ? 'auteurPrenom' : 'auteurNom';
+                    comparaison = comparerTexte((a.dataset[champ] || '').trim(), (b.dataset[champ] || '').trim(), auteurs.value);
+                    if (!comparaison && champ !== 'auteurs') comparaison = comparerTexte((a.dataset[autre] || '').trim(), (b.dataset[autre] || '').trim(), auteurs.value);
+                } else if (critere === 'date' && date.value) {
+                    comparaison = ((Number(a.dataset[champDate]) || 0) - (Number(b.dataset[champDate]) || 0)) * (date.value === 'asc' ? 1 : -1);
+                }
+                if (comparaison) return comparaison;
             }
-            if (contact?.value) {
-                const prenomA = (a.dataset.contactPrenom || '').trim();
-                const prenomB = (b.dataset.contactPrenom || '').trim();
-                const nomA = (a.dataset.contactNom || '').trim();
-                const nomB = (b.dataset.contactNom || '').trim();
-                if (!prenomA && !nomA && (prenomB || nomB)) return 1;
-                if ((prenomA || nomA) && !prenomB && !nomB) return -1;
-                const comparaison = alphabet.compare(prenomA, prenomB) || alphabet.compare(nomA, nomB);
-                return (contact.value === 'desc' ? -comparaison : comparaison) || recente(a, b);
-            }
-            if (auteurs.value) {
-                const nomA = (a.dataset.auteurs || '').trim();
-                const nomB = (b.dataset.auteurs || '').trim();
-                if (!nomA && nomB) return 1;
-                if (nomA && !nomB) return -1;
-                const comparaison = alphabet.compare(nomA, nomB);
-                return (auteurs.value === 'desc' ? -comparaison : comparaison) || recente(a, b);
-            }
-            return date.value === 'asc' ? -recente(a, b) : recente(a, b);
+            return recente(a, b);
         });
         cartes.forEach(carte => conteneur.appendChild(carte));
         actualiser({ total: cartes.length, visibles, statut: statut?.value || '' });
@@ -68,20 +75,11 @@ export function creerFiltresLivres({ page, conteneur, selecteur, recherche, ecou
 
     // Applique tous les critères du formulaire sans recharger la liste.
     ecouter(formulaire, 'submit', event => { event.preventDefault(); appliquer(); });
-    // Le dernier tri sélectionné prend la main sans effacer les filtres de genre et de statut.
-    ecouter(auteurs, 'change', () => { effacerTriNote(); date.value = ''; if (contact) contact.value = ''; appliquer(); });
-    ecouter(date, 'change', () => { effacerTriNote(); auteurs.value = ''; if (contact) contact.value = ''; appliquer(); });
-    // Le tri par note remplace les autres tris ; une tranche conserve les filtres et le tri courant.
-    ecouter(note, 'change', () => {
-        if (['asc', 'desc'].includes(note.value)) {
-            auteurs.value = '';
-            date.value = '';
-            if (contact) contact.value = '';
-        }
-        appliquer();
-    });
-    // Trie les prêts par prénom puis par nom du contact, en remplacement du tri par auteur ou date.
-    ecouter(contact, 'change', () => { auteurs.value = ''; date.value = ''; appliquer(); });
+    // Chaque choix conserve les autres filtres, notamment une tranche de note associée à la date d’ajout.
+    ecouter(auteurs, 'change', () => prioriser('auteurs'));
+    ecouter(date, 'change', () => prioriser('date'));
+    ecouter(note, 'change', () => prioriser('note'));
+    ecouter(contact, 'change', () => prioriser('contact'));
     // Efface la recherche, les filtres et les tris pour retrouver la liste complète.
     ecouter(formulaire.querySelector('[data-reinitialiser-filtres]'), 'click', () => {
         if (recherche) recherche.value = '';

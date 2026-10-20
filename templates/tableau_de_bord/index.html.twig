@@ -19,14 +19,16 @@
             <p class="sous-titre-page">Retrouvez votre univers littéraire en un coup d’œil.</p>
         </header>
 
-        {# La recherche de bureau transmet le texte à la page de pile à lire, qui applique ses filtres. #}
+        {# Conserve la recherche et ses résultats sur le tableau de bord, sans redirection vers la pile à lire. #}
         <header class="dashboard-header">
-            <form action="{{ path('app_livre') }}" method="get" class="dashboard-recherche">
+            <form action="{{ path('app_tableau_de_bord') }}" method="get" class="dashboard-recherche">
                 <img src="{{ asset('images/rechercher.png') }}" alt="">
                 <input
                     type="search"
                     name="recherche"
-                    placeholder="Rechercher un titre, un auteur, un ISBN..."
+                    value="{{ recherche }}"
+                    maxlength="200"
+                    placeholder="Rechercher un titre, un auteur, une saga, un ISBN…"
                     aria-label="Rechercher un livre"
                 >
                 <button type="submit" class="bouton-rechercher">Rechercher</button>
@@ -51,6 +53,45 @@
             <h1 class="titre-page">Mon tableau de bord</h1>
             <p class="sous-titre-page">Retrouvez votre univers littéraire en un coup d'œil.</p>
         </div>
+
+        {% if recherche != '' %}
+            {# Présente les correspondances sans remplacer les compteurs et les autres sections du tableau de bord. #}
+            <section class="dashboard-carte dashboard-resultats" aria-labelledby="dashboard-resultats-titre">
+                <div class="dashboard-resultats-entete">
+                    <div>
+                        <h2 id="dashboard-resultats-titre">Résultats de recherche</h2>
+                        <p>{{ nombreResultats }} livre{{ nombreResultats > 1 ? 's' : '' }} pour « {{ recherche }} »</p>
+                    </div>
+                    <a class="dashboard-recherche-effacer" href="{{ path('app_tableau_de_bord') }}">Effacer la recherche</a>
+                </div>
+                <div class="dashboard-liste">
+                    {% for livre in resultatsRecherche %}
+                        <article class="dashboard-livre">
+                            {% if livre.image_couverture %}
+                                <img class="dashboard-couverture" src="{{ livre.image_couverture starts with 'http' or livre.image_couverture starts with '/' ? livre.image_couverture : '/' ~ livre.image_couverture }}" alt="Couverture de {{ livre.titre }}">
+                            {% else %}
+                                <div class="dashboard-couverture dashboard-sans-couverture" aria-hidden="true"></div>
+                            {% endif %}
+                            <div class="dashboard-livre-infos">
+                                <h3>{{ livre.titre }}</h3>
+                                <p>{{ livre.auteurs ?: 'Auteur non renseigné' }}</p>
+                                {% if livre.saga %}<p>Saga : {{ livre.saga }}</p>{% endif %}
+                                {% if livre.isbn13 or livre.isbn10 %}<p>ISBN : {{ livre.isbn13 ?: livre.isbn10 }}</p>{% endif %}
+                            </div>
+                        </article>
+                    {% else %}
+                        <p class="dashboard-vide">Aucun livre de votre collection ne correspond à cette recherche.</p>
+                    {% endfor %}
+                </div>
+                {% if nombreResultats > 30 %}
+                    <nav class="dashboard-resultats-pagination" aria-label="Pages des résultats de recherche">
+                        {% if pageRecherche > 1 %}<a href="{{ path('app_tableau_de_bord', {recherche: recherche, page: pageRecherche - 1}) }}">← Précédent</a>{% endif %}
+                        <span>Page {{ pageRecherche }}</span>
+                        {% if pageRecherche * 30 < nombreResultats and pageRecherche < 1000 %}<a href="{{ path('app_tableau_de_bord', {recherche: recherche, page: pageRecherche + 1}) }}">Suivant →</a>{% endif %}
+                    </nav>
+                {% endif %}
+            </section>
+        {% endif %}
 
         {# Génère les quatre compteurs avec une structure commune pour éviter de répéter les mêmes cartes. #}
         <section class="dashboard-statistiques" aria-label="Statistiques de bibliothèque">

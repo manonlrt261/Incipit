@@ -139,7 +139,7 @@ final class LivreController extends AbstractController
             'SELECT statut, note, avis, date_debut, date_fin FROM session_lecture WHERE livre_id = ? ORDER BY date_creation DESC, id DESC',
             [$id]
         );
-        return $this->render('auteur/_details_livre.html.twig', ['livre' => $livre, 'lectures' => $lectures, 'souhait' => null]);
+        return $this->render('auteur/_details_livre.html.twig', ['livre' => $livre, 'lectures' => $lectures, 'souhait' => null, 'livreRetire' => true]);
     }
 
     #[Route('/livre/{id}/details', name: 'app_livre_details', requirements: ['id' => '\d+'], methods: ['GET'])]

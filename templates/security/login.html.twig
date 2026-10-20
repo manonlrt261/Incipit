@@ -53,13 +53,13 @@
                     {# Le script bascule la visibilité du mot de passe et synchronise l’icône avec le libellé accessible. #}
                     <button
                         type="button"
-                        id="toggle-password"
+                        data-reset-password-toggle="password"
+                        aria-controls="password"
                         class="login-password-toggle"
                         aria-label="Afficher le mot de passe"
                         aria-pressed="false"
                     >
                         <img
-                            id="password-icon"
                             src="{{ asset('images/afficher2.png') }}"
                             data-image-afficher="{{ asset('images/afficher2.png') }}"
                             data-image-masquer="{{ asset('images/masquer2.png') }}"
@@ -94,3 +94,6 @@
     </div>
 </main>
 {% endblock %}
+
+{# Réutilise les commandes d’affichage du nouveau mot de passe, y compris après une navigation Turbo. #}
+{% block importmap %}{{ importmap(['app', 'reset-password']) }}{% endblock %}

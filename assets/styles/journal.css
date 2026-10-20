@@ -52,7 +52,9 @@
 .journal-criteres input[type='date'] { appearance: none; -webkit-appearance: none; }
 .journal-criteres input::-webkit-date-and-time-value { min-width: 0; text-align: left; }
 .journal-criteres input::placeholder { color: var(--color-secondary); opacity: 0.65; }
-.journal-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
+.journal-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 20px; }
+/* Conserve le même bouton de réinitialisation lorsque l’action est un lien de navigation. */
+.journal-actions .bibliotheque-reinitialiser { text-decoration: none; }
 
 /* Actions du journal avec les couleurs et les contours de l’application */
 .journal .journal-bouton {

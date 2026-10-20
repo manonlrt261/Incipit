@@ -607,9 +607,14 @@ dialog#modal-ajout-livre {
     font-weight: 600;
 }
 
-.modal-recherche-couverture-formulaire {
+/* Empêche la base flexible commune de devenir une hauteur de 640 px dans cette colonne. */
+#modal-ajout-livre .modal-recherche-couverture-formulaire {
     display: flex;
-    flex-direction: column;
+    flex: 0 0 auto;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    height: auto;
     gap: 8px;
 }
 

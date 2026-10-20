@@ -44,8 +44,15 @@
             <span class="sr-only">Auteurs</span>
             <select id="{{ prefixe }}tri-auteurs" data-tri-auteurs>
                 <option value="">Auteurs</option>
-                <option value="asc">Auteurs : A à Z</option>
-                <option value="desc">Auteurs : Z à A</option>
+                {% if tri_auteurs_detaille|default(false) %}
+                    <option value="nom-asc">Nom : Croissant</option>
+                    <option value="nom-desc">Nom : Décroissant</option>
+                    <option value="prenom-asc">Prénom : Croissant</option>
+                    <option value="prenom-desc">Prénom : Décroissant</option>
+                {% else %}
+                    <option value="asc">Auteurs : A à Z</option>
+                    <option value="desc">Auteurs : Z à A</option>
+                {% endif %}
             </select>
         </label>
 

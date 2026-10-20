@@ -107,6 +107,30 @@ initialiserPage((ecouter) => {
         ouvrirLivreRetire(carte);
     });
 
+    // Réintègre le livre puis actualise les deux listes et les compteurs, sans perdre les filtres courants.
+    ecouter(document.getElementById('lectures-retire-details'), 'submit', async event => {
+        const formulaire = event.target.closest('[data-rajouter-livre]');
+        if (!formulaire) return;
+        event.preventDefault();
+        const bouton = formulaire.querySelector('button[type="submit"]');
+        const erreur = formulaire.querySelector('[data-rajouter-erreur]');
+        if (bouton.disabled) return;
+        bouton.disabled = true;
+        erreur.hidden = true;
+        try {
+            const reponse = await fetch(formulaire.action, { method: 'POST', body: new FormData(formulaire), headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+            if (reponse.redirected) throw new Error('Session expirée. Actualisez la page.');
+            const resultat = await reponse.json();
+            if (!reponse.ok || !resultat.success) throw new Error(resultat.message || 'Impossible de rajouter ce livre.');
+            await actualiserLectures();
+            formulaire.closest('dialog').close();
+            grille.querySelector(`[data-livre-id="${formulaire.dataset.livreId}"]`)?.focus({ preventScroll: true });
+        } catch (exception) {
+            erreur.textContent = exception.message;
+            erreur.hidden = false;
+        } finally { bouton.disabled = false; }
+    });
+
     const statuts = {
         'en-cours': 'En cours', 'termine': 'Terminé', 'en-pause': 'En pause',
         'abandonne': 'Abandonné', 'pas-commence': 'Pas commencé', 'tous': ''
@@ -211,6 +235,8 @@ initialiserPage((ecouter) => {
 
             // Remplace seulement les cartes ; les écouteurs placés sur la grille restent actifs.
             grille.innerHTML = nouvelleGrille.innerHTML;
+            const nouveauxRetires = documentActualise.getElementById('contenu-retires');
+            if (nouveauxRetires && livresRetires) livresRetires.innerHTML = nouveauxRetires.innerHTML;
 
             // Reprend les totaux calculés par le serveur pour chaque statut.
             document.querySelectorAll('[data-compteur]').forEach((element) => {
