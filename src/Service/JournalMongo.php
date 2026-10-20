@@ -14,6 +14,20 @@ final class JournalMongo
         #[Autowire('%env(default::MONGODB_DB)%')] private ?string $base = null,
     ) {}
 
+    // Décrit uniquement la présence de la configuration pour comparer PHP web et CLI sans révéler les identifiants.
+    public function diagnostic(): array
+    {
+        return [
+            'php' => PHP_VERSION,
+            'execution' => PHP_SAPI,
+            'extension_mongodb' => extension_loaded('mongodb'),
+            'version_mongodb' => phpversion('mongodb') ?: null,
+            'uri_presente' => (bool) $this->uri,
+            'base_renseignee' => (bool) $this->base,
+            'php_ini' => php_ini_loaded_file() ?: null,
+        ];
+    }
+
     private function manager(): \MongoDB\Driver\Manager
     {
         if (!$this->uri || !extension_loaded('mongodb')) {

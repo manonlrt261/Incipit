@@ -29,7 +29,14 @@ final class JournalController extends AbstractController
         if ($filtres['debut'] && $filtres['fin'] && $filtres['debut'] > $filtres['fin']) $erreur = 'La date de début doit précéder la date de fin.';
         if (!$erreur) {
             try { $resultat = $mongo->rechercher($filtres, $page); }
-            catch (\Throwable) { $erreur = 'Le journal est momentanément indisponible. Les nouvelles actions restent conservées en attente de transmission.'; }
+            catch (\Throwable $exception) {
+                // Le détail reste dans les logs serveur : aucun message du pilote susceptible de contenir une URI n’est copié.
+                error_log('[INCIPIT - JOURNAL] '.json_encode($mongo->diagnostic() + [
+                    'type' => get_class($exception),
+                    'code' => $exception->getCode(),
+                ], JSON_UNESCAPED_SLASHES));
+                $erreur = 'Le journal est momentanément indisponible. Les nouvelles actions restent conservées en attente de transmission.';
+            }
         }
         return $this->render('journal/index.html.twig', $resultat + ['filtres' => $filtres, 'actions' => JournalActivite::ACTIONS, 'page' => $page, 'erreur' => $erreur, 'enAttente' => $journal->enAttente()]);
     }
