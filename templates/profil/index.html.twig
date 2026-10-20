@@ -46,9 +46,6 @@
             </button>
         </div>
 
-        {# Donne aux administrateurs accès à l’historique privé de la bibliothèque partagée. #}
-        <p><a href="{{ path('app_journal_activite') }}">Consulter le journal d’activité</a></p>
-
         <section id="profil-compte" role="tabpanel" aria-labelledby="profil-tab-compte">
             {# Affiche l’adresse de connexion du compte en lecture seule. #}
             <section class="profil-carte">
@@ -217,6 +214,8 @@
 
         {# Envoie la déconnexion hors de Turbo pour laisser Symfony terminer la session et rediriger vers l’accueil public. #}
         <footer class="profil-deconnexion">
+            {# Conserve l’accès au journal à proximité des actions générales du compte, dans les deux onglets. #}
+            <a href="{{ path('app_journal_activite') }}" class="profil-bouton-journal">Consulter le journal d’activité</a>
             <form action="{{ path('app_logout') }}" method="post" data-turbo="false">
                 <input type="hidden" name="_csrf_token" value="{{ csrf_token('logout') }}">
                 <button type="submit" class="bouton-deconnexion">Déconnexion</button>

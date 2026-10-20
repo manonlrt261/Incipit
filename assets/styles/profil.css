@@ -94,8 +94,9 @@
     cursor: pointer;
 }
 
-/* Réduit les deux actions du compte en conservant une cible tactile confortable. */
-.profil-carte button[data-ouvrir-profil] {
+/* Partage la taille et l’apparence des actions du compte avec l’accès au journal. */
+.profil-carte button[data-ouvrir-profil],
+.profil-bouton-journal {
     width: fit-content;
     max-width: 100%;
     min-height: 40px;
@@ -146,7 +147,8 @@
 
 /* Repères au clavier des réglages du profil */
 .profil button:focus-visible,
-.profil input:focus-visible {
+.profil input:focus-visible,
+.profil-bouton-journal:focus-visible {
     outline: 2px solid var(--color-secondary);
     outline-offset: 3px;
 }
@@ -288,7 +290,25 @@
 /* Déconnexion en bas de page */
 .profil-deconnexion {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
     margin-top: auto;
     padding-top: 32px;
+}
+
+/* Accès au journal présenté comme l’action de modification du mot de passe */
+.profil-bouton-journal {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    border: 1px solid var(--color-terra);
+    border-radius: 8px;
+    background: var(--color-terra);
+    color: var(--color-fond);
+    font-family: inherit;
+    line-height: normal;
+    text-align: center;
+    text-decoration: none;
 }
