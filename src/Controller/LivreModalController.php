@@ -2,16 +2,16 @@
 
 namespace App\Controller;
 
-use App\Service\AuteursLivre;
-use App\Service\GenresLivre;
-use App\Service\DoublonsLivre;
-use App\Service\DonneesLecture;
-use App\Service\CouvertureLivre;
 use App\Entity\Exemplaire;
 use App\Entity\Genre;
 use App\Entity\Livre;
 use App\Entity\SessionLecture;
 use App\Entity\Souhait;
+use App\Service\AuteursLivre;
+use App\Service\CouvertureLivre;
+use App\Service\DonneesLecture;
+use App\Service\DoublonsLivre;
+use App\Service\GenresLivre;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -42,6 +42,7 @@ final class LivreModalController extends AbstractController
         $modeWishlist = str_starts_with((string) $request->attributes->get('_route'), 'app_wishlist_');
         $souhait = null;
         $modificationWishlist = $modeWishlist && $id !== null;
+
         if (!$this->getUser()) {
             return $this->json(
                 ['success' => false, 'message' => 'Connexion requise.'],
@@ -61,6 +62,7 @@ final class LivreModalController extends AbstractController
 
         if ($modeWishlist && $id !== null) {
             $souhait = $entityManager->find(Souhait::class, $id);
+
             if (!$souhait || $souhait->getStatut() !== 'souhaité') {
                 return $this->json(['success' => false, 'message' => 'Souhait introuvable.'], 404);
             }
@@ -96,15 +98,19 @@ final class LivreModalController extends AbstractController
             // Valide le prix facultatif et limite le lien d’achat aux adresses HTTP ou HTTPS avant toute écriture.
             $prixEstime = null;
             $lienAchat = null;
+
             if ($modeWishlist) {
                 $prixEstime = $valeur($request, 'prixEstime', 20);
+
                 if ($prixEstime !== null) {
                     $prixEstime = str_replace(',', '.', $prixEstime);
+
                     if (!preg_match('/^\d{1,8}(?:\.\d{1,2})?$/', $prixEstime)) {
                         throw new \InvalidArgumentException('Le prix doit être positif, avec deux décimales maximum.');
                     }
                 }
                 $lienAchat = $valeur($request, 'lienAchat', 2048);
+
                 if ($lienAchat !== null && (!filter_var($lienAchat, FILTER_VALIDATE_URL)
                     || !in_array(strtolower((string) parse_url($lienAchat, PHP_URL_SCHEME)), ['http', 'https'], true))) {
                     throw new \InvalidArgumentException('Le lien doit être une adresse HTTP ou HTTPS valide.');
@@ -230,7 +236,6 @@ final class LivreModalController extends AbstractController
 
                 $genresSelectionnes[] = $genre;
             }
-
         } catch (\InvalidArgumentException $exception) {
             return $this->json([
                 'success' => false,
@@ -250,6 +255,7 @@ final class LivreModalController extends AbstractController
 
         // Les fichiers de couverture sont acceptés pour les livres possédés comme pour les souhaits.
         $fichierCouverture = $request->files->get('fichierCouverture');
+
         try {
             $couvertures->valider($fichierCouverture);
         } catch (\InvalidArgumentException $exception) {
@@ -262,6 +268,7 @@ final class LivreModalController extends AbstractController
 
         try {
             $livre = $souhait?->getLivre() ?? new Livre();
+
             // Remplace les associations du souhait modifié pour ne pas cumuler anciens auteurs et genres.
             if ($souhait) {
                 $livre->getAuteurs()->clear();
@@ -276,6 +283,7 @@ final class LivreModalController extends AbstractController
             $livre->setIsbn13($isbn13 ?: null);
             $livre->setIsbn10($isbn10 ?: null);
             $livre->setResume($resume);
+
             // Enregistre la couverture sous un nom aléatoire ; son chemin est conservé pour le nettoyage en cas d’échec.
             if ($fichierCouverture) {
                 $nouvelleCouverture = $couvertures->enregistrer($fichierCouverture);
@@ -317,7 +325,6 @@ final class LivreModalController extends AbstractController
                 $session->setDateCreation(new \DateTime());
                 $session->setDateModification(new \DateTime());
                 $entityManager->persist($session);
-
             }
 
             $entityManager->flush();
@@ -343,10 +350,10 @@ final class LivreModalController extends AbstractController
                     'dateCreation' => $livre->getDateCreation()?->getTimestamp(),
                 ],
             ], $modificationWishlist ? 200 : 201);
-
-         } catch (\Throwable $exception) {
+        } catch (\Throwable $exception) {
             // Supprime le fichier nouvellement envoyé si l’enregistrement du livre échoue.
             $couvertures->annuler($nouvelleCouverture);
+
             if ($connexion->isTransactionActive()) {
                 $connexion->rollBack();
             }

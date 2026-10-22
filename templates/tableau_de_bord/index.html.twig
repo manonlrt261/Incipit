@@ -4,11 +4,9 @@
 
 {% block body %}
 <div class="espace-layout dashboard-layout">
-    {# Réutilise la navigation commune avec l’onglet Tableau de bord actif. #}
     {% include 'components/_sidebar.html.twig' %}
 
     <main id="page-dashboard" class="espace-contenu dashboard">
-
         {# Sur téléphone, affiche le titre et un accès direct au profil à la place de l’en-tête de bureau. #}
         <header class="dashboard-mobile-entete">
             <h1 class="titre-page">Tableau de bord</h1>
@@ -68,15 +66,22 @@
                     {% for livre in resultatsRecherche %}
                         <article class="dashboard-livre">
                             {% if livre.image_couverture %}
-                                <img class="dashboard-couverture" src="{{ livre.image_couverture starts with 'http' or livre.image_couverture starts with '/' ? livre.image_couverture : '/' ~ livre.image_couverture }}" alt="Couverture de {{ livre.titre }}">
+                                <img
+                                    class="dashboard-couverture"
+                                    src="{{ livre.image_couverture starts with 'http' or livre.image_couverture starts with '/' ? livre.image_couverture : '/' ~ livre.image_couverture }}"
+                                    alt="Couverture de {{ livre.titre }}">
                             {% else %}
                                 <div class="dashboard-couverture dashboard-sans-couverture" aria-hidden="true"></div>
                             {% endif %}
                             <div class="dashboard-livre-infos">
                                 <h3>{{ livre.titre }}</h3>
                                 <p>{{ livre.auteurs ?: 'Auteur non renseigné' }}</p>
-                                {% if livre.saga %}<p>Saga : {{ livre.saga }}</p>{% endif %}
-                                {% if livre.isbn13 or livre.isbn10 %}<p>ISBN : {{ livre.isbn13 ?: livre.isbn10 }}</p>{% endif %}
+                                {% if livre.saga %}
+                                    <p>Saga : {{ livre.saga }}</p>
+                                {% endif %}
+                                {% if livre.isbn13 or livre.isbn10 %}
+                                    <p>ISBN : {{ livre.isbn13 ?: livre.isbn10 }}</p>
+                                {% endif %}
                             </div>
                         </article>
                     {% else %}
@@ -85,9 +90,13 @@
                 </div>
                 {% if nombreResultats > 30 %}
                     <nav class="dashboard-resultats-pagination" aria-label="Pages des résultats de recherche">
-                        {% if pageRecherche > 1 %}<a href="{{ path('app_tableau_de_bord', {recherche: recherche, page: pageRecherche - 1}) }}">← Précédent</a>{% endif %}
+                        {% if pageRecherche > 1 %}
+                            <a href="{{ path('app_tableau_de_bord', {recherche: recherche, page: pageRecherche - 1}) }}">← Précédent</a>
+                        {% endif %}
                         <span>Page {{ pageRecherche }}</span>
-                        {% if pageRecherche * 30 < nombreResultats and pageRecherche < 1000 %}<a href="{{ path('app_tableau_de_bord', {recherche: recherche, page: pageRecherche + 1}) }}">Suivant →</a>{% endif %}
+                        {% if pageRecherche * 30 < nombreResultats and pageRecherche < 1000 %}
+                            <a href="{{ path('app_tableau_de_bord', {recherche: recherche, page: pageRecherche + 1}) }}">Suivant →</a>
+                        {% endif %}
                     </nav>
                 {% endif %}
             </section>
@@ -95,7 +104,6 @@
 
         {# Génère les quatre compteurs avec une structure commune pour éviter de répéter les mêmes cartes. #}
         <section class="dashboard-statistiques" aria-label="Statistiques de bibliothèque">
-
             {% set indicateurs = [
                 {titre: 'Livres possédés', valeur: livresPossedes, image: 'livre_rond4.png'},
                 {titre: 'Livres terminés', valeur: livresTermines, image: 'check_rond.png'},
@@ -112,11 +120,9 @@
                     </div>
                 </article>
             {% endfor %}
-
         </section>
 
         <div class="dashboard-colonnes">
-
             <section class="dashboard-carte">
                 <div class="dashboard-titre-section">
                     <img src="{{ asset('images/livre2.png') }}" alt="">
@@ -166,7 +172,6 @@
                         </p>
                     {% endfor %}
                 </div>
-
             </section>
 
             <section class="dashboard-carte">
@@ -217,13 +222,10 @@
                         </p>
                     {% endfor %}
                 </div>
-
             </section>
-
         </div>
 
         <div class="dashboard-colonnes dashboard-colonnes-bas">
-
             <section class="dashboard-carte">
                 <div class="dashboard-titre-section">
                     <img src="{{ asset('images/statistiques.png') }}" alt="">
@@ -235,7 +237,12 @@
                     <div class="dashboard-genres">
                         {% for genre in genresFavoris %}
                             {# Le rang détermine la marche du podium ; la route charge les livres du genre dans la modale. #}
-                            <button type="button" class="dashboard-genre dashboard-genre--{{ loop.index }}" data-genre-url="{{ path('app_dashboard_genre_lectures', {id: genre.id}) }}" aria-haspopup="dialog" aria-label="Voir les livres lus : {{ genre.nom }}">
+                            <button
+                                type="button"
+                                class="dashboard-genre dashboard-genre--{{ loop.index }}"
+                                data-genre-url="{{ path('app_dashboard_genre_lectures', {id: genre.id}) }}"
+                                aria-haspopup="dialog"
+                                aria-label="Voir les livres lus : {{ genre.nom }}">
                                 <span class="dashboard-genre-marche">
                                     <strong>{{ loop.index }}</strong>
                                     <small>{{ genre.nombre }} livre{{ genre.nombre > 1 ? 's' : '' }}</small>
@@ -272,7 +279,6 @@
                     Moyenne des notes attribuées à vos lectures.
                 </p>
             </section>
-
         </div>
     </main>
 </div>

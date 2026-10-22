@@ -10,21 +10,26 @@ export function initialiserPage(initialiser) {
 
     // Crée les écouteurs une seule fois pour la page actuellement affichée.
     function demarrer() {
-        if (controleur) return;
+        if (controleur) {
+            return;
+        }
+
         controleur = new AbortController();
         const { signal } = controleur;
         const ecouter = (cible, evenement, action) => {
             cible?.addEventListener(evenement, action, { signal });
         };
+
         initialiser(ecouter);
     }
 
-    // Retire les écouteurs avant que Turbo conserve la page pour un retour ultérieur.
+    // Retire les écouteurs avant la mise en cache ou le remplacement de la page par Turbo.
     document.addEventListener('turbo:before-cache', nettoyer);
-    // Retire les écouteurs avant le remplacement de la page.
     document.addEventListener('turbo:before-render', nettoyer);
+
     // Réactive les interactions après chaque navigation ou restauration Turbo.
     document.addEventListener('turbo:load', demarrer);
+
     // Attend la disponibilité du document lors du premier chargement.
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', demarrer, { once: true });

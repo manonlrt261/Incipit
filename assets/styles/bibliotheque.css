@@ -420,9 +420,12 @@
    ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 1100PX)
    ======================================= */
 @media (max-width: 1100px) {
+    /* Livres et commandes d’affichage de la collection */
     .bibliotheque-livres.vue-grille {
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
+
+    /* Présentation et commandes de la bibliothèque */
 
     .bibliotheque-retires-liste {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -433,14 +436,19 @@
    ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 800PX)
    ======================================= */
 @media (max-width: 800px) {
+    /* Présentation et commandes de la bibliothèque */
     .bibliotheque {
         padding: 20px;
     }
+
+    /* Livres et commandes d’affichage de la collection */
 
     .bibliotheque-livres.vue-grille,
     .bibliotheque-retires-liste {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
+
+    /* Critères et réinitialisation des filtres */
 
     .bibliotheque-filtres,
     .bibliotheque-introduction {
@@ -453,10 +461,13 @@
    ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 500PX)
    ======================================= */
 @media (max-width: 500px) {
+    /* Livres et commandes d’affichage de la collection */
     .bibliotheque-livres.vue-grille,
     .bibliotheque-retires-liste {
         grid-template-columns: 1fr;
     }
+
+    /* Recherche et logo de la bibliothèque */
 
     .bibliotheque-header,
     .bibliotheque-outils {
@@ -524,6 +535,7 @@
    ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 700PX)
    ======================================= */
 @media (max-width: 700px) {
+    /* Recherche et logo de la bibliothèque */
     .bibliotheque-header {
         flex-wrap: wrap;
     }
@@ -533,6 +545,7 @@
         width: 100%;
         flex: 0 1 100%;
     }
+    /* Critères et réinitialisation des filtres */
     .bibliotheque-selects {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         flex-basis: 100%;
@@ -653,6 +666,10 @@
     font-weight: 400;
     color: var(--color-secondary);
 }
+
+/* =======================================
+   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 700PX)
+   ======================================= */
 
 @media (max-width: 700px) {
     /* Répartit les commandes et les actions sans élargir les cartes du téléphone. */

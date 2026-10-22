@@ -2,12 +2,12 @@
 
 namespace App\Controller;
 
-use Doctrine\DBAL\Connection;
-use App\Service\OrdreAccueil;
 use App\Service\ClassementAuteursAccueil;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Service\OrdreAccueil;
+use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -19,13 +19,13 @@ final class AccueilController extends AbstractController
     public function index(Request $request, Connection $connection, \App\Service\VisibiliteAccueil $reglages, OrdreAccueil $ordre, ClassementAuteursAccueil $classement): Response
     {
         $edition = $request->attributes->get('_route') === 'app_accueil_edition';
+
         if ($edition) {
             $this->denyAccessUnlessGranted('ROLE_ADMIN');
         }
         // Charge les réglages qui déterminent quelles sections peuvent apparaître publiquement.
         $visibilite = $reglages->publique();
-        // Les 5 livres dont la dernière lecture terminée et notée
-        // a obtenu la note maximale.
+        // Sélectionne les cinq livres dont la dernière lecture terminée et notée a reçu la note maximale.
         $livres = $this->chargerLivresFavoris($connection);
 
         // Prépare aussi les auteurs hors du top cinq pour pouvoir choisir parmi tous les ex æquo.
@@ -66,7 +66,10 @@ final class AccueilController extends AbstractController
     public function lecturesAuteurs(Request $request, Connection $connection, \App\Service\VisibiliteAccueil $reglages, ClassementAuteursAccueil $classement): Response
     {
         $edition = $this->modeEdition($request);
-        if (!$reglages->publique()['auteurs']) throw $this->createNotFoundException();
+
+        if (!$reglages->publique()['auteurs']) {
+            throw $this->createNotFoundException();
+        }
         $auteurs = array_slice($classement->charger(), 0, 5);
         $lectures = $connection->fetchAllAssociative(
             "SELECT la.auteur_id, l.id, l.titre, l.image_couverture, s.note, s.avis, s.date_fin
@@ -76,11 +79,15 @@ final class AccueilController extends AbstractController
              WHERE s.statut = :statut AND s.date_fin >= :debut AND s.date_fin < :fin
                AND la.auteur_id IN (:auteurs)
              ORDER BY s.date_fin ASC, s.id ASC",
-            ['statut' => 'terminé', 'debut' => date('Y-01-01'), 'fin' => (date('Y') + 1).'-01-01', 'auteurs' => array_column($auteurs, 'id')],
+            ['statut' => 'terminé', 'debut' => date('Y-01-01'), 'fin' => (date('Y') + 1) . '-01-01', 'auteurs' => array_column($auteurs, 'id')],
             ['auteurs' => \Doctrine\DBAL\ArrayParameterType::INTEGER]
         );
         $parAuteur = [];
-        foreach ($lectures as $lecture) $parAuteur[$lecture['auteur_id']][] = $lecture;
+
+        foreach ($lectures as $lecture) {
+            $parAuteur[$lecture['auteur_id']][] = $lecture;
+        }
+
         return $this->render('accueil/auteurs_lectures.html.twig', [
             'auteurs' => $auteurs, 'lecturesParAuteur' => $parAuteur, 'annee' => date('Y'), 'edition' => $edition,
         ]);
@@ -90,8 +97,11 @@ final class AccueilController extends AbstractController
     // Les anciens liens rejoignent désormais la page commune, directement à la section de l’auteur.
     public function lecturesAuteur(int $id, \App\Service\VisibiliteAccueil $reglages): Response
     {
-        if (!$reglages->publique()['auteurs']) throw $this->createNotFoundException();
-        return $this->redirectToRoute('app_accueil_auteurs_lectures', ['_fragment' => 'auteur-'.$id]);
+        if (!$reglages->publique()['auteurs']) {
+            throw $this->createNotFoundException();
+        }
+
+        return $this->redirectToRoute('app_accueil_auteurs_lectures', ['_fragment' => 'auteur-' . $id]);
     }
 
     #[Route('/espace/accueil/ordre', name: 'app_accueil_ordre', methods: ['POST'])]
@@ -101,10 +111,12 @@ final class AccueilController extends AbstractController
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
         // Tous les administrateurs modifient l’ordre du même accueil public.
         $id = $bibliotheque->proprietaireId();
+
         if (!$this->isCsrfTokenValid('ordre_accueil', $request->request->getString('_token'))) {
             return $this->json(['success' => false, 'message' => 'Session expirée. Actualise la page.'], 403);
         }
         $ordre = json_decode($request->request->getString('ordre'), true);
+
         if (!is_array($ordre) || array_diff(array_keys($ordre), ['favoris', 'wishlist', 'auteurs'])) {
             return $this->json(['success' => false, 'message' => 'Ordre invalide.'], 422);
         }
@@ -117,21 +129,26 @@ final class AccueilController extends AbstractController
         // Une page n’envoie que sa section : préserve les autres positions déjà enregistrées.
         $jsonExistant = $connection->fetchOne('SELECT ordre_accueil FROM parametre_confidentialite WHERE utilisateur_id = ?', [$id]);
         $existant = is_string($jsonExistant) ? (json_decode($jsonExistant, true) ?: []) : [];
+
         foreach (array_keys($ordre) as $section) {
             $ids = $ordre[$section] ?? [];
+
             if (!is_array($ids) || count($ids) > 10000 || count($ids) !== count(array_unique($ids, SORT_REGULAR))) {
                 return $this->json(['success' => false, 'message' => 'Sélection invalide.'], 422);
             }
+
             foreach ($ids as $livreId) {
                 if (!is_int($livreId) || !in_array($livreId, array_map('intval', $autorises[$section]), true)) {
                     return $this->json(['success' => false, 'message' => 'Les livres visibles ont changé. Recharge le mode édition.'], 409);
                 }
             }
+
             // Refuse les doublons et les choix qui feraient passer un auteur moins lu devant un autre.
             if ($section === 'auteurs') {
                 $comptes = array_column($auteursAnnuels, 'nombre_lectures', 'id');
                 $attendus = array_map('intval', array_column(array_slice($auteursAnnuels, 0, 5), 'nombre_lectures'));
                 $choisis = array_map(static fn (int $auteurId): int => (int) $comptes[$auteurId], $ids);
+
                 if ($choisis !== $attendus) {
                     return $this->json(['success' => false, 'message' => 'Le classement a changé. Recharge le mode édition pour choisir parmi les auteurs à égalité.'], 409);
                 }
@@ -145,6 +162,7 @@ final class AccueilController extends AbstractController
             'INSERT INTO parametre_confidentialite (utilisateur_id, afficher_wishlist, afficher_auteurs_favoris, afficher_livres_favoris, date_modification, ordre_accueil) VALUES (?, 1, 1, 1, NOW(), ?) ON DUPLICATE KEY UPDATE ordre_accueil = VALUES(ordre_accueil), date_modification = NOW()',
             [$id, json_encode($existant, JSON_THROW_ON_ERROR)]
         );
+
         return $this->json(['success' => true]);
     }
 
@@ -153,7 +171,10 @@ final class AccueilController extends AbstractController
     public function livresMieuxNotes(Request $request, Connection $connection, \App\Service\VisibiliteAccueil $reglages, OrdreAccueil $ordre): Response
     {
         $edition = $this->modeEdition($request);
-        if (!$reglages->publique()['favoris']) throw $this->createNotFoundException();
+
+        if (!$reglages->publique()['favoris']) {
+            throw $this->createNotFoundException();
+        }
         $livres = $this->chargerLivresFavoris($connection);
 
         return $this->render('accueil/livres-mieux-notes.html.twig', [
@@ -167,7 +188,11 @@ final class AccueilController extends AbstractController
     public function wishlist(Request $request, Connection $connection, \App\Repository\SouhaitRepository $repository, \App\Service\VisibiliteAccueil $reglages, OrdreAccueil $ordre): Response
     {
         $edition = $this->modeEdition($request);
-        if (!$reglages->publique()['wishlist']) throw $this->createNotFoundException();
+
+        if (!$reglages->publique()['wishlist']) {
+            throw $this->createNotFoundException();
+        }
+
         return $this->render('wishlist/public.html.twig', [
             'souhaits' => $ordre->appliquer($repository->findBy(['statut' => 'souhaité', 'publique' => true], ['dateAjout' => 'DESC', 'id' => 'DESC']), 'wishlist'),
             'edition' => $edition,
@@ -177,8 +202,11 @@ final class AccueilController extends AbstractController
     // Réserve l’édition des pages publiques à tous les comptes administrateurs.
     private function modeEdition(Request $request): bool
     {
-        if (!$request->query->getBoolean('edition')) return false;
+        if (!$request->query->getBoolean('edition')) {
+            return false;
+        }
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
         return true;
     }
 
@@ -211,7 +239,7 @@ final class AccueilController extends AbstractController
          ORDER BY s.date_fin DESC, l.id DESC";
 
         if ($limite !== null) {
-            $sql .= ' LIMIT '.$limite;
+            $sql .= ' LIMIT ' . $limite;
         }
 
         return $connection->fetchAllAssociative($sql, ['statut' => 'terminé']);

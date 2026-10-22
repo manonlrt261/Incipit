@@ -163,6 +163,7 @@
    ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 700PX)
    ======================================= */
 @media (max-width: 700px) {
+    /* Prêts et formulaires de gestion */
     .prets-introduction {
         align-items: flex-start;
         flex-direction: column;
@@ -244,6 +245,7 @@
    ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 480PX)
    ======================================= */
 @media (max-width: 480px) {
+    /* Prêts et formulaires de gestion */
     .prets-modale-actions {
         flex-wrap: wrap;
     }
@@ -406,7 +408,12 @@
 }
 
 /* Les noms longs restent lisibles sur téléphone. */
+
+/* =======================================
+   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 480PX)
+   ======================================= */
 @media (max-width: 480px) {
+    /* Coordonnées et actions des contacts de prêt */
     .prets-contact {
         align-items: flex-start;
         flex-wrap: wrap;

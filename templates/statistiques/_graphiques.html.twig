@@ -1,5 +1,4 @@
 <div class="stats-grille">
-
     {# Répartit les lectures terminées datées sur les douze mois de l’année sélectionnée. #}
     <section class="stats-panneau stats-mensuel">
         <header>
@@ -19,6 +18,7 @@
                 <line x1="35" y1="{{ y }}" x2="670" y2="{{ y }}" class="stats-graduation"/>
                 <text x="25" y="{{ y + 4 }}" text-anchor="end">{{ echelle * i / 4 }}</text>
             {% endfor %}
+
             {% set nomsMois = ['Jan', 'Fév', 'Mars', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sept', 'Oct', 'Nov', 'Déc'] %}
             {% for numero, nombre in mois %}
                 {% set x = 44 + (numero - 1) * 52 %}
@@ -40,6 +40,7 @@
                 </g>
             {% endfor %}
         </svg>
+
         {# Les listes restent dans des modèles HTML inactifs jusqu’à leur copie dans la modale par JavaScript. #}
         {% for numero, lectures in detailsMois %}
             <template data-stats-details-mois="{{ numero }}" data-titre="Lectures de {{ nomsMois[numero - 1] }} {{ annee }}">
@@ -54,6 +55,7 @@
                 {% endfor %}
             </template>
         {% endfor %}
+
         {% if termineesAnnee == 0 %}
             <p class="stats-vide">Aucune lecture terminée datée en {{ annee }}.</p>
         {% endif %}
@@ -109,6 +111,7 @@
                 <p>Genres des livres terminés en {{ annee }}.</p>
             </div>
         </header>
+
         {% if genres is empty %}
             <p class="stats-vide">Aucun livre terminé pour cette année.</p>
         {% else %}
@@ -135,9 +138,7 @@
                     {% endfor %}
                 </ul>
             </div>
-            <p
-                class="stats-note"
-            >Chaque livre est compté une fois par genre. Un livre peut avoir plusieurs genres.</p>
+            <p class="stats-note">Chaque livre est compté une fois par genre. Un livre peut avoir plusieurs genres.</p>
         {% endif %}
     </section>
 
@@ -150,6 +151,7 @@
                 <p>Classement par nombre de lectures terminées en {{ annee }}.</p>
             </div>
         </header>
+
         {% if auteurs is empty %}
             <p class="stats-vide">Aucun auteur renseigné pour les lectures terminées cette année.</p>
         {% else %}
@@ -169,12 +171,18 @@
     <section class="stats-panneau stats-collection-genres">
         <header>
             <img src="{{ asset('images/graphique.png') }}" alt="">
-            <div><h2>Livres lus par genre</h2><p>Part des livres lus parmi vos livres possédés, toutes années confondues.</p></div>
+            <div>
+                <h2>Livres lus par genre</h2>
+                <p>Part des livres lus parmi vos livres possédés, toutes années confondues.</p>
+            </div>
         </header>
         <div class="stats-progressions-genres">
             {% for genre in genresCollection %}
                 <div class="stats-progression-genre">
-                    <div><strong>{{ genre.nom }}</strong><span>{{ genre.lus }} / {{ genre.possedes }} livre{{ genre.possedes > 1 ? 's' : '' }} lus · {{ genre.pourcentage }} %</span></div>
+                    <div>
+                        <strong>{{ genre.nom }}</strong>
+                        <span>{{ genre.lus }} / {{ genre.possedes }} livre{{ genre.possedes > 1 ? 's' : '' }} lus · {{ genre.pourcentage }} %</span>
+                    </div>
                     <progress value="{{ genre.lus }}" max="{{ genre.possedes }}" aria-label="{{ genre.nom }} : {{ genre.pourcentage }} % lus">{{ genre.pourcentage }} %</progress>
                 </div>
             {% else %}
@@ -201,6 +209,7 @@
                 <option value="toutes">Toutes les années</option>
             </select>
         </label>
+
         {# Prépare les quatre périodes pour basculer entre elles sans requête ; trois ans sont affichés par défaut. #}
         {% for periode, comparaison in comparaisons %}
             <div data-stats-comparaison="{{ periode }}" {{ periode != 3 ? 'hidden' : '' }}>
@@ -226,6 +235,7 @@
                             <line x1="35" y1="{{ y }}" x2="{{ largeur - 10 }}" y2="{{ y }}" class="stats-graduation"/>
                             <text x="25" y="{{ y + 4 }}" text-anchor="end">{{ echelleAn * i / 4 }}</text>
                         {% endfor %}
+
                         {% set pas = (largeur - 50) / comparaison|length %}
                         {% for an, nombre in comparaison %}
                             {% set hauteur = nombre / echelleAn * 140 %}

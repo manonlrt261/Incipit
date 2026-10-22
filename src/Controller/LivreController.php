@@ -3,8 +3,8 @@
 namespace App\Controller;
 
 use App\Entity\Livre;
-use App\Service\GenresLivre;
 use App\Form\LivreType;
+use App\Service\GenresLivre;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -122,7 +122,6 @@ final class LivreController extends AbstractController
         ]);
     }
 
-
     #[Route('/livre/{id}/details-retire', name: 'app_livre_retire_details', requirements: ['id' => '\d+'], methods: ['GET'])]
     // Consulte les informations conservées d’un livre retiré sans proposer de le retirer une seconde fois.
     public function detailsRetire(int $id, Connection $connection, EntityManagerInterface $em): Response
@@ -132,13 +131,20 @@ final class LivreController extends AbstractController
              AND NOT EXISTS (SELECT 1 FROM exemplaire actif WHERE actif.livre_id = e.livre_id AND actif.date_retrait IS NULL) LIMIT 1',
             [$id]
         );
-        if (!$retire) throw $this->createNotFoundException('Livre retiré introuvable.');
+
+        if (!$retire) {
+            throw $this->createNotFoundException('Livre retiré introuvable.');
+        }
         $livre = $em->find(Livre::class, $id);
-        if (!$livre) throw $this->createNotFoundException('Livre introuvable.');
+
+        if (!$livre) {
+            throw $this->createNotFoundException('Livre introuvable.');
+        }
         $lectures = $connection->fetchAllAssociative(
             'SELECT statut, note, avis, date_debut, date_fin FROM session_lecture WHERE livre_id = ? ORDER BY date_creation DESC, id DESC',
             [$id]
         );
+
         return $this->render('auteur/_details_livre.html.twig', ['livre' => $livre, 'lectures' => $lectures, 'souhait' => null, 'livreRetire' => true]);
     }
 
@@ -237,5 +243,4 @@ final class LivreController extends AbstractController
             'lectures' => $lectures
         ]);
     }
-
 }

@@ -3,7 +3,9 @@
    ======================================= */
 
 /* En-tête et retour au profil alignés sur les autres pages privées */
-.journal-entete { margin-bottom: 20px; }
+.journal-entete {
+    margin-bottom: 20px;
+}
 .journal-retour {
     display: inline-flex;
     margin-bottom: 24px;
@@ -11,7 +13,9 @@
     font-size: 14px;
     text-decoration: none;
 }
-.journal-retour:hover { text-decoration: underline; }
+.journal-retour:hover {
+    text-decoration: underline;
+}
 
 /* Encadré des critères, avec des champs de même hauteur et des actions sur une ligne distincte */
 .journal-filtres {
@@ -49,12 +53,30 @@
     font: inherit;
     font-size: 16px;
 }
-.journal-criteres input[type='date'] { appearance: none; -webkit-appearance: none; }
-.journal-criteres input::-webkit-date-and-time-value { min-width: 0; text-align: left; }
-.journal-criteres input::placeholder { color: var(--color-secondary); opacity: 0.65; }
-.journal-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 20px; }
+.journal-criteres input[type='date'] {
+    appearance: none;
+    -webkit-appearance: none;
+}
+.journal-criteres input::-webkit-date-and-time-value {
+    min-width: 0;
+    text-align: left;
+}
+.journal-criteres input::placeholder {
+    color: var(--color-secondary);
+    opacity: 0.65;
+}
+.journal-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-top: 20px;
+}
+
 /* Conserve le même bouton de réinitialisation lorsque l’action est un lien de navigation. */
-.journal-actions .bibliotheque-reinitialiser { text-decoration: none; }
+.journal-actions .bibliotheque-reinitialiser {
+    text-decoration: none;
+}
 
 /* Actions du journal avec les couleurs et les contours de l’application */
 .journal .journal-bouton {
@@ -76,12 +98,28 @@
     text-decoration: none;
     cursor: pointer;
 }
-.journal .journal-bouton-secondaire { background: transparent; color: var(--color-secondary); }
-.journal .journal-bouton:hover { background: var(--color-terra); border-color: var(--color-terra); color: var(--color-fond); }
-.journal :is(a, button, input, select):focus-visible { outline: 2px solid var(--color-secondary); outline-offset: 3px; }
+.journal .journal-bouton-secondaire {
+    background: transparent;
+    color: var(--color-secondary);
+}
+.journal .journal-bouton:hover {
+    background: var(--color-terra);
+    border-color: var(--color-terra);
+    color: var(--color-fond);
+}
+.journal :is(a, button, input, select):focus-visible {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 3px;
+}
 
 /* Cartes de la chronologie, avec date, titre et compte lisibles sur mobile */
-.journal-evenements { display: grid; gap: 18px; list-style: none; padding: 0; margin: 0; }
+.journal-evenements {
+    display: grid;
+    gap: 18px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
 .journal-evenement,
 .journal-vide {
     padding: 24px;
@@ -90,31 +128,96 @@
     background: var(--color-white);
     overflow-wrap: anywhere;
 }
-.journal-evenement-entete { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; margin-bottom: 12px; }
-.journal-evenement h2 { margin: 0; font-size: 26px; color: var(--color-terra); }
-.journal-evenement time { flex-shrink: 0; color: var(--color-secondary); font-size: 13px; }
-.journal-evenement p { margin: 8px 0 0; }
-.journal-livre { color: var(--color-secondary); font-weight: 600; }
+.journal-evenement-entete {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+.journal-evenement h2 {
+    margin: 0;
+    font-size: 26px;
+    color: var(--color-terra);
+}
+.journal-evenement time {
+    flex-shrink: 0;
+    color: var(--color-secondary);
+    font-size: 13px;
+}
+.journal-evenement p {
+    margin: 8px 0 0;
+}
+.journal-livre {
+    color: var(--color-secondary);
+    font-weight: 600;
+}
 .journal-compte,
-.journal-details { color: var(--color-secondary); font-size: 14px; line-height: 1.6; }
-.journal-vide { padding-block: 40px; text-align: center; color: var(--color-secondary); }
+.journal-details {
+    color: var(--color-secondary);
+    font-size: 14px;
+    line-height: 1.6;
+}
+.journal-vide {
+    padding-block: 40px;
+    text-align: center;
+    color: var(--color-secondary);
+}
 
 /* Informations de disponibilité et navigation entre les pages */
-.journal-message { padding: 16px 20px; border-radius: 8px; background: var(--color-white); color: var(--color-secondary); line-height: 1.6; }
-.journal-message-erreur { border: 1px solid var(--color-encadre); }
-.journal-pagination { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 20px; margin-top: 24px; color: var(--color-secondary); font-size: 14px; }
+.journal-message {
+    padding: 16px 20px;
+    border-radius: 8px;
+    background: var(--color-white);
+    color: var(--color-secondary);
+    line-height: 1.6;
+}
+.journal-message-erreur {
+    border: 1px solid var(--color-encadre);
+}
+.journal-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 24px;
+    color: var(--color-secondary);
+    font-size: 14px;
+}
 
 /* =======================================
    ADAPTATION AUX ÉCRANS
    ======================================= */
 @media (max-width: 1100px) {
-    .journal-criteres { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    /* Filtres et événements du journal d’activité */
+    .journal-criteres {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
+
+/* =======================================
+   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 600PX)
+   ======================================= */
 @media (max-width: 600px) {
+    /* Filtres et événements du journal d’activité */
     .journal-filtres,
-    .journal-evenement { padding: 18px; }
-    .journal-criteres { grid-template-columns: minmax(0, 1fr); gap: 16px; }
-    .journal-evenement-entete { flex-direction: column; gap: 6px; }
-    .journal-evenement h2 { font-size: 24px; }
-    .journal-actions { flex-direction: column; align-items: stretch; }
+    .journal-evenement {
+        padding: 18px;
+    }
+    .journal-criteres {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 16px;
+    }
+    .journal-evenement-entete {
+        flex-direction: column;
+        gap: 6px;
+    }
+    .journal-evenement h2 {
+        font-size: 24px;
+    }
+    .journal-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
 }

@@ -1,0 +1,15 @@
+{# Regroupe les liens d’information du pied de page de l’accueil public. #}
+<footer class="accueil-footer">
+    <div class="accueil-footer-contenu">
+        <img class="accueil-footer-logo" src="{{ asset('images/incipit.png') }}" alt="Incipit">
+
+        <nav aria-label="Informations sur le site">
+            <ul>
+                <li><a href="{{ path('app_aide_contact') }}">Aide et contact</a></li>
+                <li><a href="{{ path('app_cgu') }}">CGU</a></li>
+                <li><a href="{{ path('app_mentions_legales') }}">Mentions légales</a></li>
+                <li><a href="{{ path('app_donnees_personnelles') }}">Données personnelles</a></li>
+            </ul>
+        </nav>
+    </div>
+</footer>

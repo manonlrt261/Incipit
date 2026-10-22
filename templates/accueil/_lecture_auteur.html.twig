@@ -1,17 +1,23 @@
-{# Préserve la note de zéro et masque entièrement les commentaires vides. #}
+{# Affiche les lectures du classement public en conservant les notes égales à zéro. #}
 <article class="accueil-carte-livre">
     <div class="accueil-couverture">
         {% if lecture.image_couverture %}
-            <img src="{{ lecture.image_couverture starts with 'http' or lecture.image_couverture starts with '/' ? lecture.image_couverture : '/' ~ lecture.image_couverture }}" alt="Couverture de {{ lecture.titre }}">
+            <img
+                src="{{ lecture.image_couverture starts with 'http' or lecture.image_couverture starts with '/' ? lecture.image_couverture : '/' ~ lecture.image_couverture }}"
+                alt="Couverture de {{ lecture.titre }}"
+            >
         {% else %}
             <span>Couverture indisponible</span>
         {% endif %}
     </div>
+
     <h3>{{ lecture.titre }}</h3>
     <p>{{ auteur.nom_affichage }}</p>
+
     {% if lecture.note is not null %}
         <p class="accueil-lecture-note">Note : {{ lecture.note|number_format(1, ',', ' ') }}/5</p>
     {% endif %}
+
     {# N’affiche ni rubrique ni espace réservé lorsque l’avis est vide. #}
     {% if lecture.avis|default('')|trim is not empty %}
         <div class="accueil-lecture-avis">

@@ -1,3 +1,9 @@
+/* =======================================
+   CHARGEMENT DES STYLES ET BASE DE LA PAGE
+   ======================================= */
+
+/* Feuilles de styles partagées et styles des pages */
+@import './information.css';
 @import url('./colors.css');
 @import url('./typography.css');
 @import url('./components.css');
@@ -10,6 +16,7 @@
 @import url('./modal-ajout-livre.css');
 @import url('./modal-details-livre.css');
 
+/* Dimensions et fond de la page */
 
 html,
 body {
@@ -21,4 +28,3 @@ body {
 body {
     background-color: var(--color-fond);
 }
-

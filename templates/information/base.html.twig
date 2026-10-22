@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% block information_titre %}{% endblock %} - Incipit{% endblock %}
+
+{% block body %}
+<main class="information-page">
+    <a class="information-retour" href="{{ path('app_accueil') }}">Retour à l’accueil</a>
+
+    <article class="information-carte">
+        <p class="information-surtitre">Incipit · Projet de fin d’études</p>
+        <h1>{{ block('information_titre') }}</h1>
+
+        {% block information_contenu %}{% endblock %}
+    </article>
+</main>
+{% endblock %}

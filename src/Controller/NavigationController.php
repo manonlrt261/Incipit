@@ -2,8 +2,8 @@
 
 namespace App\Controller;
 
-use Doctrine\DBAL\Connection;
 use App\Service\NomsAuteur;
+use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -149,5 +149,4 @@ final class NavigationController extends AbstractController
     {
         return $this->redirectToRoute('app_prets_index');
     }
-
 }

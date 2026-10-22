@@ -23,6 +23,17 @@ class SecurityController extends AbstractController
         ]);
     }
 
+    #[Route(path: '/logout', name: 'app_logout_confirmation', methods: ['GET'])]
+    // Une ouverture directe propose une confirmation sans terminer la session par une requête GET.
+    public function confirmerDeconnexion(): Response
+    {
+        if (!$this->getUser()) {
+            return $this->redirectToRoute('app_accueil');
+        }
+
+        return $this->render('security/logout.html.twig');
+    }
+
     #[Route(path: '/logout', name: 'app_logout', methods: ['POST'])]
     // Déclare la route de déconnexion ; Symfony Security intercepte la requête et termine la session.
     public function logout(): void

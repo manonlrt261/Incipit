@@ -1,11 +1,17 @@
 <?php
+
 namespace App\Controller;
 
-use App\Entity\{Souhait, Genre, Exemplaire, SessionLecture};
-use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\Exemplaire;
+use App\Entity\Genre;
+use App\Entity\SessionLecture;
+use App\Entity\Souhait;
 use Doctrine\DBAL\LockMode;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\{Request, Response, JsonResponse};
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -31,16 +37,17 @@ final class WishlistController extends AbstractController
             return $this->json(['success' => false, 'message' => 'Souhait introuvable.'], 404);
         }
         $l = $souhait->getLivre();
+
         return $this->json(['success' => true, 'publique' => $souhait->isPublique(),
             'prixEstime' => $souhait->getPrixEstime(), 'lienAchat' => $souhait->getLienAchat(), 'livre' => [
-            'titre' => $l->getTitre(), 'sous_titre' => $l->getSousTitre(), 'saga' => $l->getSaga(),
-            'tome' => $l->getTome(), 'isbn13' => $l->getIsbn13(), 'isbn10' => $l->getIsbn10(),
-            'edition' => $l->getEdition(), 'langue' => $l->getLangue(),
-            'date_publication' => $l->getDatePublication()?->format('Y-m-d'),
-            'nombre_pages' => $l->getNombrePages(), 'resume' => $l->getResume(), 'image_couverture' => $l->getImageCouverture(),
-            'auteurs_liste' => array_map(fn($a) => $a->getNomAffichage() ?: trim($a->getPrenom().' '.$a->getNom()), $l->getAuteurs()->toArray()),
-            'genres_ids' => array_map(fn($g) => $g->getId(), $l->getGenres()->toArray()),
-        ]]);
+                'titre' => $l->getTitre(), 'sous_titre' => $l->getSousTitre(), 'saga' => $l->getSaga(),
+                'tome' => $l->getTome(), 'isbn13' => $l->getIsbn13(), 'isbn10' => $l->getIsbn10(),
+                'edition' => $l->getEdition(), 'langue' => $l->getLangue(),
+                'date_publication' => $l->getDatePublication()?->format('Y-m-d'),
+                'nombre_pages' => $l->getNombrePages(), 'resume' => $l->getResume(), 'image_couverture' => $l->getImageCouverture(),
+                'auteurs_liste' => array_map(fn ($a) => $a->getNomAffichage() ?: trim($a->getPrenom() . ' ' . $a->getNom()), $l->getAuteurs()->toArray()),
+                'genres_ids' => array_map(fn ($g) => $g->getId(), $l->getGenres()->toArray()),
+            ]]);
     }
 
     #[Route('/wishlist/{id}/{action}', name: 'app_wishlist_action', requirements: ['id' => '\d+', 'action' => 'acheter|supprimer'], methods: ['POST'])]
@@ -48,18 +55,23 @@ final class WishlistController extends AbstractController
     public function action(int $id, string $action, Request $request, EntityManagerInterface $em): JsonResponse
     {
         $jeton = $request->request->get('_token');
-        if (!is_string($jeton) || !$this->isCsrfTokenValid('wishlist_'.$id, $jeton)) {
+
+        if (!is_string($jeton) || !$this->isCsrfTokenValid('wishlist_' . $id, $jeton)) {
             return $this->json(['success' => false, 'message' => 'Session expirée. Actualisez la page.'], 403);
         }
         $db = $em->getConnection();
         $db->beginTransaction();
+
         try {
             // Verrouille le souhait pour empêcher deux requêtes simultanées de créer deux achats.
             $souhait = $em->find(Souhait::class, $id, LockMode::PESSIMISTIC_WRITE);
+
             if (!$souhait || $souhait->getStatut() !== 'souhaité') {
                 $db->rollBack();
+
                 return $this->json(['success' => false, 'message' => 'Ce livre ne figure plus dans la wishlist.'], 409);
             }
+
             // Distingue la suppression du souhait de son achat, qui le transfère vers les livres possédés.
             if ($action === 'supprimer') {
                 $em->remove($souhait);
@@ -73,10 +85,15 @@ final class WishlistController extends AbstractController
             }
             $em->flush();
             $db->commit();
+
             return $this->json(['success' => true]);
         } catch (\Throwable $exception) {
-            error_log('[INCIPIT - WISHLIST] '.$exception->getMessage());
-            if ($db->isTransactionActive()) $db->rollBack();
+            error_log('[INCIPIT - WISHLIST] ' . $exception->getMessage());
+
+            if ($db->isTransactionActive()) {
+                $db->rollBack();
+            }
+
             return $this->json(['success' => false, 'message' => 'Impossible d’enregistrer cette action. Réessayez.'], 500);
         }
     }

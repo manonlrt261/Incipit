@@ -35,9 +35,14 @@ class ChangePasswordFormType extends AbstractType
                             // Limite la longueur traitée par le hachage du mot de passe.
                             max: 4096,
                         ),
-                        new PasswordStrength(message: 'Ce mot de passe est trop faible. Choisissez un mot de passe plus robuste.'),
+                        new PasswordStrength(
+                            message: 'Ce mot de passe est trop faible. Choisissez un mot de passe plus robuste.',
+                        ),
+
                         // Refuse un mot de passe connu dans les fuites de données.
-                        new NotCompromisedPassword(message: 'Ce mot de passe figure dans une fuite de données. Choisissez-en un autre.'),
+                        new NotCompromisedPassword(
+                            message: 'Ce mot de passe figure dans une fuite de données. Choisissez-en un autre.',
+                        ),
                     ],
                     'label' => 'Nouveau mot de passe',
                 ],
@@ -45,6 +50,7 @@ class ChangePasswordFormType extends AbstractType
                     'label' => 'Confirmer le mot de passe',
                 ],
                 'invalid_message' => 'Les deux mots de passe doivent être identiques.',
+
                 // Le contrôleur hache la saisie avant de l’enregistrer sur le compte.
                 'mapped' => false,
             ]);

@@ -3,17 +3,14 @@
 {% block title %}Connexion | Incipit{% endblock %}
 
 {% block body %}
-
-{# Permet de revenir à l’accueil public sans se connecter. #}
 <a href="{{ path('app_accueil') }}" class="login-back-home">
     ← Retour à l'accueil
 </a>
 
 <main class="login-page">
     <div class="login-container">
-        <img src="{{ asset('images/livre2.png') }}" alt="" class="login-logo">
+        <img src="{{ asset('images/incipit.png') }}" alt="Incipit" class="login-logo">
 
-        <h1>Ma Bibliothèque</h1>
         <p class="login-subtitle">
             Connectez-vous pour accéder à votre bibliothèque.
         </p>
@@ -24,6 +21,7 @@
                 <label for="username">Adresse e-mail</label>
                 <div class="login-input-wrapper">
                     <img src="{{ asset('images/mail.png') }}" alt="">
+
                     {# Conserve la dernière adresse saisie après un échec de connexion. #}
                     <input
                         type="email"
@@ -66,7 +64,6 @@
                             alt=""
                         >
                     </button>
-
                 </div>
             </div>
 
@@ -81,7 +78,6 @@
                 Se connecter
             </button>
 
-            {# Ouvre la demande d’un lien de réinitialisation du mot de passe. #}
             <a href="{{ path('app_forgot_password_request') }}" class="login-forgot-password">Mot de passe oublié ?</a>
 
             {# Affiche le message d’échec traduit renvoyé par Symfony Security. #}
@@ -95,5 +91,7 @@
 </main>
 {% endblock %}
 
-{# Réutilise les commandes d’affichage du nouveau mot de passe, y compris après une navigation Turbo. #}
-{% block importmap %}{{ importmap(['app', 'reset-password']) }}{% endblock %}
+{# Charge les commandes d’affichage du mot de passe, y compris après une navigation Turbo. #}
+{% block importmap %}
+    {{ importmap(['app', 'reset-password']) }}
+{% endblock %}

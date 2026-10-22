@@ -18,6 +18,7 @@ final class IsbnController extends AbstractController
             return $this->json(['message' => 'Connexion requise.'], 401);
         }
         $isbn = strtoupper(preg_replace('/[\s-]/', '', $request->query->getString('isbn')));
+
         if (!preg_match('/^(?:\d{13}|\d{9}[\dX])$/', $isbn)) {
             return $this->json(['message' => 'ISBN invalide.'], 400);
         }

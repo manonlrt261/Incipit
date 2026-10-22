@@ -4,7 +4,6 @@
 
 {% block body %}
 <div class="espace-layout profil-layout">
-    {# Réutilise la navigation commune avec l’onglet du profil actif. #}
     {% include 'components/_sidebar.html.twig' %}
 
     <main id="page-profil" class="espace-contenu bibliotheque profil">
@@ -56,7 +55,6 @@
                         <p id="profil-email-actuel">{{ app.user.email }}</p>
                     </div>
                 </header>
-
             </section>
 
             {# Recueille le mot de passe actuel et la confirmation ; leur vérification est effectuée côté serveur. #}
@@ -155,7 +153,6 @@
                 >
                     <input type="hidden" name="_token" value="{{ csrf_token('profil_visibilite') }}">
 
-                    {# Centralise les intitulés et les explications des trois sections configurables. #}
                     {% set sections = [
                         {
                             cle: 'wishlist',
@@ -212,10 +209,11 @@
             </a>
         </section>
 
-        {# Envoie la déconnexion hors de Turbo pour laisser Symfony terminer la session et rediriger vers l’accueil public. #}
         <footer class="profil-deconnexion">
             {# Conserve l’accès au journal à proximité des actions générales du compte, dans les deux onglets. #}
             <a href="{{ path('app_journal_activite') }}" class="profil-bouton-journal">Consulter le journal d’activité</a>
+
+            {# Envoie la déconnexion hors de Turbo pour laisser Symfony terminer la session et rediriger vers l’accueil public. #}
             <form action="{{ path('app_logout') }}" method="post" data-turbo="false">
                 <input type="hidden" name="_csrf_token" value="{{ csrf_token('logout') }}">
                 <button type="submit" class="bouton-deconnexion">Déconnexion</button>

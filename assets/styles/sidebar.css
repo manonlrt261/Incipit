@@ -93,6 +93,7 @@
    ======================================= */
 
 @media (max-width: 900px) {
+    /* Navigation et onglet actif de la bibliothèque */
     .sidebar {
         width: 220px;
         min-width: 220px;
@@ -121,9 +122,11 @@
    ======================================= */
 
 @media (max-width: 700px) {
+    /* Répartition de la navigation et du contenu */
     .espace-layout {
         flex-direction: column;
     }
+    /* Navigation et onglet actif de la bibliothèque */
     .sidebar {
         z-index: 100;
         width: 100%;
@@ -191,6 +194,7 @@
         border-top: 1px solid var(--color-encadre);
         border-bottom: 0;
     }
+    /* Répartition de la navigation et du contenu */
     .espace-layout {
         box-sizing: border-box;
         padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px));
@@ -204,10 +208,12 @@
 .sidebar-lien > .sidebar-libelle-mobile {
     display: none;
 }
+
 /* =======================================
    ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 700PX)
    ======================================= */
 @media (max-width: 700px) {
+    /* Libellés de navigation adaptés au téléphone */
     .sidebar-lien > .sidebar-libelle-desktop {
         display: none;
     }

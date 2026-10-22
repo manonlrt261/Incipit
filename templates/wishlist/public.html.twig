@@ -35,7 +35,11 @@
                         %}
 
                         {# En édition, le déplacement remplace l’ouverture de la fiche au clic. #}
-                        <article class="wishlist-carte" data-ordre-livre data-livre-id="{{ livre.id }}" tabindex="0" {% if not edition|default(false) %}data-fiche-souhait="fiche-souhait-{{ souhait.id }}"{% endif %} aria-label="Consulter {{ livre.titre }}">
+                        <article
+                            class="wishlist-carte" data-ordre-livre
+                            data-livre-id="{{ livre.id }}"
+                            tabindex="0" {% if not edition|default(false) %}data-fiche-souhait="fiche-souhait-{{ souhait.id }}"{% endif %}
+                            aria-label="Consulter {{ livre.titre }}">
                             {# Conserve les URL distantes et les chemins absolus ; complète les chemins locaux relatifs. #}
                             <div class="wishlist-couverture">
                                 {% if livre.imageCouverture %}
@@ -55,6 +59,7 @@
                                 Ajouté le {{ souhait.dateAjout|date('d/m/Y') }}
                             </p>
                         </article>
+
                         {# Le mode public conserve les informations du souhait et masque toutes les actions de gestion. #}
                         {% include 'wishlist/_fiche.html.twig' with {souhait: souhait, livre: livre, auteurs: auteurs, publique: true} only %}
                     {% endfor %}

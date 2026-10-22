@@ -264,7 +264,12 @@
     min-width: 0;
 }
 
+/* =======================================
+   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 700PX)
+   ======================================= */
+
 @media (max-width: 700px) {
+    /* Menus de tri et réinitialisation des auteurs */
     .auteurs-tris {
         grid-template-columns: minmax(0, 1fr);
     }
@@ -341,4 +346,24 @@
     font: inherit;
     text-align: left;
     cursor: pointer;
+}
+
+/* =======================================
+   CLASSEMENT ALPHABÉTIQUE DES AUTEURS
+   ======================================= */
+
+/* Lettres et traits de séparation des groupes d’auteurs */
+.auteurs-separateur {
+    grid-column: 1 / -1;
+    margin: 20px 0 4px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--color-primary);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 32px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--color-secondary);
+}
+.auteurs-separateur:first-child {
+    margin-top: 0;
 }

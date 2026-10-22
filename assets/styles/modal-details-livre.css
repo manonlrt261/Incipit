@@ -315,6 +315,7 @@
    ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 750PX)
    ======================================= */
 @media (max-width: 750px) {
+    /* Fiche détaillée et actions du livre */
     .modal-details-livre {
         width: calc(100vw - 20px);
         max-height: calc(100vh - 20px);
@@ -329,14 +330,20 @@
         gap: 24px;
     }
 
+    /* Couverture du livre et menu de modification */
+
     .details-livre-couverture-zone {
         width: min(220px, 100%);
         margin: 0 auto;
     }
 
+    /* Fiche détaillée et actions du livre */
+
     .details-livre-metadonnees {
         grid-template-columns: 1fr;
     }
+
+    /* Suivi des lectures et commandes d’affichage */
 
     .details-livre-lectures-entete {
         align-items: flex-start;
@@ -483,6 +490,8 @@
         grid-column: auto;
     }
 
+    /* Fiche détaillée et actions du livre */
+
     :root .modal-details-livre input,
     :root .modal-details-livre select,
     :root .modal-details-livre textarea {
@@ -490,6 +499,8 @@
         max-width: 100%;
         font-size: 16px;
     }
+
+    /* Formulaires et historique des sessions de lecture */
 
     .details-lecture-champ input,
     .details-lecture-champ select {
@@ -586,6 +597,16 @@
     font: inherit;
     cursor: pointer;
 }
-.details-livre-restauration button:disabled { opacity: 0.6; cursor: wait; }
-.details-livre-restauration button:focus-visible { outline: 2px solid var(--color-secondary); outline-offset: 3px; }
-.details-livre-restauration p { margin: 0; color: var(--color-secondary); text-align: center; }
+.details-livre-restauration button:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+.details-livre-restauration button:focus-visible {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 3px;
+}
+.details-livre-restauration p {
+    margin: 0;
+    color: var(--color-secondary);
+    text-align: center;
+}

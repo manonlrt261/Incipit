@@ -1,10 +1,14 @@
 {# Chaque livre terminé apparaît une fois, comme dans le compteur du podium. #}
 <p>{{ livres|length }} livre{{ livres|length > 1 ? 's' : '' }} lu{{ livres|length > 1 ? 's' : '' }} · Toutes années confondues</p>
+
 <div class="dashboard-liste">
     {% for livre in livres %}
         <article class="dashboard-livre">
             {% if livre.image_couverture %}
-                <img class="dashboard-couverture" src="{{ livre.image_couverture starts with 'http' or livre.image_couverture starts with '/' ? livre.image_couverture : '/' ~ livre.image_couverture }}" alt="Couverture de {{ livre.titre }}">
+                <img
+                    class="dashboard-couverture"
+                    src="{{ livre.image_couverture starts with 'http' or livre.image_couverture starts with '/' ? livre.image_couverture : '/' ~ livre.image_couverture }}"
+                    alt="Couverture de {{ livre.titre }}">
             {% else %}
                 <div class="dashboard-couverture dashboard-sans-couverture" aria-hidden="true"></div>
             {% endif %}

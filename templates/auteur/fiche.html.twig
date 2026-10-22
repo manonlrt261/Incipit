@@ -1,30 +1,51 @@
 {% extends 'base.html.twig' %}
+
 {% block title %}{{ auteur.affichage }} | Incipit{% endblock %}
+
 {% block body %}
 <div class="espace-layout">
     {% include 'components/_sidebar.html.twig' %}
+
     <main class="espace-contenu bibliotheque page-auteurs" id="page-auteur-fiche">
         <header class="bibliotheque-header">
             <a class="auteurs-retour" href="{{ path('app_auteurs') }}">← Mes auteurs</a>
             <img src="{{ asset('images/incipit.png') }}" alt="Incipit" class="bibliotheque-logo">
         </header>
+
         <div class="bibliotheque-introduction">
-            <div><h1 class="titre-page">{{ auteur.affichage }}</h1><p class="sous-titre-page">Tous vos livres de cet auteur.</p></div>
+            <div>
+                <h1 class="titre-page">{{ auteur.affichage }}</h1>
+                <p class="sous-titre-page">Tous vos livres de cet auteur.</p>
+            </div>
             <a class="auteurs-modifier" href="{{ path('app_auteur_modifier', {id: auteur.id}) }}"><img src="{{ asset('images/modifier.png') }}" alt="">Modifier l’auteur</a>
         </div>
+
         {# Les onglets utilisent les associations existantes, sans déplacer ni modifier les livres. #}
         <div class="auteurs-onglets" role="tablist" aria-label="Livres de cet auteur">
             {% for cle, onglet in onglets %}
-                <button type="button" role="tab" id="auteur-tab-{{ cle }}" aria-controls="auteur-panel-{{ cle }}" aria-selected="{{ loop.first ? 'true' : 'false' }}" tabindex="{{ loop.first ? '0' : '-1' }}">{{ onglet.titre }} ({{ onglet.livres|length }})</button>
+                <button
+                    type="button"
+                    role="tab"
+                    id="auteur-tab-{{ cle }}"
+                    aria-controls="auteur-panel-{{ cle }}"
+                    aria-selected="{{ loop.first ? 'true' : 'false' }}"
+                    tabindex="{{ loop.first ? '0' : '-1' }}">{{ onglet.titre }} ({{ onglet.livres|length }})</button>
             {% endfor %}
         </div>
         {% for cle, onglet in onglets %}
             <section role="tabpanel" id="auteur-panel-{{ cle }}" aria-labelledby="auteur-tab-{{ cle }}" {{ not loop.first ? 'hidden' : '' }} tabindex="0">
                 {% if cle == 'sagas' %}
+
                     {# Filtre les sagas de cet auteur en conservant l’ordre numérique des tomes. #}
                     <label class="auteur-filtre-saga" for="auteur-saga">Saga
-                        <select id="auteur-saga"><option value="">Toutes les sagas</option>{% for valeur, nomSaga in sagas %}<option value="{{ valeur }}" {{ sagaSelectionnee == valeur ? 'selected' : '' }}>{{ nomSaga }}</option>{% endfor %}</select>
+                        <select id="auteur-saga">
+                            <option value="">Toutes les sagas</option>
+                            {% for valeur, nomSaga in sagas %}
+                                <option value="{{ valeur }}" {{ sagaSelectionnee == valeur ? 'selected' : '' }}>{{ nomSaga }}</option>
+                            {% endfor %}
+                        </select>
                     </label>
+
                     {# Les actions et la moyenne concernent uniquement la saga sélectionnée. #}
                     <div id="auteur-saga-actions" hidden data-modifier-url="{{ path('app_auteur_saga_modifier', {id: auteur.id}) }}">
                         <a class="auteurs-modifier" id="auteur-saga-modifier" href="#">Modifier la saga / Ajouter un livre</a>
@@ -33,8 +54,16 @@
                 {% endif %}
                 <div class="auteur-livres-grille">
                     {% for livre in onglet.livres %}
+
                         {# Le lien de détail sert au chargement à la demande ; les données de saga servent au filtre et à la moyenne. #}
-                        <article class="auteur-livre" data-livre-id="{{ livre.id }}" {% if cle == 'sagas' %}data-saga="{{ livre.cle_saga|e('html_attr') }}" data-note="{{ livre.note }}"{% endif %} data-details-url="{{ path('app_auteur_livre_details', {id: auteur.id, livreId: livre.id}) }}" tabindex="0" role="button" aria-label="Voir les détails de {{ livre.titre }}">
+                        <article
+                            class="auteur-livre"
+                            data-livre-id="{{ livre.id }}" {% if cle == 'sagas' %}data-saga="{{ livre.cle_saga|e('html_attr') }}"
+                            data-note="{{ livre.note }}"{% endif %}
+                            data-details-url="{{ path('app_auteur_livre_details', {id: auteur.id, livreId: livre.id}) }}"
+                            tabindex="0"
+                            role="button"
+                            aria-label="Voir les détails de {{ livre.titre }}">
                             <div class="auteur-couverture">
                                 {% if livre.image_couverture %}
                                     <img src="{{ livre.image_couverture starts with 'http' or livre.image_couverture starts with '/' ? livre.image_couverture : '/' ~ livre.image_couverture }}" alt="Couverture de {{ livre.titre }}">
@@ -42,7 +71,9 @@
                             </div>
                             <h2>{{ livre.titre }}</h2>
                             <p>{{ auteur.affichage }}</p>
-                            {% if livre.saga %}<p class="auteur-livre-saga">{{ livre.saga }}{% if livre.tome is not null %} · Tome {{ livre.tome }}{% endif %}</p>{% endif %}
+                            {% if livre.saga %}
+                                <p class="auteur-livre-saga">{{ livre.saga }}{% if livre.tome is not null %} · Tome {{ livre.tome }}{% endif %}</p>
+                            {% endif %}
                             {% if cle == 'possedes' %}
                                 {% include 'components/_badge_lecture.html.twig' with {statut: livre.statut} only %}
                             {% endif %}
@@ -53,6 +84,7 @@
                 </div>
             </section>
         {% endfor %}
+
         {# Reçoit la fiche détaillée chargée au clic sans quitter la catégorie consultée. #}
         <div id="auteur-detail-conteneur"></div>
         <p id="auteur-detail-erreur" role="alert" hidden></p>

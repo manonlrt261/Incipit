@@ -26,8 +26,8 @@
 
 /* Logo de la connexion */
 .login-logo {
-    width: 52px;
-    height: 52px;
+    width: 180px;
+    height: auto;
     object-fit: contain;
     margin-bottom: 20px;
 }
@@ -143,9 +143,12 @@
    ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 480PX)
    ======================================= */
 @media (max-width: 480px) {
+    /* Disposition du formulaire de connexion */
     .login-page {
         padding: 45px 16px;
     }
+
+    /* Champs et encadré de connexion */
 
     .login-card {
         padding: 26px 20px;
@@ -155,10 +158,9 @@
 /* Dimensions du logo indépendantes des règles générales sur les images */
 .login-page .login-logo {
     display: block;
-    width: 52px;
-    height: 52px;
-    max-width: 52px;
-    max-height: 52px;
+    width: 180px;
+    height: auto;
+    max-width: 100%;
     object-fit: contain;
     margin: 0 auto 20px;
 }
@@ -181,8 +183,25 @@
    ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 480PX)
    ======================================= */
 @media (max-width: 480px) {
+    /* Lien de retour à l’accueil depuis la connexion */
     .login-back-home {
         top: 20px;
         left: 20px;
+    }
+}
+
+/* Centre le bloc de connexion sur téléphone tout en laissant défiler les petits écrans. */
+
+/* =======================================
+   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 700PX)
+   ======================================= */
+@media (max-width: 700px) {
+    /* Disposition du formulaire de connexion */
+    .login-page {
+        min-height: 100vh;
+        min-height: 100svh;
+        align-items: center;
+        padding-top: max(64px, env(safe-area-inset-top, 0px));
+        padding-bottom: max(64px, env(safe-area-inset-bottom, 0px));
     }
 }

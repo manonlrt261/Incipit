@@ -1,10 +1,11 @@
 {% extends 'base.html.twig' %}
+
 {% block title %}Mes statistiques | Incipit{% endblock %}
+
 {% block body %}
     <div class="espace-layout stats-layout">
-
-        {# Réutilise la navigation commune avec l’onglet Statistiques actif. #}
         {% include 'components/_sidebar.html.twig' %}
+
         <main id="page-statistiques" class="espace-contenu bibliotheque statistiques">
             <header class="stats-entete">
                 <div>
@@ -13,6 +14,7 @@
                 </div>
                 <img src="{{ asset('images/incipit.png') }}" class="bibliotheque-logo" alt="Incipit">
             </header>
+
             <p class="stats-periode">Toutes vos lectures, toutes années confondues</p>
 
             {# Affiche les totaux par statut pour toutes les années, indépendamment de l’année des graphiques. #}
@@ -23,6 +25,7 @@
                     {cle: 'pas commencé', nom: 'Pas commencé', image: 'pascommence2.png'},
                     {cle: 'abandonné', nom: 'Abandonné', image: 'abandonnee.png'}
                 ] %}
+
                 {% for indicateur in indicateurs %}
                     <article class="stats-compteur" data-statut="{{ indicateur.cle }}">
                         <span class="stats-icone">
@@ -108,7 +111,7 @@
             </div>
         </form>
 
-        {# Affiche le résultat de l’enregistrement sans fermer la fenêtre ni perdre la saisie. #}
+        {# Annonce la réussite ou l’échec de l’enregistrement dans la fenêtre de l’objectif. #}
         <p id="stats-objectif-erreur" role="alert" hidden></p>
         <p id="stats-objectif-succes" role="status" hidden></p>
     </dialog>

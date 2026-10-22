@@ -10,6 +10,7 @@ function initialiserBibliotheque(ecouter) {
         return;
     }
 
+
     const boutonGrille = document.getElementById('vue-grille');
     const boutonListe = document.getElementById('vue-liste');
     const boutonRepli = document.getElementById('bibliotheque-basculer-livres');
@@ -27,15 +28,28 @@ function initialiserBibliotheque(ecouter) {
         boutonListe.setAttribute('aria-pressed', String(!grille));
     }
     changerVue(!mobile.matches);
-    ecouter(mobile, 'change', () => { if (!choixManuel) changerVue(!mobile.matches); });
-    ecouter(boutonGrille, 'click', () => { choixManuel = true; changerVue(true); });
-    ecouter(boutonListe, 'click', () => { choixManuel = true; changerVue(false); });
+    ecouter(mobile, 'change', () => {
+        if (!choixManuel) {
+            changerVue(!mobile.matches);
+        }
+    });
+    ecouter(boutonGrille, 'click', () => {
+        choixManuel = true;
+        changerVue(true);
+    });
+    ecouter(boutonListe, 'click', () => {
+        choixManuel = true;
+        changerVue(false);
+    });
 
     // Replie la sélection sans perdre ses filtres ni son mode d’affichage.
     ecouter(boutonRepli, 'click', () => {
         const ouvert = boutonRepli.getAttribute('aria-expanded') === 'true';
         boutonRepli.setAttribute('aria-expanded', String(!ouvert));
-        boutonRepli.setAttribute('aria-label', ouvert ? 'Afficher les livres' : 'Masquer les livres');
+        boutonRepli.setAttribute(
+            'aria-label',
+            ouvert ? 'Afficher les livres' : 'Masquer les livres'
+        );
         zone.hidden = ouvert;
     });
 
@@ -64,9 +78,9 @@ function initialiserBibliotheque(ecouter) {
 
     // Trie les cartes existantes sans les recréer, en conservant leurs actions et leur état de visibilité.
     function trierLivres(livres) {
-        const dateAjout = livre => Number(livre.dataset.dateAjout) || 0;
-        const parDateRecente = (a, b) => dateAjout(b) - dateAjout(a)
-            || Number(b.dataset.livreId) - Number(a.dataset.livreId);
+        const dateAjout = (livre) => Number(livre.dataset.dateAjout) || 0;
+        const parDateRecente = (a, b) =>
+            dateAjout(b) - dateAjout(a) || Number(b.dataset.livreId) - Number(a.dataset.livreId);
 
         livres.sort((a, b) => {
             if (triAuteurs.value) {
@@ -74,25 +88,29 @@ function initialiserBibliotheque(ecouter) {
                 const auteurB = (b.dataset.auteurs || '').trim();
 
                 // Les livres sans auteur restent à la fin, quel que soit le sens du tri.
-                if (!auteurA && auteurB) return 1;
-                if (auteurA && !auteurB) return -1;
+                if (!auteurA && auteurB) {
+                    return 1;
+                }
+                if (auteurA && !auteurB) {
+                    return -1;
+                }
+
+
                 const comparaison = ordreAlphabetique.compare(auteurA, auteurB);
-                return (triAuteurs.value === 'desc' ? -comparaison : comparaison)
-                    || parDateRecente(a, b);
+                return (
+                    (triAuteurs.value === 'desc' ? -comparaison : comparaison) ||
+                    parDateRecente(a, b)
+                );
             }
-            return triDateAjout.value === 'asc'
-                ? -parDateRecente(a, b)
-                : parDateRecente(a, b);
+            return triDateAjout.value === 'asc' ? -parDateRecente(a, b) : parDateRecente(a, b);
         });
 
-        livres.forEach(livre => conteneur.appendChild(livre));
+        livres.forEach((livre) => conteneur.appendChild(livre));
     }
 
     // Combine recherche et filtres, applique le tri choisi et actualise le compteur des livres visibles.
     function appliquerFiltres() {
-        const livres = [
-            ...conteneur.querySelectorAll('.bibliotheque-livre')
-        ];
+        const livres = [...conteneur.querySelectorAll('.bibliotheque-livre')];
 
         const texte = normaliser(recherche.value);
         const genre = normaliser(filtreGenre.value);
@@ -103,25 +121,17 @@ function initialiserBibliotheque(ecouter) {
         livres.forEach((livre) => {
             const texteLivre = normaliser(livre.dataset.recherche);
 
-            const genresLivre = (livre.dataset.genres || '')
-                .split('|')
-                .map(normaliser);
+            const genresLivre = (livre.dataset.genres || '').split('|').map(normaliser);
 
             const statutLivre = normaliser(livre.dataset.statut);
 
-            const correspondRecherche =
-                !texte || texteLivre.includes(texte);
+            const correspondRecherche = !texte || texteLivre.includes(texte);
 
-            const correspondGenre =
-                !genre || genresLivre.includes(genre);
+            const correspondGenre = !genre || genresLivre.includes(genre);
 
-            const correspondStatut =
-                !statut || statutLivre === statut;
+            const correspondStatut = !statut || statutLivre === statut;
 
-            const visible =
-                correspondRecherche &&
-                correspondGenre &&
-                correspondStatut;
+            const visible = correspondRecherche && correspondGenre && correspondStatut;
 
             livre.hidden = !visible;
 
@@ -132,8 +142,7 @@ function initialiserBibliotheque(ecouter) {
 
         trierLivres(livres);
 
-        compteur.textContent =
-            `${nombreVisible} livre${nombreVisible > 1 ? 's' : ''} dans ma pile à lire`;
+        compteur.textContent = `${nombreVisible} livre${nombreVisible > 1 ? 's' : ''} dans ma pile à lire`;
 
         aucunResultat.hidden = nombreVisible !== 0;
     }
@@ -171,9 +180,7 @@ function initialiserBibliotheque(ecouter) {
         appliquerFiltres();
     });
 
-    const rechercheURL = new URLSearchParams(
-        window.location.search
-    ).get('recherche');
+    const rechercheURL = new URLSearchParams(window.location.search).get('recherche');
 
     // Reprend une recherche transmise dans le lien menant à cette page.
     if (rechercheURL) {
@@ -181,10 +188,7 @@ function initialiserBibliotheque(ecouter) {
     }
 
     // Intègre le livre ajouté dans les filtres, le tri et le compteur actuels.
-    ecouter(document,
-        'bibliotheque:livre-ajoute',
-        appliquerFiltres
-    );
+    ecouter(document, 'bibliotheque:livre-ajoute', appliquerFiltres);
 
     appliquerFiltres();
 }

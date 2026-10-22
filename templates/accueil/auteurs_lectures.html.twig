@@ -1,10 +1,21 @@
 {% extends 'base.html.twig' %}
+
 {% block title %}Mes auteurs — Lectures {{ annee }} | Incipit{% endblock %}
+
 {% block body %}
 {# Les attributs d’édition permettent au script de sauvegarder les choix avant de revenir au profil. #}
-<div class="accueil" {% if edition %}id="edition-accueil" data-url="{{ path('app_accueil_ordre') }}" data-token="{{ csrf_token('ordre_accueil') }}" data-retour="{{ path('app_espace_profil') }}#visibilite"{% endif %}>
+<div class="accueil"
+    {% if edition %}
+        id="edition-accueil"
+        data-url="{{ path('app_accueil_ordre') }}"
+        data-token="{{ csrf_token('ordre_accueil') }}"
+        data-retour="{{ path('app_espace_profil') }}#visibilite"
+    {% endif %}
+>
     {% include 'accueil/_edition_commandes.html.twig' %}
+
     {% include 'accueil/_entete.html.twig' only %}
+
     <main class="accueil-main">
         <section class="accueil-section">
             <div class="accueil-section-entete">
@@ -13,13 +24,21 @@
                     <h2>Mes 5 auteurs les plus lus en {{ annee }}</h2>
                     <p>Les livres que j’ai lus cette année, regroupés par auteur.</p>
                 </div>
-                <a class="accueil-lien" {% if edition %}data-edition-navigation{% endif %} href="{{ path(edition ? 'app_accueil_edition' : 'app_accueil') }}">← Retour à l’accueil</a>
+                <a
+                    class="accueil-lien"
+                    {% if edition %}data-edition-navigation{% endif %}
+                    href="{{ path(edition ? 'app_accueil_edition' : 'app_accueil') }}"
+                >
+                    ← Retour à l’accueil
+                </a>
             </div>
+
             {# Reprend les cinq auteurs de l’accueil, avec les choix enregistrés en cas d’égalité. #}
             {% for auteur in auteurs %}
                 <section class="accueil-auteur-lectures" id="auteur-{{ auteur.id }}" aria-labelledby="auteur-titre-{{ auteur.id }}">
                     <h3 id="auteur-titre-{{ auteur.id }}">{{ auteur.nom_affichage }}</h3>
                     <p>{{ auteur.nombre_lectures }} {{ auteur.nombre_lectures == 1 ? 'lecture' : 'lectures' }}</p>
+
                     <div class="accueil-grille-livres">
                         {# Le contrôleur limite ces lectures à l’année courante et aux auteurs du classement public. #}
                         {% for lecture in lecturesParAuteur[auteur.id]|default([]) %}

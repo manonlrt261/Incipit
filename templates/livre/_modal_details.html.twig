@@ -1,15 +1,11 @@
 <dialog id="modal-details-livre" class="modal-details-livre" aria-labelledby="details-livre-titre">
-
     {# Transmet le jeton vérifié par le serveur lors du retrait du livre de la collection. #}
     <input
         type="hidden"
         id="details-livre-token-retrait"
         value="{{ csrf_token('retirer_livre') }}"
     >
-
     <div class="details-livre-contenu">
-
-        {# Réutilise le bouton de fermeture commun aux fenêtres modales. #}
         <header class="details-livre-entete">
             <h2 id="details-livre-titre">Détails du livre</h2>
 
@@ -31,12 +27,10 @@
 
         {# Le JavaScript remplit la couverture et les informations avec les données du livre sélectionné. #}
         <section class="details-livre-principal">
-
             <div class="details-livre-couverture-zone">
                 <div id="details-livre-couverture" class="details-livre-couverture">
                     <span>Aucune couverture</span>
                 </div>
-
             </div>
 
             <div class="details-livre-informations">
@@ -119,7 +113,6 @@
 
             {# Formulaire partagé entre ajout et modification d’une session ; les erreurs restent dans cette zone. #}
             <div id="details-formulaire-lecture" class="details-formulaire-lecture" hidden>
-
                 <h4 id="details-titre-formulaire-lecture" class="details-formulaire-lecture-titre">
                     Ajouter une session de lecture
                 </h4>
@@ -127,13 +120,11 @@
                 <form id="form-ajouter-lecture">
                     {# Identifie la session modifiée ; vide pour créer une nouvelle lecture. #}
                     <input type="hidden" name="lectureId" value="">
-
                     <input
                         type="hidden"
                         name="_token"
                         value="{{ csrf_token('ajouter_lecture') }}"
                     >
-
                     <div class="details-lecture-grille">
                         <div class="details-lecture-champ">
                             <label for="lecture-statut">Statut de lecture</label>
@@ -187,7 +178,6 @@
                                 placeholder="Ton avis sur cette lecture..."
                             ></textarea>
                         </div>
-
                     </div>
 
                     <p id="lecture-message-erreur" role="alert" hidden></p>
@@ -208,21 +198,20 @@
                             Enregistrer la lecture
                         </button>
                     </div>
-
                 </form>
-
             </div>
 
             {# Le JavaScript construit les sessions avec leurs dates, notes et boutons de modification ou suppression. #}
             <p id="details-erreur-session" role="alert" hidden></p>
-            <div id="details-livre-liste-lectures"
+            <div
+                id="details-livre-liste-lectures"
                 data-modifier="{{ asset('images/modifier.png') }}"
-                data-poubelle="{{ asset('images/poubelle.png') }}">
+                data-poubelle="{{ asset('images/poubelle.png') }}"
+            >
                 <p class="details-livre-aucune-lecture">
                     Aucune lecture enregistrée pour ce livre.
                 </p>
             </div>
         </section>
-
     </div>
 </dialog>

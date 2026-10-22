@@ -1,0 +1,15 @@
+{% extends 'information/base.html.twig' %}
+
+{% block information_titre %}Déconnexion{% endblock %}
+
+{% block information_contenu %}
+    <p>Souhaitez-vous vous déconnecter de votre bibliothèque ?</p>
+
+    {# Confirme la déconnexion par une requête POST protégée, hors de la navigation Turbo. #}
+    <form action="{{ path('app_logout') }}" method="post" data-turbo="false">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('logout') }}">
+        <button type="submit" class="bouton-deconnexion">Se déconnecter</button>
+    </form>
+
+    <p><a href="{{ path('app_tableau_de_bord') }}">Rester connecté et retourner au tableau de bord</a></p>
+{% endblock %}

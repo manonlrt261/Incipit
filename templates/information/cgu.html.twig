@@ -1,0 +1,23 @@
+{% extends 'information/base.html.twig' %}
+
+{% block information_titre %}Conditions générales d’utilisation{% endblock %}
+
+{% block information_contenu %}
+    <h2>Présentation du site</h2>
+    <p>Incipit est un projet pédagogique réalisé par Manon FAYOLLE dans le cadre de son examen de fin d’études. Il présente une bibliothèque virtuelle et des fonctionnalités de gestion des livres, des lectures et des prêts. Le site ne propose pas de vente en ligne.</p>
+
+    <h2>Accès aux fonctionnalités</h2>
+    <p>Les visiteurs peuvent consulter les contenus rendus publics. L’espace de gestion est réservé aux personnes autorisées ; la consultation du site ne donne pas accès à l’administration de la bibliothèque.</p>
+
+    <h2>Utilisation du site</h2>
+    <p>Chaque utilisateur s’engage à respecter les droits des tiers et à ne pas tenter de contourner les protections du site, d’accéder à des données privées ou de perturber son fonctionnement. Les personnes disposant d’un accès doivent préserver la confidentialité de leurs identifiants.</p>
+
+    <h2>Contenus et liens externes</h2>
+    <p>Les avis et sélections reflètent des appréciations personnelles. Les couvertures, titres et informations bibliographiques peuvent appartenir à leurs titulaires respectifs ; leur présence sur Incipit ne constitue pas une autorisation de réutilisation. Les sites externes accessibles par un lien appliquent leurs propres conditions et politiques de confidentialité.</p>
+
+    <h2>Disponibilité et évolution</h2>
+    <p>Le site peut évoluer ou être temporairement indisponible, notamment lors des opérations de maintenance. Un problème peut être signalé depuis la page <a href="{{ path('app_aide_contact') }}">Aide et contact</a>.</p>
+
+    <h2>Données personnelles</h2>
+    <p>Les informations relatives aux traitements sont présentées sur la page <a href="{{ path('app_donnees_personnelles') }}">Données personnelles</a>.</p>
+{% endblock %}

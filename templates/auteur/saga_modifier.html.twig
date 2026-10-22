@@ -1,42 +1,75 @@
 {% extends 'base.html.twig' %}
+
 {% block title %}Modifier la saga | Incipit{% endblock %}
+
 {% block body %}
 <div class="espace-layout">
     {% include 'components/_sidebar.html.twig' %}
+
     <main id="page-saga-modifier" class="espace-contenu bibliotheque page-auteurs">
         <header class="bibliotheque-header">
             <a class="auteurs-retour" href="{{ path('app_auteur_fiche', {id: auteur.id, saga: cleSaga}) }}">← Fiche de l’auteur</a>
             <img src="{{ asset('images/incipit.png') }}" alt="Incipit" class="bibliotheque-logo">
         </header>
-        <div class="bibliotheque-introduction"><div><h1 class="titre-page">Modifier la saga</h1><p class="sous-titre-page">{{ auteur.affichage }}</p></div></div>
+
+        <div class="bibliotheque-introduction">
+            <div>
+                <h1 class="titre-page">Modifier la saga</h1>
+                <p class="sous-titre-page">{{ auteur.affichage }}</p>
+            </div>
+        </div>
+
         {# Conserve les livres existants et applique le nouveau nom à tous les tomes de la saga. #}
         <form class="auteur-formulaire" method="post" data-turbo="false">
             <input type="hidden" name="_token" value="{{ csrf_token('modifier_saga_' ~ auteur.id ~ '_' ~ cleSaga) }}">
             <label for="saga-nom">Nom de la saga</label>
             <input id="saga-nom" name="nom" value="{{ nomSaga }}" maxlength="255" required>
+
             <h2>Ajouter un livre existant</h2>
             <label for="saga-recherche-livre">Rechercher parmi les livres de cet auteur</label>
             <div class="bibliotheque-recherche" role="search">
                 <img src="{{ asset('images/rechercher.png') }}" alt="">
-                <input id="saga-recherche-livre" type="search" placeholder="Un titre ou une saga…" aria-controls="saga-resultats-livres" autocomplete="off" value="{% for livre in livres %}{% if livreId == livre.id %}{{ livre.titre }}{% endif %}{% endfor %}">
+                <input
+                    id="saga-recherche-livre"
+                    type="search"
+                    placeholder="Un titre ou une saga…"
+                    aria-controls="saga-resultats-livres"
+                    autocomplete="off"
+                    value="{% for livre in livres %}{% if livreId == livre.id %}{{ livre.titre }}{% endif %}{% endfor %}">
                 <button type="button" id="saga-rechercher-livre" class="bouton-rechercher">Rechercher</button>
             </div>
+
             {# Envoie l’identifiant choisi dans les résultats, indépendamment du texte de recherche. #}
             <input type="hidden" id="saga-livre" name="livre" value="{{ livreId }}">
+
             {# Les livres existants se choisissent directement dans les résultats de recherche. #}
             <div id="saga-resultats-livres" hidden>
                 {% for livre in livres %}
-                    <button type="button" data-saga-livre-id="{{ livre.id }}" data-titre="{{ livre.titre }}" data-saga="{{ livre.saga }}">{{ livre.titre }}{% if livre.saga %} — {{ livre.saga }}{% endif %}</button>
+                    <button
+                        type="button"
+                        data-saga-livre-id="{{ livre.id }}"
+                        data-titre="{{ livre.titre }}"
+                        data-saga="{{ livre.saga }}">{{ livre.titre }}{% if livre.saga %} — {{ livre.saga }}{% endif %}</button>
                 {% endfor %}
                 <p id="saga-recherche-vide" hidden>Aucun livre trouvé.</p>
             </div>
+
             {# Préremplit le formulaire commun avec l’auteur et la saga déjà enregistrée. #}
-            <button type="button" id="ouvrir-ajout" class="bibliotheque-ajouter" data-saga="{{ sagaEnregistree }}" data-auteur="{{ auteur.affichage }}">Ajouter un nouveau livre</button>
+            <button
+                type="button"
+                id="ouvrir-ajout"
+                class="bibliotheque-ajouter"
+                data-saga="{{ sagaEnregistree }}"
+                data-auteur="{{ auteur.affichage }}">Ajouter un nouveau livre</button>
             <p>Créez un livre avec le formulaire habituel. Il sera enregistré dans cette saga. Vous pourrez y préciser son numéro de tome.</p>
             <p id="saga-ajout-succes" role="status" hidden></p>
+
             <label for="saga-tome">Numéro du tome du livre ajouté (facultatif)</label>
             <input id="saga-tome" name="tome" type="number" min="1" max="100000" step="1" value="{{ tome }}">
-            {% if erreur %}<p role="alert">{{ erreur }}</p>{% endif %}
+            {% if erreur %}
+                <p role="alert">{{ erreur }}</p>
+            {% endif %}
+
             <div class="auteur-formulaire-actions">
                 <a href="{{ path('app_auteur_fiche', {id: auteur.id, saga: cleSaga}) }}">Annuler</a>
                 <button type="submit">Enregistrer</button>
@@ -44,6 +77,7 @@
         </form>
     </main>
 </div>
+
 {# Place la modale hors du formulaire de saga pour éviter des formulaires imbriqués. #}
 {% include 'livre/_modal_ajout.html.twig' %}
 {% endblock %}

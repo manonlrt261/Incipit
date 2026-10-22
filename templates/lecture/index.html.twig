@@ -3,9 +3,7 @@
 {% block title %}Mes lectures | Incipit{% endblock %}
 
 {% block body %}
-
 <div class="espace-layout">
-
     {# Réutilise la navigation commune avec l’onglet Lectures actif. #}
     {% include 'components/_sidebar.html.twig' %}
 
@@ -15,16 +13,13 @@
         class="espace-contenu page-lectures"
         data-pile-token="{{ csrf_token('pile_a_lire') }}"
     >
-
         <header class="bibliotheque-header">
-
             {# Permet de rechercher les livres affichés sans recharger la page. #}
             <form id="lectures-recherche-form" class="lectures-recherche" role="search">
                 <img
                     src="{{ asset('images/rechercher.png') }}"
                     alt=""
                 >
-
                 <input
                     type="search"
                     id="lectures-recherche"
@@ -39,11 +34,9 @@
                 alt="Incipit"
                 class="bibliotheque-logo"
             >
-
         </header>
 
         <div class="lectures-introduction">
-
             <div>
                 <h1 class="titre-page">Mes lectures</h1>
                 <p class="sous-titre-page">Suivez et gérez toutes vos sessions de lecture.</p>
@@ -58,17 +51,20 @@
             >
                 Ajouter un livre
             </button>
-
         </div>
 
         {# Reprend les filtres et tris de la bibliothèque, en complément des compteurs par statut. #}
-        {% include 'components/_filtres_livres.html.twig' with {genres: genres, prefixe: 'lectures-', avec_note: true, tri_auteurs_detaille: true} only %}
+        {% include 'components/_filtres_livres.html.twig' with {
+            genres: genres,
+            prefixe: 'lectures-',
+            avec_note: true,
+            tri_auteurs_detaille: true
+        } only %}
 
         <section
             class="lectures-statistiques"
             aria-label="Filtrer les livres par statut"
         >
-
             {# Définit les compteurs qui servent aussi de filtres par statut. #}
             {% set encadres = [
                 {
@@ -105,14 +101,12 @@
 
             {# Active le filtre « Livres possédés » par défaut et expose les autres statuts au JavaScript. #}
             {% for encadre in encadres %}
-
                 <button
                     type="button"
                     class="lectures-statistique {{ loop.first ? 'actif' : '' }}"
                     data-filtre="{{ encadre.filtre }}"
                     aria-pressed="{{ loop.first ? 'true' : 'false' }}"
                 >
-
                     <span class="lectures-statistique-icone">
                         <img
                             src="{{ asset('images/' ~ encadre.image ~ '.png') }}"
@@ -127,17 +121,21 @@
                             {{ statistiques[encadre.filtre] }}
                         </strong>
                     </span>
-
                 </button>
-
             {% endfor %}
-
         </section>
 
         {# Réunit le compteur, le repli des livres et les deux modes d’affichage. #}
         <div class="bibliotheque-outils lectures-outils">
             <p id="lectures-resultats-compteur" class="lectures-resultats-compteur" aria-live="polite"></p>
-            <button type="button" id="bibliotheque-basculer-livres" class="bibliotheque-basculer-livres" aria-expanded="true" aria-controls="bibliotheque-liste-zone" aria-label="Masquer les livres">
+            <button
+                type="button"
+                id="bibliotheque-basculer-livres"
+                class="bibliotheque-basculer-livres"
+                aria-expanded="true"
+                aria-controls="bibliotheque-liste-zone"
+                aria-label="Masquer les livres"
+            >
                 <span class="bibliotheque-ligne-repli" aria-hidden="true"></span>
                 <span class="bibliotheque-fleche-repli" aria-hidden="true"></span>
             </button>
@@ -167,100 +165,90 @@
 
         {# Le JavaScript adapte la vue initiale à l’écran et conserve le choix manuel grille ou liste. #}
         <div id="bibliotheque-liste-zone">
-
             <section
                 id="bibliotheque-livres"
                 class="lectures-livres vue-grille"
                 aria-label="Livres de ma collection"
             >
+                {# Associe les statuts affichés aux valeurs attendues par les filtres JavaScript. #}
+                {% set statutsFiltres = {
+                    'En cours': 'en-cours',
+                    'Terminé': 'termine',
+                    'En pause': 'en-pause',
+                    'Abandonné': 'abandonne'
+                } %}
 
-            {# Associe les statuts affichés aux valeurs attendues par les filtres JavaScript. #}
-            {% set statutsFiltres = {
-                'En cours': 'en-cours',
-                'Terminé': 'termine',
-                'En pause': 'en-pause',
-                'Abandonné': 'abandonne'
-            } %}
+                {# Fournit les données de recherche et de statut aux cartes accessibles au clic et au clavier. #}
+                {% for livre in livres %}
+                    {% set statutFiltre = statutsFiltres[livre.statut] ?? 'pas-commence' %}
 
-            {# Fournit les données de recherche et de statut aux cartes accessibles au clic et au clavier. #}
-            {% for livre in livres %}
-
-                {% set statutFiltre = statutsFiltres[livre.statut] ?? 'pas-commence' %}
-
-                <article
-                    class="bibliotheque-livre lectures-carte"
-                    data-livre-id="{{ livre.id }}"
-                    data-statut="{{ statutFiltre }}"
-                    data-statut-lecture="{{ livre.statut }}"
-                    data-note="{{ livre.note }}"
-                    data-genres="{{ livre.genres|e('html_attr') }}"
-                    data-auteurs="{{ livre.auteurs|e('html_attr') }}"
-                    data-auteur-nom="{{ livre.auteur_nom|e('html_attr') }}"
-                    data-auteur-prenom="{{ livre.auteur_prenom|e('html_attr') }}"
-                    data-date-ajout="{{ livre.date_creation ? livre.date_creation|date('U') : '' }}"
-                    data-recherche="{{ (livre.titre ~ ' ' ~ livre.auteurs ~ ' ' ~ livre.saga)|lower|e('html_attr') }}"
-                    tabindex="0"
-                    role="button"
-                    aria-label="Voir les détails de {{ livre.titre }}"
-                >
-
-                    {# Affiche la couverture disponible ou un emplacement de remplacement. #}
-                    {% if livre.image_couverture %}
-
-                        <img
-                            class="lectures-couverture"
-                            src="{{ asset(livre.image_couverture) }}"
-                            alt="Couverture de {{ livre.titre }}"
-                        >
-
-                    {% else %}
-
-                        <div
-                            class="lectures-couverture lectures-couverture-vide"
-                            aria-label="Aucune couverture"
-                        ></div>
-
-                    {% endif %}
-
-                    <div class="lectures-carte-informations">
-
-                        <h2>{{ livre.titre }}</h2>
-
-                        <p class="lectures-auteur">
-                            {{ livre.auteurs ?: 'Auteur non renseigné' }}
-                        </p>
-
-                        {# Regroupe le statut et la sélection de pile à lire sur une même ligne lorsque l’espace le permet. #}
-                        <div class="lectures-statut-actions">
-                            {% include 'components/_badge_lecture.html.twig' with {
-                                statut: livre.statut
-                            } only %}
-                            <button type="button" class="pile-ajouter-depuis-lectures" data-pile-action="ajouter" data-livre-id="{{ livre.id }}" {{ livre.pile_a_lire ? 'disabled' : '' }}>{{ livre.pile_a_lire ? 'Dans ma pile à lire' : 'Ajouter à ma pile à lire' }}</button>
-                        </div>
-
-                        {# Affiche uniquement les notes renseignées, en conservant les demi-étoiles et la note zéro. #}
-                        {% if livre.note is not null %}
-
-                            <p class="lectures-note">
-                                <span aria-hidden="true">★</span>
-                                {{ livre.note|number_format(1, ',', ' ')|replace({',0': ''}) }}/5
-                            </p>
-
+                    <article
+                        class="bibliotheque-livre lectures-carte"
+                        data-livre-id="{{ livre.id }}"
+                        data-statut="{{ statutFiltre }}"
+                        data-statut-lecture="{{ livre.statut }}"
+                        data-note="{{ livre.note }}"
+                        data-genres="{{ livre.genres|e('html_attr') }}"
+                        data-auteurs="{{ livre.auteurs|e('html_attr') }}"
+                        data-auteur-nom="{{ livre.auteur_nom|e('html_attr') }}"
+                        data-auteur-prenom="{{ livre.auteur_prenom|e('html_attr') }}"
+                        data-date-ajout="{{ livre.date_creation ? livre.date_creation|date('U') : '' }}"
+                        data-recherche="{{ (livre.titre ~ ' ' ~ livre.auteurs ~ ' ' ~ livre.saga)|lower|e('html_attr') }}"
+                        tabindex="0"
+                        role="button"
+                        aria-label="Voir les détails de {{ livre.titre }}"
+                    >
+                        {# Affiche la couverture disponible ou un emplacement de remplacement. #}
+                        {% if livre.image_couverture %}
+                            <img
+                                class="lectures-couverture"
+                                src="{{ asset(livre.image_couverture) }}"
+                                alt="Couverture de {{ livre.titre }}"
+                            >
+                        {% else %}
+                            <div
+                                class="lectures-couverture lectures-couverture-vide"
+                                aria-label="Aucune couverture"
+                            ></div>
                         {% endif %}
 
-                    </div>
+                        <div class="lectures-carte-informations">
+                            <h2>{{ livre.titre }}</h2>
 
-                </article>
+                            <p class="lectures-auteur">
+                                {{ livre.auteurs ?: 'Auteur non renseigné' }}
+                            </p>
 
-            {% endfor %}
+                            {# Regroupe le statut et la sélection de pile à lire sur une même ligne lorsque l’espace le permet. #}
+                            <div class="lectures-statut-actions">
+                                {% include 'components/_badge_lecture.html.twig' with {
+                                    statut: livre.statut
+                                } only %}
+                                <button
+                                    type="button"
+                                    class="pile-ajouter-depuis-lectures"
+                                    data-pile-action="ajouter"
+                                    data-livre-id="{{ livre.id }}"
+                                    {{ livre.pile_a_lire ? 'disabled' : '' }}
+                                >{{ livre.pile_a_lire ? 'Dans ma pile à lire' : 'Ajouter à ma pile à lire' }}</button>
+                            </div>
 
+                            {# Affiche uniquement les notes renseignées, en conservant les décimales et la note zéro. #}
+                            {% if livre.note is not null %}
+                                <p class="lectures-note">
+                                    <span aria-hidden="true">★</span>
+                                    {{ livre.note|number_format(1, ',', ' ')|replace({',0': ''}) }}/5
+                                </p>
+                            {% endif %}
+                        </div>
+                    </article>
+                {% endfor %}
             </section>
 
             {# Ce message est affiché par le JavaScript lorsqu’aucun livre ne correspond aux filtres. #}
             <p id="lectures-aucun-resultat" class="lectures-vide" hidden>
                 Aucun livre ne correspond à ce filtre.
             </p>
-
         </div>
 
         {# Conserve l’accès aux titres retirés de la collection et à leur historique. #}
@@ -273,7 +261,6 @@
                 aria-controls="contenu-retires"
             >
                 <img src="{{ asset('images/poubelle.png') }}" alt="">
-
                 <span class="bibliotheque-retires-titre">
                     <strong>Livres retirés de ma collection</strong>
                     <small>
@@ -287,7 +274,14 @@
 
             <div id="contenu-retires" class="bibliotheque-retires-liste">
                 {% for livre in livresRetires %}
-                    <article class="bibliotheque-livre-retire" data-retire-details-url="{{ path('app_livre_retire_details', {id: livre.id}) }}" tabindex="0" role="button" aria-haspopup="dialog" aria-label="Voir les détails de {{ livre.titre }}">
+                    <article
+                        class="bibliotheque-livre-retire"
+                        data-retire-details-url="{{ path('app_livre_retire_details', {id: livre.id}) }}"
+                        tabindex="0"
+                        role="button"
+                        aria-haspopup="dialog"
+                        aria-label="Voir les détails de {{ livre.titre }}"
+                    >
                         {% if livre.image_couverture %}
                             <img
                                 src="{{ asset(livre.image_couverture) }}"
@@ -309,15 +303,14 @@
                 {% endfor %}
             </div>
         </section>
+
         {# Reçoit les détails du livre retiré chargé au clic, sans quitter les lectures. #}
         <div id="lectures-retire-details"></div>
         <p id="lectures-retire-erreur" role="alert" hidden></p>
     </main>
-
 </div>
 
 {# Charge les fenêtres communes nécessaires à l’ajout et à la consultation des livres. #}
 {% include 'livre/_modal_ajout.html.twig' %}
 {% include 'livre/_modal_details.html.twig' %}
-
 {% endblock %}

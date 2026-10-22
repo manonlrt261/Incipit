@@ -3,7 +3,13 @@
 {% set prefixe = prefixe|default('') %}
 {% set mode_prets = mode_prets|default(false) %}
 {% set avec_note = avec_note|default(false) %}
-<form id="{{ prefixe ? prefixe ~ 'filtres' : 'bibliotheque-filtres' }}" data-filtres-livres data-champ-date="{{ mode_prets ? 'datePret' : 'dateAjout' }}" class="bibliotheque-filtres">
+
+<form
+    id="{{ prefixe ? prefixe ~ 'filtres' : 'bibliotheque-filtres' }}"
+    data-filtres-livres
+    data-champ-date="{{ mode_prets ? 'datePret' : 'dateAjout' }}"
+    class="bibliotheque-filtres"
+>
     <div class="bibliotheque-selects">
         <label class="bibliotheque-select">
             <span class="sr-only">Genre</span>
@@ -78,23 +84,31 @@
                     {% endfor %}
                 </select>
             </label>
-        {# Avec le filtre de note, les deux actions passent ensemble sous les menus. #}
-    </div>
-    <div class="lectures-filtres-actions">
+            {# Avec la note, les actions ont leur propre ligne ; sinon, Valider reste dans la rangée des menus. #}
+            </div>
+            <div class="lectures-filtres-actions">
         {% endif %}
+
         <button type="submit" class="bibliotheque-valider">
             Valider
         </button>
+
     {% if not avec_note %}
-    </div>
+        </div>
     {% endif %}
 
     {# Le JavaScript efface la recherche et les critères sans soumettre à nouveau la page. #}
-    <button type="button" id="{{ prefixe }}reinitialiser-filtres" data-reinitialiser-filtres class="bibliotheque-reinitialiser">
+    <button
+        type="button"
+        id="{{ prefixe }}reinitialiser-filtres"
+        data-reinitialiser-filtres
+        class="bibliotheque-reinitialiser"
+    >
         <span aria-hidden="true">↻</span>
         Réinitialiser les filtres
     </button>
+
     {% if avec_note %}
-    </div>
+        </div>
     {% endif %}
 </form>

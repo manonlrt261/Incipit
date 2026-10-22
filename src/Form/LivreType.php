@@ -16,10 +16,8 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 class LivreType extends AbstractType
 {
     // Définit les informations bibliographiques du formulaire Symfony classique d’ajout de livre.
-    public function buildForm(
-        FormBuilderInterface $builder,
-        array $options
-    ): void {
+    public function buildForm(FormBuilderInterface $builder, array $options): void
+    {
         $builder
             ->add('titre', TextType::class, [
                 'label' => 'Titre du livre',
@@ -121,9 +119,8 @@ class LivreType extends AbstractType
     }
 
     // Relie les champs du formulaire aux propriétés de l’entité Livre.
-    public function configureOptions(
-        OptionsResolver $resolver
-    ): void {
+    public function configureOptions(OptionsResolver $resolver): void
+    {
         $resolver->setDefaults([
             'data_class' => Livre::class,
         ]);

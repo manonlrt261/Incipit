@@ -4,7 +4,8 @@ namespace App\Controller;
 
 use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\{Request, Response};
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 class TableauDeBordController extends AbstractController
@@ -17,6 +18,7 @@ class TableauDeBordController extends AbstractController
         $pageRecherche = max(1, min(1000, $request->query->getInt('page', 1)));
         $resultatsRecherche = [];
         $nombreResultats = 0;
+
         if ($recherche !== '') {
             // Recherche dans toute la collection possédée, indépendamment de la sélection de la pile à lire.
             // LOCATE traite les caractères % et _ comme du texte et les paramètres restent liés par DBAL.
@@ -38,13 +40,13 @@ class TableauDeBordController extends AbstractController
                     ))
                 )";
             $parametres = ['texte' => $recherche, 'isbn' => preg_replace('/[\s-]+/u', '', $recherche)];
-            $nombreResultats = (int) $connection->fetchOne('SELECT COUNT(*) FROM livre l WHERE '.$condition, $parametres);
+            $nombreResultats = (int) $connection->fetchOne('SELECT COUNT(*) FROM livre l WHERE ' . $condition, $parametres);
             $pageRecherche = min($pageRecherche, max(1, (int) ceil($nombreResultats / 30)));
             $resultatsRecherche = $connection->fetchAllAssociative(
                 "SELECT l.id, l.titre, l.image_couverture, l.saga, l.isbn13, l.isbn10,
                     (SELECT GROUP_CONCAT(COALESCE(a.nom_affichage, CONCAT_WS(' ', a.prenom, a.nom)) SEPARATOR ', ')
                      FROM livre_auteur la JOIN auteur a ON a.id = la.auteur_id WHERE la.livre_id = l.id) AS auteurs
-                 FROM livre l WHERE ".$condition." ORDER BY l.titre ASC, l.id ASC LIMIT 30 OFFSET ".(($pageRecherche - 1) * 30),
+                 FROM livre l WHERE " . $condition . " ORDER BY l.titre ASC, l.id ASC LIMIT 30 OFFSET " . (($pageRecherche - 1) * 30),
                 $parametres
             );
         }
@@ -167,7 +169,10 @@ class TableauDeBordController extends AbstractController
     public function lecturesGenre(int $id, Connection $connection): Response
     {
         $genre = $connection->fetchAssociative('SELECT id, nom FROM genre WHERE id = ?', [$id]);
-        if (!$genre) throw $this->createNotFoundException('Genre introuvable.');
+
+        if (!$genre) {
+            throw $this->createNotFoundException('Genre introuvable.');
+        }
         $livres = $connection->fetchAllAssociative(
             "SELECT l.id, l.titre, l.image_couverture,
                 (SELECT GROUP_CONCAT(COALESCE(a.nom_affichage, CONCAT_WS(' ', a.prenom, a.nom)) ORDER BY a.nom_affichage SEPARATOR ', ')
@@ -181,7 +186,7 @@ class TableauDeBordController extends AbstractController
              ORDER BY l.titre ASC, l.id ASC",
             ['genre' => $id]
         );
+
         return $this->render('tableau_de_bord/_lectures_genre.html.twig', ['genre' => $genre, 'livres' => $livres]);
     }
-
 }

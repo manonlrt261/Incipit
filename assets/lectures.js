@@ -5,7 +5,10 @@ import { creerFiltresLivres } from './components/filtres-livres.js';
 initialiserPage((ecouter) => {
     const page = document.getElementById('page-mes-lectures');
 
-    if (!page) return;
+    if (!page) {
+        return;
+    }
+
 
     const grille = document.getElementById('bibliotheque-livres');
     const boutonsFiltres = document.querySelectorAll('.lectures-statistique');
@@ -17,6 +20,7 @@ initialiserPage((ecouter) => {
         console.error('La grille des livres est introuvable.');
         return;
     }
+
 
     const boutonGrille = document.getElementById('vue-grille');
     const boutonListe = document.getElementById('vue-liste');
@@ -38,8 +42,11 @@ initialiserPage((ecouter) => {
 
     // Affiche une liste sur téléphone et une grille sur ordinateur, jusqu’au choix manuel d’un mode.
     function adapterVue() {
-        if (!vueChoisie) changerVue(mobile.matches ? 'liste' : 'grille');
+        if (!vueChoisie) {
+            changerVue(mobile.matches ? 'liste' : 'grille');
+        }
     }
+
     ecouter(mobile, 'change', adapterVue);
     ecouter(boutonGrille, 'click', () => {
         vueChoisie = true;
@@ -55,7 +62,10 @@ initialiserPage((ecouter) => {
     ecouter(boutonRepli, 'click', () => {
         const ouvert = boutonRepli.getAttribute('aria-expanded') === 'true';
         boutonRepli.setAttribute('aria-expanded', String(!ouvert));
-        boutonRepli.setAttribute('aria-label', ouvert ? 'Afficher les livres' : 'Masquer les livres');
+        boutonRepli.setAttribute(
+            'aria-label',
+            ouvert ? 'Afficher les livres' : 'Masquer les livres'
+        );
         zoneLivres.hidden = ouvert;
     });
 
@@ -78,75 +88,121 @@ initialiserPage((ecouter) => {
         const erreur = document.getElementById('lectures-retire-erreur');
         erreur.hidden = true;
         try {
-            const reponse = await fetch(carte.dataset.retireDetailsUrl, { signal: requeteRetire.signal, headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-            if (!reponse.ok || reponse.redirected) throw new Error('Impossible de charger les détails du livre. Réessayez.');
+            const reponse = await fetch(carte.dataset.retireDetailsUrl, {
+                signal: requeteRetire.signal,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            if (!reponse.ok || reponse.redirected) {
+                throw new Error('Impossible de charger les détails du livre. Réessayez.');
+            }
+
             const html = await reponse.text();
-            if (numero !== numeroRetire || !page.isConnected) return;
+            if (numero !== numeroRetire || !page.isConnected) {
+                return;
+            }
+
             const zone = document.getElementById('lectures-retire-details');
             zone.innerHTML = html;
             const modale = zone.querySelector('dialog');
+
             // La fermeture rend le focus au livre sélectionné pour continuer la navigation au clavier.
             ecouter(zone.querySelector('#auteur-details-fermer'), 'click', () => modale.close());
             ecouter(modale, 'close', () => carte.focus({ preventScroll: true }));
             modale.showModal();
         } catch (e) {
-            if (e.name === 'AbortError' || numero !== numeroRetire || !page.isConnected) return;
+            if (e.name === 'AbortError' || numero !== numeroRetire || !page.isConnected) {
+                return;
+            }
             erreur.textContent = e.message;
             erreur.hidden = false;
         }
     }
+
     const livresRetires = document.getElementById('contenu-retires');
-    ecouter(livresRetires, 'click', event => {
+    ecouter(livresRetires, 'click', (event) => {
         const carte = event.target.closest('[data-retire-details-url]');
-        if (carte) ouvrirLivreRetire(carte);
+        if (carte) {
+            ouvrirLivreRetire(carte);
+        }
     });
-    ecouter(livresRetires, 'keydown', event => {
+    ecouter(livresRetires, 'keydown', (event) => {
         const carte = event.target.closest('[data-retire-details-url]');
-        if (!carte || !['Enter', ' '].includes(event.key)) return;
+        if (!carte || !['Enter', ' '].includes(event.key)) {
+            return;
+        }
         event.preventDefault();
         ouvrirLivreRetire(carte);
     });
 
     // Réintègre le livre puis actualise les deux listes et les compteurs, sans perdre les filtres courants.
-    ecouter(document.getElementById('lectures-retire-details'), 'submit', async event => {
+    ecouter(document.getElementById('lectures-retire-details'), 'submit', async (event) => {
         const formulaire = event.target.closest('[data-rajouter-livre]');
-        if (!formulaire) return;
+        if (!formulaire) {
+            return;
+        }
         event.preventDefault();
         const bouton = formulaire.querySelector('button[type="submit"]');
         const erreur = formulaire.querySelector('[data-rajouter-erreur]');
-        if (bouton.disabled) return;
+        if (bouton.disabled) {
+            return;
+        }
         bouton.disabled = true;
         erreur.hidden = true;
         try {
-            const reponse = await fetch(formulaire.action, { method: 'POST', body: new FormData(formulaire), headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-            if (reponse.redirected) throw new Error('Session expirée. Actualisez la page.');
+            const reponse = await fetch(formulaire.action, {
+                method: 'POST',
+                body: new FormData(formulaire),
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            if (reponse.redirected) {
+                throw new Error('Session expirée. Actualisez la page.');
+            }
+
             const resultat = await reponse.json();
-            if (!reponse.ok || !resultat.success) throw new Error(resultat.message || 'Impossible de rajouter ce livre.');
+            if (!reponse.ok || !resultat.success) {
+                throw new Error(resultat.message || 'Impossible de rajouter ce livre.');
+            }
             await actualiserLectures();
             formulaire.closest('dialog').close();
-            grille.querySelector(`[data-livre-id="${formulaire.dataset.livreId}"]`)?.focus({ preventScroll: true });
+            grille
+                .querySelector(`[data-livre-id="${formulaire.dataset.livreId}"]`)
+                ?.focus({ preventScroll: true });
         } catch (exception) {
             erreur.textContent = exception.message;
             erreur.hidden = false;
-        } finally { bouton.disabled = false; }
+        } finally {
+            bouton.disabled = false;
+        }
     });
 
     const statuts = {
-        'en-cours': 'En cours', 'termine': 'Terminé', 'en-pause': 'En pause',
-        'abandonne': 'Abandonné', 'pas-commence': 'Pas commencé', 'tous': ''
+        'en-cours': 'En cours',
+        termine: 'Terminé',
+        'en-pause': 'En pause',
+        abandonne: 'Abandonné',
+        'pas-commence': 'Pas commencé',
+        tous: ''
     };
 
     // Demande à la fenêtre commune d’ouvrir le livre sélectionné dans la liste.
 
     ecouter(grille, 'click', (event) => {
-        if (event.target.closest('[data-pile-action]')) return;
+        if (event.target.closest('[data-pile-action]')) {
+            return;
+        }
+
         const carte = event.target.closest('.lectures-carte');
 
-        if (!carte) return;
+        if (!carte) {
+            return;
+        }
+
 
         const id = carte.dataset.livreId;
 
-        if (!id) return;
+        if (!id) {
+            return;
+        }
 
         document.dispatchEvent(
             new CustomEvent('livre:ouvrir-details', {
@@ -158,11 +214,19 @@ initialiserPage((ecouter) => {
     // Actualise le nombre de résultats et les compteurs actifs avec les filtres partagés.
 
     const filtres = creerFiltresLivres({
-        page, conteneur: grille, selecteur: '.lectures-carte', recherche, ecouter,
+        page,
+        conteneur: grille,
+        selecteur: '.lectures-carte',
+        recherche,
+        ecouter,
         actualiser({ visibles, statut }) {
-            if (compteur) compteur.textContent = `${visibles} livre${visibles > 1 ? 's' : ''} affiché${visibles > 1 ? 's' : ''}`;
-            if (aucunResultat) aucunResultat.hidden = visibles !== 0;
-            boutonsFiltres.forEach(bouton => {
+            if (compteur) {
+                compteur.textContent = `${visibles} livre${visibles > 1 ? 's' : ''} affiché${visibles > 1 ? 's' : ''}`;
+            }
+            if (aucunResultat) {
+                aucunResultat.hidden = visibles !== 0;
+            }
+            boutonsFiltres.forEach((bouton) => {
                 const actif = statuts[bouton.dataset.filtre] === statut;
                 bouton.classList.toggle('actif', actif);
                 bouton.setAttribute('aria-pressed', String(actif));
@@ -182,8 +246,9 @@ initialiserPage((ecouter) => {
     // Actualise la liste à mesure que la recherche est saisie.
 
     ecouter(recherche, 'input', filtrerLivres);
+
     // Le bouton et la touche Entrée appliquent la recherche sans rechargement.
-    ecouter(document.getElementById('lectures-recherche-form'), 'submit', event => {
+    ecouter(document.getElementById('lectures-recherche-form'), 'submit', (event) => {
         event.preventDefault();
         filtrerLivres();
     });
@@ -191,10 +256,15 @@ initialiserPage((ecouter) => {
     // Permet d’ouvrir les cartes avec Entrée ou Espace, comme avec un clic.
 
     ecouter(grille, 'keydown', (event) => {
-        if (event.target.closest('[data-pile-action]')) return;
+        if (event.target.closest('[data-pile-action]')) {
+            return;
+        }
+
         const carte = event.target.closest('.lectures-carte');
 
-        if (!carte) return;
+        if (!carte) {
+            return;
+        }
 
         if (event.key !== 'Enter' && event.key !== ' ') {
             return;
@@ -219,15 +289,18 @@ initialiserPage((ecouter) => {
                 throw new Error('Actualisation impossible.');
             }
 
+
             const html = await reponse.text();
+
             // Ignore une réponse ancienne si un autre ajout a déjà demandé une actualisation.
-            if (numeroRequete !== numeroActualisation) return;
+            if (numeroRequete !== numeroActualisation) {
+                return;
+            }
 
-            const documentActualise = new DOMParser()
-                .parseFromString(html, 'text/html');
 
-            const nouvelleGrille = documentActualise
-                .getElementById('bibliotheque-livres');
+            const documentActualise = new DOMParser().parseFromString(html, 'text/html');
+
+            const nouvelleGrille = documentActualise.getElementById('bibliotheque-livres');
 
             if (!nouvelleGrille) {
                 throw new Error('Liste des livres introuvable.');
@@ -236,7 +309,9 @@ initialiserPage((ecouter) => {
             // Remplace seulement les cartes ; les écouteurs placés sur la grille restent actifs.
             grille.innerHTML = nouvelleGrille.innerHTML;
             const nouveauxRetires = documentActualise.getElementById('contenu-retires');
-            if (nouveauxRetires && livresRetires) livresRetires.innerHTML = nouveauxRetires.innerHTML;
+            if (nouveauxRetires && livresRetires) {
+                livresRetires.innerHTML = nouveauxRetires.innerHTML;
+            }
 
             // Reprend les totaux calculés par le serveur pour chaque statut.
             document.querySelectorAll('[data-compteur]').forEach((element) => {
@@ -250,17 +325,11 @@ initialiserPage((ecouter) => {
             });
 
             // Referme et vide le formulaire une fois la nouvelle lecture enregistrée.
-            const formulaireZone = document.getElementById(
-                'details-formulaire-lecture'
-            );
+            const formulaireZone = document.getElementById('details-formulaire-lecture');
 
-            const formulaire = document.getElementById(
-                'form-ajouter-lecture'
-            );
+            const formulaire = document.getElementById('form-ajouter-lecture');
 
-            const boutonLecture = document.getElementById(
-                'ajouter-lecture-details'
-            );
+            const boutonLecture = document.getElementById('ajouter-lecture-details');
 
             formulaire?.reset();
 
@@ -273,12 +342,8 @@ initialiserPage((ecouter) => {
             }
 
             filtrerLivres();
-
         } catch (erreur) {
-            console.error(
-                'Erreur lors de l’actualisation des lectures :',
-                erreur
-            );
+            console.error('Erreur lors de l’actualisation des lectures :', erreur);
         }
     }
 

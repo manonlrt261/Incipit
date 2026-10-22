@@ -1,7 +1,11 @@
 {# Réutilise la présentation de la fiche des lectures ; les actions dépendent de la page d’origine. #}
-{# Chaque souhait possède son propre identifiant de fiche ; la croix reste disponible dans les deux modes. #}
 {% set publique = publique|default(false) %}
-<dialog id="fiche-souhait-{{ souhait.id }}" class="modal-details-livre wishlist-details" data-souhait-id="{{ souhait.id }}" aria-labelledby="fiche-souhait-titre-{{ souhait.id }}">
+
+<dialog
+    id="fiche-souhait-{{ souhait.id }}"
+    class="modal-details-livre wishlist-details"
+    data-souhait-id="{{ souhait.id }}"
+    aria-labelledby="fiche-souhait-titre-{{ souhait.id }}">
     <div class="details-livre-contenu">
         <header class="details-livre-entete">
             <h2 id="fiche-souhait-titre-{{ souhait.id }}">Détails du livre</h2>
@@ -26,7 +30,9 @@
                 <div class="details-livre-couverture">
                     {# Garde le même emplacement de couverture lorsqu’aucune image n’est renseignée. #}
                     {% if livre.imageCouverture %}
-                        <img src="{{ livre.imageCouverture starts with 'http' or livre.imageCouverture starts with '/' ? livre.imageCouverture : '/' ~ livre.imageCouverture }}" alt="Couverture de {{ livre.titre }}">
+                        <img
+                            src="{{ livre.imageCouverture starts with 'http' or livre.imageCouverture starts with '/' ? livre.imageCouverture : '/' ~ livre.imageCouverture }}"
+                            alt="Couverture de {{ livre.titre }}">
                     {% else %}
                         <span>Aucune couverture</span>
                     {% endif %}
@@ -47,25 +53,59 @@
 
                 {# Prix et lien complètent uniquement la fiche wishlist, sans modifier celle des lectures. #}
                 <div class="details-livre-metadonnees">
-                    <div><strong>Saga</strong><span>{{ livre.saga ?: '—' }}</span></div>
-                    <div><strong>Tome</strong><span>{{ livre.tome ?: '—' }}</span></div>
-                    <div><strong>Genre(s)</strong><span>{{ livre.genres|map(genre => genre.nom)|join(', ') ?: '—' }}</span></div>
-                    <div><strong>ISBN-13</strong><span>{{ livre.isbn13 ?: '—' }}</span></div>
-                    <div><strong>ISBN-10</strong><span>{{ livre.isbn10 ?: '—' }}</span></div>
-                    <div><strong>Éditeur</strong><span>{{ livre.edition ?: '—' }}</span></div>
-                    <div class="wishlist-details-date"><strong>Date de publication</strong><span>{{ livre.datePublication ? livre.datePublication|date('d/m/Y') : '—' }}</span></div>
-                    <div><strong>Nombre de pages</strong><span>{{ livre.nombrePages ?: '—' }}</span></div>
-                    <div><strong>Langue</strong><span>{{ livre.langue ?: '—' }}</span></div>
-                    <div><strong>Prix</strong><span>{{ souhait.prixEstime is not null ? souhait.prixEstime|number_format(2, ',', ' ') ~ ' €' : '—' }}</span></div>
-                    <div><strong>Lien</strong><span>
-                        {# Rend cliquables uniquement les liens HTTP ou HTTPS et ouvre la boutique dans un autre onglet. #}
-                        {% if souhait.lienAchat and (souhait.lienAchat starts with 'https://' or souhait.lienAchat starts with 'http://') %}
-                            <a href="{{ souhait.lienAchat }}" target="_blank" rel="noopener noreferrer">{{ souhait.lienAchat }}</a>
-                        {% else %}
-                            —
-                        {% endif %}
-                    </span></div>
+                    <div>
+                        <strong>Saga</strong>
+                        <span>{{ livre.saga ?: '—' }}</span>
+                    </div>
+                    <div>
+                        <strong>Tome</strong>
+                        <span>{{ livre.tome ?: '—' }}</span>
+                    </div>
+                    <div>
+                        <strong>Genre(s)</strong>
+                        <span>{{ livre.genres|map(genre => genre.nom)|join(', ') ?: '—' }}</span>
+                    </div>
+                    <div>
+                        <strong>ISBN-13</strong>
+                        <span>{{ livre.isbn13 ?: '—' }}</span>
+                    </div>
+                    <div>
+                        <strong>ISBN-10</strong>
+                        <span>{{ livre.isbn10 ?: '—' }}</span>
+                    </div>
+                    <div>
+                        <strong>Éditeur</strong>
+                        <span>{{ livre.edition ?: '—' }}</span>
+                    </div>
+                    <div class="wishlist-details-date">
+                        <strong>Date de publication</strong>
+                        <span>{{ livre.datePublication ? livre.datePublication|date('d/m/Y') : '—' }}</span>
+                    </div>
+                    <div>
+                        <strong>Nombre de pages</strong>
+                        <span>{{ livre.nombrePages ?: '—' }}</span>
+                    </div>
+                    <div>
+                        <strong>Langue</strong>
+                        <span>{{ livre.langue ?: '—' }}</span>
+                    </div>
+                    <div>
+                        <strong>Prix</strong>
+                        <span>{{ souhait.prixEstime is not null ? souhait.prixEstime|number_format(2, ',', ' ') ~ ' €' : '—' }}</span>
+                    </div>
+                    <div>
+                        <strong>Lien</strong>
+                        <span>
+                            {# Rend cliquables uniquement les liens HTTP ou HTTPS et ouvre la boutique dans un autre onglet. #}
+                            {% if souhait.lienAchat and (souhait.lienAchat starts with 'https://' or souhait.lienAchat starts with 'http://') %}
+                                <a href="{{ souhait.lienAchat }}" target="_blank" rel="noopener noreferrer">{{ souhait.lienAchat }}</a>
+                            {% else %}
+                                —
+                            {% endif %}
+                        </span>
+                    </div>
                 </div>
+
                 <div class="details-livre-resume">
                     <h4>Résumé</h4>
                     <p>{{ livre.resume ?: 'Aucun résumé renseigné.' }}</p>

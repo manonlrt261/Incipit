@@ -1,6 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}Journal d’activité | Incipit{% endblock %}
+
 {% block stylesheets %}
     {{ parent() }}
     <link rel="stylesheet" href="{{ asset('styles/journal.css') }}">
@@ -18,9 +19,10 @@
             </div>
             <img src="{{ asset('images/incipit.png') }}" class="bibliotheque-logo" alt="Incipit">
         </header>
+
         <a class="journal-retour" href="{{ path('app_espace_profil') }}">← Retour au profil</a>
 
-        {# Regroupe les critères dans le même encadré que les autres outils de gestion ; les actions restent sous les champs. #}
+        {# Transmet les critères dans l’URL pour retrouver et partager la recherche effectuée. #}
         <form method="get" class="journal-filtres">
             <div class="journal-criteres">
                 <label for="journal-action">Action
@@ -31,16 +33,20 @@
                         {% endfor %}
                     </select>
                 </label>
+
                 <label for="journal-livre">Livre
                     <input id="journal-livre" type="search" name="livre" maxlength="150" value="{{ filtres.livre }}" placeholder="Titre du livre">
                 </label>
+
                 <label for="journal-debut">Du
                     <input id="journal-debut" type="date" name="debut" value="{{ filtres.debut }}">
                 </label>
+
                 <label for="journal-fin">Au
                     <input id="journal-fin" type="date" name="fin" value="{{ filtres.fin }}">
                 </label>
             </div>
+
             <div class="journal-actions">
                 <button class="bibliotheque-valider" type="submit">Valider</button>
                 <a class="bibliotheque-reinitialiser" href="{{ path('app_journal_activite') }}"><span aria-hidden="true">↻</span>Réinitialiser les filtres</a>
@@ -50,6 +56,7 @@
         {% if enAttente %}
             <p class="journal-message" role="status">{{ enAttente }} événement(s) en attente de transmission.</p>
         {% endif %}
+
         {% if erreur %}
             <p class="journal-message journal-message-erreur" role="alert">{{ erreur }}</p>
         {% else %}
@@ -71,10 +78,18 @@
                     <li class="journal-vide">Aucune activité pour ces critères.</li>
                 {% endfor %}
             </ol>
+
+            {# Conserve les critères de recherche lors du passage à la page précédente ou suivante. #}
             <nav class="journal-pagination" aria-label="Pagination du journal">
-                {% if page > 1 %}<a class="journal-bouton journal-bouton-secondaire" href="{{ path('app_journal_activite', filtres|merge({page: page - 1})) }}">← Précédent</a>{% endif %}
+                {% if page > 1 %}
+                    <a class="journal-bouton journal-bouton-secondaire" href="{{ path('app_journal_activite', filtres|merge({page: page - 1})) }}">← Précédent</a>
+                {% endif %}
+
                 <span>Page {{ page }}</span>
-                {% if suite and page < 1000 %}<a class="journal-bouton journal-bouton-secondaire" href="{{ path('app_journal_activite', filtres|merge({page: page + 1})) }}">Suivant →</a>{% endif %}
+
+                {% if suite and page < 1000 %}
+                    <a class="journal-bouton journal-bouton-secondaire" href="{{ path('app_journal_activite', filtres|merge({page: page + 1})) }}">Suivant →</a>
+                {% endif %}
             </nav>
         {% endif %}
     </main>

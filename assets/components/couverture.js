@@ -29,7 +29,9 @@ export function creerGestionnaireCouverture({
 
     // Affiche une couverture distante et efface le fichier local précédemment sélectionné.
     function afficherURL(url, titre = 'Livre') {
-        if (!url) return;
+        if (!url) {
+            return;
+        }
 
         nettoyer();
 

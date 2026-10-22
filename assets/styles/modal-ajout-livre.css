@@ -299,8 +299,9 @@
 }
 
 /* =======================================
-   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 700PX)
+   PRÉSENTATION DU FORMULAIRE D’AJOUT
    ======================================= */
+
 /* Dimensions et espacements du formulaire partagé */
 dialog#modal-ajout-livre.bibliotheque-modal {
     box-sizing: border-box;
@@ -702,6 +703,8 @@ dialog#modal-ajout-livre {
         font-size: 26px;
     }
 
+    /* Fenêtre et champs d’ajout d’un livre */
+
     dialog#modal-ajout-livre #form-ajout-livre {
         padding: 0 18px 24px;
     }
@@ -710,6 +713,8 @@ dialog#modal-ajout-livre {
     .modal-deux-colonnes {
         grid-template-columns: minmax(0, 1fr);
     }
+
+    /* Aperçu et sélection de la couverture */
 
     .modal-couverture-zone {
         max-width: 210px;
@@ -762,6 +767,8 @@ dialog#modal-ajout-livre {
     .modal-auteur-ligne button {
         flex-shrink: 0;
     }
+
+    /* Fenêtre et champs d’ajout d’un livre */
 
     .modal-recherche-ligne {
         flex-wrap: wrap;
@@ -844,6 +851,10 @@ dialog#modal-ajout-livre {
 .modal-recherche-ligne > .bibliotheque-recherche {
     flex: 1 1 auto;
 }
+
+/* =======================================
+   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 480PX)
+   ======================================= */
 
 @media (max-width: 480px) {
     /* Préserve la saisie sans zoom automatique dans Safari. */

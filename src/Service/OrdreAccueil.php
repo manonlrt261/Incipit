@@ -6,7 +6,9 @@ use Doctrine\DBAL\Connection;
 
 final class OrdreAccueil
 {
-    public function __construct(private Connection $connexion) {}
+    public function __construct(private Connection $connexion)
+    {
+    }
 
     // Réordonne uniquement la sélection déjà publique : aucun titre masqué ou acheté ne peut réapparaître.
     public function appliquer(array $livres, string $section): array
@@ -19,6 +21,7 @@ final class OrdreAccueil
         // Les livres sans position personnalisée gardent leur ordre relatif après ceux déjà placés.
         $initial = array_flip(array_map($id, $livres));
         usort($livres, static fn ($a, $b): int => ($positions[$id($a)] ?? PHP_INT_MAX) <=> ($positions[$id($b)] ?? PHP_INT_MAX) ?: $initial[$id($a)] <=> $initial[$id($b)]);
+
         return $livres;
     }
 }

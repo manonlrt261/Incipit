@@ -1,0 +1,18 @@
+{% extends 'information/base.html.twig' %}
+
+{% block information_titre %}Mentions légales{% endblock %}
+
+{% block information_contenu %}
+    <h2>Édition du site</h2>
+    <p>Incipit est réalisé et publié par Manon FAYOLLE dans le cadre de son examen de fin d’études.</p>
+    <p>Responsable de publication : Manon FAYOLLE.<br>Contact : <a href="mailto:incipitbibliothequevirtuelle@gmail.com">incipitbibliothequevirtuelle@gmail.com</a>.</p>
+
+    <h2>Hébergement</h2>
+    <p>alwaysdata, SARL immatriculée au RCS de Paris sous le numéro 492 893 490.<br>Adresse : 91 rue du Faubourg Saint-Honoré, 75008 Paris, France.<br>Site : <a href="https://www.alwaysdata.com/fr/mentions-legales/">www.alwaysdata.com — informations légales</a>.</p>
+
+    <h2>Propriété intellectuelle</h2>
+    <p>Les couvertures de livres, noms d’auteurs, textes et autres contenus appartenant à des tiers restent soumis aux droits de leurs titulaires respectifs. Toute demande concernant un contenu affiché peut être adressée à la responsable de publication.</p>
+
+    <h2>Informations complémentaires</h2>
+    <p>Consultez les <a href="{{ path('app_cgu') }}">conditions générales d’utilisation</a> et les informations sur les <a href="{{ path('app_donnees_personnelles') }}">données personnelles</a>.</p>
+{% endblock %}

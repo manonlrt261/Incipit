@@ -3,26 +3,20 @@
 {% block title %}Mes prêts | Incipit{% endblock %}
 
 {% block body %}
-
 <div class="espace-layout">
-
-    {# Réutilise la navigation commune avec l’onglet Prêts actif. #}
     {% include 'components/_sidebar.html.twig' %}
 
     <main
         id="page-mes-prets"
         class="espace-contenu bibliotheque page-prets"
     >
-
         <header class="bibliotheque-header">
-
             {# Filtre les prêts par titre, saga, auteur ou emprunteur sans recharger la page. #}
             <form id="prets-formulaire-recherche" class="bibliotheque-recherche" role="search">
                 <img
                     src="{{ asset('images/rechercher.png') }}"
                     alt=""
                 >
-
                 <input
                     type="search"
                     id="prets-recherche"
@@ -37,18 +31,28 @@
                 alt="Incipit"
                 class="bibliotheque-logo"
             >
-
         </header>
 
         {# Change d’onglet au clic ou au clavier sans recharger la page. #}
         <div class="prets-onglets" role="tablist" aria-label="Prêts et contacts">
-            <button id="prets-tab-prets" type="button" role="tab" aria-selected="true" aria-controls="prets-panneau-prets" tabindex="0">Mes prêts</button>
-            <button id="prets-tab-contacts" type="button" role="tab" aria-selected="false" aria-controls="prets-panneau-contacts" tabindex="-1">Contacts</button>
+            <button
+                id="prets-tab-prets"
+                type="button"
+                role="tab"
+                aria-selected="true"
+                aria-controls="prets-panneau-prets"
+                tabindex="0">Mes prêts</button>
+            <button
+                id="prets-tab-contacts"
+                type="button"
+                role="tab"
+                aria-selected="false"
+                aria-controls="prets-panneau-contacts"
+                tabindex="-1">Contacts</button>
         </div>
 
         <section id="prets-panneau-prets" role="tabpanel" aria-labelledby="prets-tab-prets">
             <div class="prets-introduction">
-
                 <div>
                     <h1 class="titre-page">Mes prêts</h1>
                     <p class="sous-titre-page">Retrouvez et gérez tous les livres que vous avez prêtés.</p>
@@ -62,11 +66,14 @@
                 >
                     Ajouter un prêt
                 </button>
-
             </div>
 
             {# Filtre les prêts par genre et les trie par prénom du contact, auteur ou date réelle du prêt. #}
-            {% include 'components/_filtres_livres.html.twig' with {genres: genres, prefixe: 'prets-', mode_prets: true} only %}
+            {% include 'components/_filtres_livres.html.twig' with {
+                genres: genres,
+                prefixe: 'prets-',
+                mode_prets: true
+            } only %}
 
             {# Annonce le nombre de prêts et suit les résultats des filtres sans rechargement. #}
             <p id="prets-compteur" aria-live="polite">
@@ -77,10 +84,8 @@
                 class="prets-liste"
                 aria-label="Liste de mes prêts"
             >
-
                 {# Le texte de recherche réunit titre, saga, auteur et nom complet du contact ; son identifiant relie le prêt à la bonne personne. #}
                 {% for pret in prets %}
-
                     <article
                         class="prets-carte"
                         data-pret-id="{{ pret.id }}"
@@ -93,9 +98,7 @@
                         data-saga="{{ pret.saga }}"
                         data-recherche="{{ (pret.titre ~ ' ' ~ pret.saga ~ ' ' ~ pret.auteur ~ ' ' ~ pret.emprunteur)|lower|e('html_attr') }}"
                     >
-
                         <div class="prets-informations">
-
                             <h2>{{ pret.titre }}</h2>
 
                             <p class="prets-auteur">
@@ -106,7 +109,6 @@
                                 Prêté à :
                                 <strong>{{ pret.emprunteur }}</strong>
                             </p>
-
                         </div>
 
                         {# Transmet l’adresse de suppression et un jeton propre à chaque prêt pour la confirmation. #}
@@ -125,11 +127,8 @@
                                 alt=""
                             >
                         </button>
-
                     </article>
-
                 {% endfor %}
-
             </section>
 
             {# Distingue une recherche sans résultat d’une liste ne contenant encore aucun prêt. #}
@@ -156,7 +155,6 @@
                 role="alert"
                 hidden
             ></p>
-
         </section>
 
         {# Les contacts existent indépendamment des prêts ; les actions sont enregistrées sans rechargement. #}
@@ -168,11 +166,18 @@
                 </div>
                 <button type="button" id="ouvrir-ajout-contact" class="prets-bouton-ajouter">Ajouter un contact</button>
             </div>
+
             <p id="prets-contacts-message" role="status" hidden></p>
+
             {# Les identifiants et routes servent aux actions des contacts ; les images sont reprises pour les cartes créées sans rechargement. #}
-            <div id="prets-contacts" class="prets-contacts" data-image-modifier="{{ asset('images/modifier.png') }}" data-image-supprimer="{{ asset('images/poubelle.png') }}">
+            <div
+                id="prets-contacts"
+                class="prets-contacts"
+                data-image-modifier="{{ asset('images/modifier.png') }}"
+                data-image-supprimer="{{ asset('images/poubelle.png') }}">
                 {% for contact in contacts %}
-                    <article class="prets-contact"
+                    <article
+                        class="prets-contact"
                         data-contact-id="{{ contact.id }}"
                         data-prenom="{{ contact.prenom }}"
                         data-nom="{{ contact.nom }}"
@@ -188,28 +193,38 @@
                         </div>
                         <div class="prets-contact-actions">
                             {# Ouvre la liste des prêts de ce contact dans une fenêtre, sans quitter l’onglet Contacts. #}
-                            <button type="button" class="prets-contact-voir" data-action-contact="voir" aria-label="Voir les prêts de {{ contact.prenom }} {{ contact.nom }}">Voir les prêts</button>
-                            <button type="button" data-action-contact="modifier" aria-label="Modifier {{ contact.prenom }} {{ contact.nom }}"><img src="{{ asset('images/modifier.png') }}" alt=""></button>
-                            <button type="button" data-action-contact="supprimer" aria-label="Supprimer {{ contact.prenom }} {{ contact.nom }}"><img src="{{ asset('images/poubelle.png') }}" alt=""></button>
+                            <button
+                                type="button"
+                                class="prets-contact-voir"
+                                data-action-contact="voir"
+                                aria-label="Voir les prêts de {{ contact.prenom }} {{ contact.nom }}">Voir les prêts</button>
+                            <button
+                                type="button"
+                                data-action-contact="modifier"
+                                aria-label="Modifier {{ contact.prenom }} {{ contact.nom }}"><img
+                                src="{{ asset('images/modifier.png') }}"
+                                alt=""></button>
+                            <button
+                                type="button"
+                                data-action-contact="supprimer"
+                                aria-label="Supprimer {{ contact.prenom }} {{ contact.nom }}"><img
+                                src="{{ asset('images/poubelle.png') }}"
+                                alt=""></button>
                         </div>
                     </article>
                 {% endfor %}
             </div>
             <p id="prets-contacts-vide" {% if contacts is not empty %}hidden{% endif %}>Aucun contact enregistré pour le moment.</p>
         </section>
-
     </main>
-
 </div>
 
 {# Demande une confirmation avant la suppression ; le JavaScript y reprend le titre du prêt sélectionné. #}
-
 <dialog
     id="modal-suppression-pret"
     class="prets-modale"
     aria-labelledby="prets-suppression-titre"
 >
-
     <h2 id="prets-suppression-titre">
         Supprimer ce prêt ?
     </h2>
@@ -219,7 +234,6 @@
     </p>
 
     <div class="prets-modale-actions">
-
         <button
             type="button"
             id="annuler-suppression-pret"
@@ -235,33 +249,26 @@
         >
             Supprimer
         </button>
-
     </div>
-
 </dialog>
 
 {# Permet de prêter un livre possédé ou de saisir librement un titre absent de la bibliothèque. #}
-
 <dialog
     id="modal-ajout-pret"
     class="prets-modale"
     aria-labelledby="prets-ajout-titre"
 >
-
     <div class="prets-modale-entete">
-
         <h2 id="prets-ajout-titre">
             Ajouter un prêt
         </h2>
 
         {% include 'components/_bouton_fermer.html.twig' with {id: 'fermer-ajout-pret'} only %}
-
     </div>
 
     {# Envoie les informations du prêt avec le jeton vérifié par le serveur. #}
     <form id="form-ajout-pret" action="{{ path('app_prets_ajouter') }}" method="post">
         <input type="hidden" name="_token" value="{{ csrf_token('ajouter_pret') }}">
-
         <div class="prets-champ">
             <label for="pret-titre">Titre</label>
             <input
@@ -304,22 +311,31 @@
             <label for="pret-auteur">Auteur <span>(facultatif)</span></label>
             <input id="pret-auteur" name="auteur" type="text" maxlength="255">
         </div>
+
         {# La saisie reste libre ; l’identifiant masqué distingue les contacts homonymes proposés par JavaScript. #}
         <div class="prets-champ">
             <label for="pret-emprunteur">Personne à qui vous l’avez prêté</label>
-            <input id="pret-emprunteur" name="emprunteur" type="text" maxlength="255" required autocomplete="off" aria-controls="pret-contacts-suggestions" aria-describedby="pret-contact-aide">
+            <input
+                id="pret-emprunteur"
+                name="emprunteur"
+                type="text"
+                maxlength="255" required
+                autocomplete="off"
+                aria-controls="pret-contacts-suggestions"
+                aria-describedby="pret-contact-aide">
             <input type="hidden" id="pret-contact-id" name="contact_id">
             <small id="pret-contact-aide">Saisissez un prénom puis choisissez la personne dans les contacts proposés, ou saisissez un nouveau contact.</small>
             <div id="pret-contacts-suggestions" class="prets-suggestions" aria-label="Contacts enregistrés" hidden></div>
         </div>
+
         {# Conserve les erreurs de validation dans la fenêtre pour permettre de corriger la saisie. #}
         <p id="prets-ajout-erreur" class="prets-message-erreur" role="alert" hidden></p>
+
         <div class="prets-modale-actions">
             <button type="button" id="annuler-ajout-pret" class="prets-bouton-annuler">Annuler</button>
             <button type="submit" id="enregistrer-ajout-pret" class="prets-bouton-ajouter">Enregistrer le prêt</button>
         </div>
     </form>
-
 </dialog>
 
 {# Formulaire partagé pour créer un contact ou modifier le prénom et le nom d’un contact existant. #}
@@ -340,6 +356,7 @@
             <input type="text" id="contact-nom" name="nom" maxlength="255" autocomplete="family-name">
         </div>
         <p id="contact-erreur" role="alert" hidden></p>
+
         <div class="prets-modale-actions">
             <button type="button" data-fermer-contact class="prets-bouton-annuler">Annuler</button>
             <button type="submit" class="prets-bouton-ajouter">Enregistrer</button>
@@ -364,9 +381,9 @@
         <h2 id="contact-prets-titre">Prêts du contact</h2>
         {% include 'components/_bouton_fermer.html.twig' with {id: 'fermer-prets-contact'} only %}
     </header>
+
     {# Le JavaScript remplit la liste à chaque ouverture et ne propose aucune action de modification du prêt. #}
     <div id="contact-liste-prets" class="prets-liste"></div>
     <p id="contact-prets-vide" class="prets-message-vide" hidden>Aucun prêt enregistré pour ce contact.</p>
 </dialog>
-
 {% endblock %}

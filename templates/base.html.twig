@@ -1,14 +1,12 @@
 <!DOCTYPE html>
 <html lang="fr">
     <head>
-        {# Définit l’encodage du texte et adapte la largeur de chaque page à l’écran utilisé. #}
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         {# Chaque page définit son titre ; Incipit sert de titre par défaut. #}
         <title>{% block title %}Incipit{% endblock %}</title>
 
-        {# Affiche le logo Incipit dans l’onglet du navigateur sur toutes les pages. #}
         <link
             rel="icon"
             type="image/png"
@@ -27,6 +25,7 @@
 
         {# Active le rechargement automatique uniquement lorsque le serveur fournit une URL FrankenPHP. #}
         {% set frankenphp_hot_reload = app.request.server.get('FRANKENPHP_HOT_RELOAD') %}
+
         {% if frankenphp_hot_reload %}
             <meta name="frankenphp-hot-reload:url" content="{{ frankenphp_hot_reload }}">
             <script src="https://cdn.jsdelivr.net/npm/idiomorph"></script>
@@ -35,7 +34,6 @@
     </head>
 
     <body>
-        {# Accueille le contenu propre à chaque page qui hérite de ce template. #}
         {% block body %}{% endblock %}
     </body>
 </html>

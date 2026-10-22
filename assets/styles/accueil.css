@@ -298,6 +298,8 @@
         inset-inline: 0;
     }
 
+    /* Sections et listes de la bibliothèque publique */
+
     .accueil-grille-livres {
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
@@ -358,6 +360,8 @@
     .accueil-main::before {
         inset-inline: 0;
     }
+
+    /* Sections et listes de la bibliothèque publique */
 
     .accueil-section {
         padding: 20px 16px;
@@ -574,4 +578,74 @@
 .accueil-auteur-lectures > p {
     margin: 0 0 20px;
     color: var(--color-primary);
+}
+
+/* =======================================
+   PIED DE PAGE DE L’ACCUEIL
+   ======================================= */
+
+/* Logo et liens du pied de page public */
+.accueil-footer {
+    position: static;
+    margin-top: 28px;
+    padding: 18px 24px;
+    border-top: 1px solid var(--color-encadre);
+    background: var(--color-fond);
+    color: var(--color-bgdark);
+}
+.accueil-footer-contenu {
+    max-width: 1140px;
+    margin: auto;
+    text-align: center;
+}
+.accueil-footer-logo {
+    display: block;
+    width: 88px;
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto 4px;
+}
+.accueil-footer ul {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px 28px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.accueil-footer a {
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--color-bgdark);
+    text-decoration: underline;
+    text-underline-offset: 5px;
+}
+.accueil-footer a:hover {
+    color: var(--color-terra);
+}
+.accueil-footer a:focus-visible {
+    outline: 3px solid var(--color-terra);
+    outline-offset: 4px;
+    border-radius: 3px;
+}
+
+/* =======================================
+   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 540PX)
+   ======================================= */
+@media (max-width: 540px) {
+    /* Logo et liens du pied de page public */
+    .accueil-footer {
+        padding: 16px 20px;
+    }
+    .accueil-footer ul {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px 16px;
+    }
+    .accueil-footer a {
+        justify-content: center;
+    }
 }

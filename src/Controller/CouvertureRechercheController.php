@@ -18,9 +18,11 @@ final class CouvertureRechercheController extends AbstractController
             return $this->json(['success' => false, 'message' => 'Connexion requise.'], 401);
         }
         $recherche = preg_replace('/\s+/u', ' ', trim($request->query->getString('q'))) ?? '';
+
         if (mb_strlen($recherche) < 2 || mb_strlen($recherche) > 255) {
             return $this->json(['success' => false, 'message' => 'Saisis un titre ou un auteur de 2 à 255 caractères.'], 422);
         }
+
         try {
             return $this->json(['success' => true, 'images' => $couvertures->rechercher($recherche)]);
         } catch (\RuntimeException $exception) {

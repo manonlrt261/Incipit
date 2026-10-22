@@ -2,20 +2,20 @@
 
 namespace App\Controller;
 
-use App\Entity\Pret;
-use App\Entity\Livre;
 use App\Entity\Auteur;
 use App\Entity\Contact;
 use App\Entity\Exemplaire;
+use App\Entity\Livre;
+use App\Entity\Pret;
 use App\Repository\PretRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\DBAL\LockMode;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[IsGranted('ROLE_USER')]
 #[Route('/mes-prets', name: 'app_prets_')]
@@ -31,6 +31,7 @@ class PretController extends AbstractController
         );
 
         $listePrets = [];
+
         // Prépare le titre, les auteurs et le nom de l’emprunteur pour chaque prêt.
         foreach ($prets as $pret) {
             $livre = $pret->getExemplaire()?->getLivre();
@@ -76,19 +77,23 @@ class PretController extends AbstractController
     public function ajouter(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         $jeton = $request->request->get('_token');
+
         if (!is_string($jeton) || !$this->isCsrfTokenValid('ajouter_pret', $jeton)) {
             return $this->json(['success' => false, 'message' => 'Session expirée. Actualisez la page.'], 403);
         }
 
         // Contrôle les longueurs et les champs obligatoires avant de créer les données du prêt.
         $champs = [];
+
         foreach (['titre', 'auteur', 'emprunteur'] as $champ) {
             $valeur = $request->request->all()[$champ] ?? '';
+
             if (!is_string($valeur) || mb_strlen(trim($valeur)) > 255) {
                 return $this->json(['success' => false, 'message' => 'Chaque champ doit contenir au maximum 255 caractères.'], 422);
             }
             $champs[$champ] = trim($valeur);
         }
+
         if ($champs['titre'] === '' || $champs['emprunteur'] === '') {
             return $this->json(['success' => false, 'message' => 'Le titre et la personne à qui le livre est prêté sont obligatoires.'], 422);
         }
@@ -96,9 +101,11 @@ class PretController extends AbstractController
         // Une seule transaction pour éviter les fiches partielles en cas d'échec.
         $connexion = $entityManager->getConnection();
         $connexion->beginTransaction();
+
         try {
             $livre = null;
             $idLivre = $request->request->get('livre_id');
+
             // Vérifie qu’un livre sélectionné dans les suggestions est toujours possédé.
             if ($idLivre !== null && $idLivre !== '') {
                 if (!is_string($idLivre) || !ctype_digit($idLivre)) {
@@ -106,23 +113,29 @@ class PretController extends AbstractController
                 }
                 $livre = $entityManager->getRepository(Livre::class)->find($idLivre);
                 $possede = $livre && $entityManager->getRepository(Exemplaire::class)->findOneBy(['livre' => $livre, 'dateRetrait' => null]);
+
                 if (!$possede) {
                     $connexion->rollBack();
+
                     return $this->json(['success' => false, 'message' => 'Ce livre ne figure plus dans votre bibliothèque.'], 422);
                 }
             }
             // Réutilise une fiche correspondant au titre et à l’auteur avant d’en créer une nouvelle.
             $candidats = $livre ? [] : $entityManager->getRepository(Livre::class)->findBy(['titre' => $champs['titre']]);
+
             foreach ($candidats as $candidat) {
                 if ($champs['auteur'] === '' || mb_strtolower($this->obtenirAuteurs($candidat)) === mb_strtolower($champs['auteur'])) {
                     $livre = $candidat;
                     break;
                 }
             }
+
             if ($livre === null) {
                 $livre = (new Livre())->setTitre($champs['titre']);
+
                 if ($champs['auteur'] !== '') {
                     $auteur = $entityManager->getRepository(Auteur::class)->findOneBy(['nomAffichage' => $champs['auteur']]);
+
                     if ($auteur === null) {
                         $auteur = (new Auteur())->setNom($champs['auteur'])->setNomAffichage($champs['auteur']);
                         $entityManager->persist($auteur);
@@ -134,6 +147,7 @@ class PretController extends AbstractController
 
             // Recherche un exemplaire actif qui n’est pas déjà prêté, ou en crée un si nécessaire.
             $exemplaire = null;
+
             if ($livre->getId() !== null) {
                 $exemplaire = $entityManager->createQueryBuilder()
                     ->select('e')->from(Exemplaire::class, 'e')
@@ -142,6 +156,7 @@ class PretController extends AbstractController
                     ->setParameter('livre', $livre)->setMaxResults(1)
                     ->getQuery()->getOneOrNullResult();
             }
+
             if ($exemplaire === null) {
                 $exemplaire = (new Exemplaire())->setLivre($livre)->setDateCreation(new \DateTime());
                 $entityManager->persist($exemplaire);
@@ -150,27 +165,32 @@ class PretController extends AbstractController
             // L’identifiant choisi distingue les contacts portant le même prénom ou le même nom.
             $contact = null;
             $idContact = $request->request->get('contact_id');
+
             if ($idContact !== null && $idContact !== '') {
                 if (!is_string($idContact) || !ctype_digit($idContact)) {
                     throw new \InvalidArgumentException('Contact invalide.');
                 }
                 // Le même verrou que la suppression empêche de rattacher un prêt à un contact supprimé simultanément.
                 $contact = $entityManager->find(Contact::class, (int) $idContact, LockMode::PESSIMISTIC_WRITE);
+
                 if (!$contact) {
                     throw new \InvalidArgumentException('Ce contact n’existe plus. Sélectionnez un autre contact.');
                 }
             } else {
                 $correspondances = [];
+
                 foreach ($entityManager->getRepository(Contact::class)->findAll() as $candidat) {
-                    if (mb_strtolower(trim($candidat->getPrenom().' '.$candidat->getNom())) === mb_strtolower($champs['emprunteur'])) {
+                    if (mb_strtolower(trim($candidat->getPrenom() . ' ' . $candidat->getNom())) === mb_strtolower($champs['emprunteur'])) {
                         $correspondances[] = $candidat;
                     }
                 }
+
                 // Une saisie ambiguë doit être résolue dans les suggestions plutôt que choisir un homonyme au hasard.
                 if (count($correspondances) > 1) {
                     throw new \InvalidArgumentException('Plusieurs contacts portent ce nom. Choisissez la personne dans les suggestions.');
                 }
                 $contact = $correspondances[0] ?? null;
+
                 if ($contact) {
                     $entityManager->refresh($contact, LockMode::PESSIMISTIC_WRITE);
                 } else {
@@ -187,12 +207,16 @@ class PretController extends AbstractController
 
             return $this->json(['success' => true], 201);
         } catch (\InvalidArgumentException $erreur) {
-            if ($connexion->isTransactionActive()) $connexion->rollBack();
+            if ($connexion->isTransactionActive()) {
+                $connexion->rollBack();
+            }
+
             return $this->json(['success' => false, 'message' => $erreur->getMessage()], 422);
         } catch (\Throwable) {
             if ($connexion->isTransactionActive()) {
                 $connexion->rollBack();
             }
+
             return $this->json(['success' => false, 'message' => 'Impossible d’enregistrer ce prêt. Réessayez.'], 500);
         }
     }
@@ -246,21 +270,31 @@ class PretController extends AbstractController
     public function enregistrerContact(Request $request, EntityManagerInterface $em, ?int $id = null): JsonResponse
     {
         $champs = $request->request->all();
+
         if (!is_string($champs['_token'] ?? null) || !$this->isCsrfTokenValid('gerer_contacts', $champs['_token'])) {
             return $this->json(['success' => false, 'message' => 'Session expirée. Actualisez la page.'], 403);
         }
         $prenom = $champs['prenom'] ?? '';
         $nom = $champs['nom'] ?? '';
+
         if (!is_string($prenom) || !is_string($nom) || trim($prenom) === '' || mb_strlen(trim($prenom)) > 255 || mb_strlen(trim($nom)) > 255) {
             return $this->json(['success' => false, 'message' => 'Le prénom est obligatoire. Chaque champ doit contenir au maximum 255 caractères.'], 422);
         }
         $contact = $id === null ? new Contact() : $em->find(Contact::class, $id);
-        if (!$contact) return $this->json(['success' => false, 'message' => 'Contact introuvable.'], 404);
+
+        if (!$contact) {
+            return $this->json(['success' => false, 'message' => 'Contact introuvable.'], 404);
+        }
+
         try {
             $contact->setPrenom(trim($prenom))->setNom(trim($nom) === '' ? null : trim($nom));
-            if ($id === null) $contact->setDateCreation(new \DateTime());
+
+            if ($id === null) {
+                $contact->setDateCreation(new \DateTime());
+            }
             $em->persist($contact);
             $em->flush();
+
             return $this->json(['success' => true, 'contact' => $this->donneesContact($contact, $em)], $id === null ? 201 : 200);
         } catch (\Throwable) {
             return $this->json(['success' => false, 'message' => 'Impossible d’enregistrer ce contact. Réessayez.'], 500);
@@ -279,21 +313,27 @@ class PretController extends AbstractController
     public function supprimerContact(int $id, Request $request, EntityManagerInterface $em): JsonResponse
     {
         $jeton = $request->request->all()['_token'] ?? null;
+
         if (!is_string($jeton) || !$this->isCsrfTokenValid('gerer_contacts', $jeton)) {
             return $this->json(['success' => false, 'message' => 'Session expirée. Actualisez la page.'], 403);
         }
         $connexion = $em->getConnection();
         $connexion->beginTransaction();
+
         try {
             $contact = $em->find(Contact::class, $id, LockMode::PESSIMISTIC_WRITE);
+
             if (!$contact) {
                 $connexion->rollBack();
+
                 return $this->json(['success' => false, 'message' => 'Contact introuvable.'], 404);
             }
             $donnees = $this->donneesContact($contact, $em);
+
             // Conserve le contact tant qu’un prêt en cours ou historique le référence.
             if ($donnees['total'] > 0) {
                 $connexion->rollBack();
+
                 return $this->json(['success' => false, 'message' => $donnees['encours'] > 0
                     ? 'Ce contact a encore des prêts en cours. Supprimez les prêts concernés avant de supprimer ce contact.'
                     : 'Ce contact est lié à l’historique de prêts. Supprimez les prêts concernés avant de supprimer ce contact.',
@@ -302,9 +342,13 @@ class PretController extends AbstractController
             $em->remove($contact);
             $em->flush();
             $connexion->commit();
+
             return $this->json(['success' => true]);
         } catch (\Throwable) {
-            if ($connexion->isTransactionActive()) $connexion->rollBack();
+            if ($connexion->isTransactionActive()) {
+                $connexion->rollBack();
+            }
+
             return $this->json(['success' => false, 'message' => 'Impossible de supprimer ce contact. Réessayez.'], 500);
         }
     }
@@ -314,6 +358,7 @@ class PretController extends AbstractController
     {
         // Distingue les prêts sans retour et tous les prêts liés pour adapter les avertissements.
         $repository = $em->getRepository(Pret::class);
+
         return [
             'id' => $contact->getId(), 'prenom' => $contact->getPrenom(), 'nom' => $contact->getNom() ?? '',
             'encours' => $repository->count(['contact' => $contact, 'dateRetourEffective' => null]),

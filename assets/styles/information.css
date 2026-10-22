@@ -1,0 +1,87 @@
+/* =======================================
+   PAGES D’INFORMATION
+   ======================================= */
+
+/* Fond et espacement des pages d’information */
+.information-page {
+    min-height: 100vh;
+    background: var(--color-fond);
+    padding: 40px 24px 64px;
+    box-sizing: border-box;
+    color: var(--color-bgdark);
+}
+
+/* Lien de retour à l’accueil */
+.information-retour {
+    display: block;
+    max-width: 900px;
+    margin: 0 auto 24px;
+    color: var(--color-secondary);
+}
+
+/* Encadré principal des informations du site */
+.information-carte {
+    max-width: 900px;
+    margin: auto;
+    padding: clamp(24px, 5vw, 56px);
+    border: 1px solid var(--color-encadre);
+    border-radius: 24px;
+    background: white;
+}
+
+/* Titre principal des pages d’information */
+.information-carte h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(32px, 5vw, 48px);
+    line-height: 1.15;
+    margin: 12px 0 28px;
+}
+
+/* Titres des rubriques d’information */
+.information-carte h2 {
+    font-size: 21px;
+    margin: 30px 0 12px;
+    color: var(--color-secondary);
+}
+
+/* Paragraphes et listes des informations du site */
+.information-carte p,
+.information-carte li {
+    line-height: 1.75;
+    overflow-wrap: anywhere;
+}
+
+/* Liens des pages d’information */
+.information-carte a {
+    color: var(--color-terra);
+    text-underline-offset: 4px;
+    overflow-wrap: anywhere;
+}
+
+/* Mention du projet au-dessus du titre */
+.information-surtitre {
+    font-size: 14px;
+    color: var(--color-secondary);
+}
+
+/* Adresse e-mail de contact */
+.information-contact {
+    display: inline-block;
+    padding: 12px 0;
+}
+
+/* Fond et espacement des pages d’information */
+.information-page a:focus-visible {
+    outline: 3px solid var(--color-terra);
+    outline-offset: 5px;
+}
+
+/* =======================================
+   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 480PX)
+   ======================================= */
+@media (max-width: 480px) {
+    /* Fond et espacement des pages d’information */
+    .information-page {
+        padding: 24px 16px 40px;
+    }
+}

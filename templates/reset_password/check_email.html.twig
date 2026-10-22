@@ -1,10 +1,13 @@
 {% extends 'base.html.twig' %}
+
 {% block title %}Demande de réinitialisation | Incipit{% endblock %}
+
 {% block body %}
 <main class="login-page reset-password-page">
     <div class="login-container">
         <img src="{{ asset('images/livre2.png') }}" alt="" class="login-logo">
         <h1>Consultez votre messagerie</h1>
+
         <div class="login-card">
             {# Garde une confirmation identique pour les adresses connues ou inconnues. #}
             <p class="forgot-password-description">Si un compte correspond à cette adresse, vous recevrez un courriel contenant un lien de réinitialisation valable 15 minutes.</p>

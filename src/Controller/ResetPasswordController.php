@@ -3,14 +3,14 @@
 namespace App\Controller;
 
 use App\Entity\Utilisateur;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Symfony\Component\DependencyInjection\Attribute\AutowireServiceClosure;
 use App\Form\ChangePasswordFormType;
 use App\Form\ResetPasswordRequestFormType;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\DependencyInjection\Attribute\AutowireServiceClosure;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -31,9 +31,11 @@ class ResetPasswordController extends AbstractController
     public function __construct(
         private ResetPasswordHelperInterface $resetPasswordHelper,
         private EntityManagerInterface $entityManager,
-        #[AutowireServiceClosure(MailerInterface::class)] private \Closure $mailer,
+        #[AutowireServiceClosure(MailerInterface::class)]
+        private \Closure $mailer,
         private LoggerInterface $logger,
-        #[Autowire('%env(default::MAILER_FROM)%')] private ?string $adresseExpediteur
+        #[Autowire('%env(default::MAILER_FROM)%')]
+        private ?string $adresseExpediteur
     ) {
     }
 
@@ -82,8 +84,10 @@ class ResetPasswordController extends AbstractController
         }
 
         $token = $this->getTokenFromSession();
+
         if (null === $token) {
             $this->addFlash('reset_password_error', 'Le lien est absent ou a expiré. Demandez un nouveau lien.');
+
             return $this->redirectToRoute('app_forgot_password_request');
         }
 
@@ -149,7 +153,7 @@ class ResetPasswordController extends AbstractController
                 ->htmlTemplate('reset_password/email.html.twig')
                 ->context(['resetToken' => $resetToken])
                 // Joint le logo au message pour qu’il ne dépende pas du chargement d’une image distante.
-                ->embedFromPath($this->getParameter('kernel.project_dir').'/assets/images/incipitbeige.png', 'incipit-logo', 'image/png');
+                ->embedFromPath($this->getParameter('kernel.project_dir') . '/assets/images/incipitbeige.png', 'incipit-logo', 'image/png');
 
             // Initialise le transport uniquement à l’envoi : une configuration SMTP incorrecte ne bloque pas le formulaire.
             ($this->mailer)()->send($email);
@@ -157,6 +161,7 @@ class ResetPasswordController extends AbstractController
             // Permet une nouvelle tentative et ne journalise ni clé SMTP, ni adresse, ni lien de réinitialisation.
             $this->resetPasswordHelper->removeResetRequest($resetToken->getToken());
             $this->logger->error('[INCIPIT - RESET PASSWORD] Envoi du courriel impossible.', ['type' => get_class($e)]);
+
             return $this->redirectToRoute('app_check_email');
         }
 

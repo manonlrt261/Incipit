@@ -402,15 +402,20 @@
    ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 1150PX)
    ======================================= */
 @media (max-width: 1150px) {
+    /* Indicateurs et graphiques de lecture */
     .stats-compteurs {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
+
+    /* Objectif annuel et formulaire de modification */
 
     .stats-objectif-contenu,
     .stats-genres-contenu {
         flex-wrap: wrap;
         justify-content: center;
     }
+
+    /* Indicateurs et graphiques de lecture */
 
     .stats-legende {
         flex-basis: 45%;
@@ -421,9 +426,12 @@
    ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 850PX)
    ======================================= */
 @media (max-width: 850px) {
+    /* Indicateurs et graphiques de lecture */
     .stats-grille {
         grid-template-columns: minmax(0, 1fr);
     }
+
+    /* Objectif annuel et formulaire de modification */
 
     .stats-objectif-contenu,
     .stats-genres-contenu {
@@ -435,6 +443,7 @@
    ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 550PX)
    ======================================= */
 @media (max-width: 550px) {
+    /* Indicateurs et graphiques de lecture */
     .stats-compteurs {
         grid-template-columns: minmax(0, 1fr);
     }
@@ -455,10 +464,14 @@
         font-size: 19px;
     }
 
+    /* Objectif annuel et formulaire de modification */
+
     .stats-objectif-contenu,
     .stats-genres-contenu {
         flex-wrap: wrap;
     }
+
+    /* Indicateurs et graphiques de lecture */
 
     .stats-anneau {
         width: 155px;
@@ -571,7 +584,12 @@
 }
 
 /* Conserve la taille des libellés du tableau de bord sur téléphone. */
+
+/* =======================================
+   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 700PX)
+   ======================================= */
 @media (max-width: 700px) {
+    /* Indicateurs et graphiques de lecture */
     .stats-compteur div span {
         font-size: 12px;
         line-height: 1.3;
@@ -583,6 +601,7 @@
    ======================================= */
 
 @media (max-width: 350px) {
+    /* Indicateurs et graphiques de lecture */
     .stats-compteur div span {
         font-size: 11px;
     }

@@ -3,7 +3,10 @@ import { initialiserPage } from './components/initialisation-page.js';
 
 initialiserPage((ecouter) => {
     const page = document.getElementById('page-statistiques');
-    if (!page) return;
+    if (!page) {
+        return;
+    }
+
     const select = document.getElementById('stats-annee');
     const graphiques = document.getElementById('stats-graphiques');
     const chargement = document.getElementById('stats-chargement');
@@ -30,13 +33,18 @@ initialiserPage((ecouter) => {
     // Conserve la période choisie lorsque l’année ou l’objectif actualise les graphiques.
     function appliquerPeriodeComparaison() {
         const choix = graphiques.querySelector('[data-stats-periode]');
-        if (choix) choix.value = periodeComparaison;
-        graphiques.querySelectorAll('[data-stats-comparaison]').forEach(zone => {
+        if (choix) {
+            choix.value = periodeComparaison;
+        }
+        graphiques.querySelectorAll('[data-stats-comparaison]').forEach((zone) => {
             zone.hidden = zone.dataset.statsComparaison !== periodeComparaison;
         });
     }
-    ecouter(graphiques, 'change', event => {
-        if (!event.target.matches('[data-stats-periode]')) return;
+
+    ecouter(graphiques, 'change', (event) => {
+        if (!event.target.matches('[data-stats-periode]')) {
+            return;
+        }
         periodeComparaison = event.target.value;
         appliquerPeriodeComparaison();
     });
@@ -46,23 +54,32 @@ initialiserPage((ecouter) => {
     function ouvrirListeLectures(cible) {
         const annuel = cible.hasAttribute('data-stats-annee');
         const valeur = annuel ? cible.dataset.statsAnnee : cible.dataset.statsMois;
-        const modele = graphiques.querySelector(`[data-stats-details-${annuel ? 'annee' : 'mois'}="${valeur}"]`);
-        if (!modalMois) return;
-        document.getElementById('stats-mois-modal-titre').textContent = modele?.dataset.titre || `Lectures terminées en ${valeur}`;
+        const modele = graphiques.querySelector(
+            `[data-stats-details-${annuel ? 'annee' : 'mois'}="${valeur}"]`
+        );
+        if (!modalMois) {
+            return;
+        }
+        document.getElementById('stats-mois-modal-titre').textContent =
+            modele?.dataset.titre || `Lectures terminées en ${valeur}`;
         const liste = document.getElementById('stats-mois-liste');
-        if (modele) liste.replaceChildren(modele.content.cloneNode(true));
-        else {
+        if (modele) {
+            liste.replaceChildren(modele.content.cloneNode(true));
+        } else {
             const vide = document.createElement('p');
             vide.textContent = 'Aucune lecture terminée pour cette année.';
             liste.replaceChildren(vide);
         }
         modalMois.showModal();
     }
-    ecouter(graphiques, 'click', event => {
+
+    ecouter(graphiques, 'click', (event) => {
         const mois = event.target.closest('[data-stats-mois], [data-stats-annee]');
-        if (mois) ouvrirListeLectures(mois);
+        if (mois) {
+            ouvrirListeLectures(mois);
+        }
     });
-    ecouter(graphiques, 'keydown', event => {
+    ecouter(graphiques, 'keydown', (event) => {
         const mois = event.target.closest('[data-stats-mois], [data-stats-annee]');
         if (mois && (event.key === 'Enter' || event.key === ' ')) {
             event.preventDefault();
@@ -83,16 +100,25 @@ initialiserPage((ecouter) => {
         erreur.hidden = true;
         graphiques.setAttribute('aria-busy', 'true');
         try {
-            const reponse = await fetch(url, { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }, signal: requete.signal });
+            const reponse = await fetch(url, {
+                headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                signal: requete.signal
+            });
             const resultat = await reponse.json();
-            if (!reponse.ok || !resultat.success) throw new Error(resultat.message || 'Impossible de charger les statistiques.');
-            if (!page.isConnected || requete.signal.aborted) return;
+            if (!reponse.ok || !resultat.success) {
+                throw new Error(resultat.message || 'Impossible de charger les statistiques.');
+            }
+            if (!page.isConnected || requete.signal.aborted) {
+                return;
+            }
             graphiques.innerHTML = resultat.html;
             appliquerPeriodeComparaison();
             anneeAffichee = select.value;
             window.history.replaceState(window.history.state, '', url.pathname + url.search);
         } catch (exception) {
-            if (exception.name === 'AbortError' || !page.isConnected) return;
+            if (exception.name === 'AbortError' || !page.isConnected) {
+                return;
+            }
             select.value = anneeAffichee;
             erreur.textContent = 'Impossible de charger cette année. Veuillez réessayer.';
             erreur.hidden = false;
@@ -104,28 +130,39 @@ initialiserPage((ecouter) => {
             }
         }
     });
+
     // Présente l’objectif de l’année sélectionnée, ou indique qu’aucun objectif n’est défini.
     function afficherObjectif() {
         document.getElementById('stats-objectif-annee').textContent = anneeObjectif;
         document.getElementById('stats-objectif-valeur').textContent = objectifActuel ?? '—';
-        document.getElementById('stats-objectif-description').textContent = objectifActuel === null
-            ? 'Vous n’avez pas encore défini votre objectif.'
-            : 'Votre objectif de lecture pour cette année.';
+        document.getElementById('stats-objectif-description').textContent =
+            objectifActuel === null
+                ? 'Vous n’avez pas encore défini votre objectif.'
+                : 'Votre objectif de lecture pour cette année.';
         affichageObjectif.hidden = false;
         formulaireObjectif.hidden = true;
     }
+
     // Ouvre l’objectif annuel depuis les graphiques, même après leur remplacement.
-    ecouter(graphiques, 'click', event => {
-        if (!(event.target instanceof Element) || select.disabled) return;
+    ecouter(graphiques, 'click', (event) => {
+        if (!(event.target instanceof Element) || select.disabled) {
+            return;
+        }
+
         const bouton = event.target.closest('[data-voir-objectif]');
-        if (!bouton) return;
+        if (!bouton) {
+            return;
+        }
         objectifActuel = bouton.dataset.objectif ? Number(bouton.dataset.objectif) : null;
         anneeObjectif = bouton.dataset.annee;
         erreurObjectif.hidden = true;
         succesObjectif.hidden = true;
         afficherObjectif();
-        if (!modal.open) modal.showModal();
+        if (!modal.open) {
+            modal.showModal();
+        }
     });
+
     // Remplace la valeur de l’objectif par un champ de saisie prérempli.
     ecouter(modifierObjectif, 'click', () => {
         affichageObjectif.hidden = true;
@@ -137,17 +174,23 @@ initialiserPage((ecouter) => {
         nombreObjectif.focus();
         nombreObjectif.select();
     });
+
     // Revient à la consultation de l’objectif sans enregistrer la saisie.
     ecouter(annulerObjectif, 'click', () => {
-        if (enregistrementEnCours) return;
+        if (enregistrementEnCours) {
+            return;
+        }
         erreurObjectif.hidden = true;
         afficherObjectif();
         modifierObjectif.focus();
     });
+
     // Enregistre l’objectif puis actualise les graphiques avec la valeur confirmée par le serveur.
-    ecouter(formulaireObjectif, 'submit', async event => {
+    ecouter(formulaireObjectif, 'submit', async (event) => {
         event.preventDefault();
-        if (enregistrementEnCours || !formulaireObjectif.reportValidity()) return;
+        if (enregistrementEnCours || !formulaireObjectif.reportValidity()) {
+            return;
+        }
         enregistrementEnCours = true;
         enregistrerObjectif.disabled = true;
         annulerObjectif.disabled = true;
@@ -158,12 +201,17 @@ initialiserPage((ecouter) => {
         succesObjectif.hidden = true;
         try {
             const reponse = await fetch(formulaireObjectif.action, {
-                method: 'POST', body: new FormData(formulaireObjectif),
-                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                method: 'POST',
+                body: new FormData(formulaireObjectif),
+                headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
             });
             const resultat = await reponse.json();
-            if (!reponse.ok || !resultat.success) throw new Error(resultat.message || 'Impossible d’enregistrer votre objectif.');
-            if (!page.isConnected) return;
+            if (!reponse.ok || !resultat.success) {
+                throw new Error(resultat.message || 'Impossible d’enregistrer votre objectif.');
+            }
+            if (!page.isConnected) {
+                return;
+            }
             objectifActuel = resultat.objectif;
             graphiques.innerHTML = resultat.html;
             appliquerPeriodeComparaison();
@@ -172,9 +220,13 @@ initialiserPage((ecouter) => {
             succesObjectif.hidden = false;
             modifierObjectif.focus();
         } catch (exception) {
-            if (!page.isConnected) return;
-            erreurObjectif.textContent = (exception instanceof SyntaxError || exception instanceof TypeError)
-                ? 'Impossible d’enregistrer votre objectif. Réessayez.' : exception.message;
+            if (!page.isConnected) {
+                return;
+            }
+            erreurObjectif.textContent =
+                exception instanceof SyntaxError || exception instanceof TypeError
+                    ? 'Impossible d’enregistrer votre objectif. Réessayez.'
+                    : exception.message;
             erreurObjectif.hidden = false;
         } finally {
             enregistrementEnCours = false;
@@ -185,10 +237,21 @@ initialiserPage((ecouter) => {
             enregistrerObjectif.textContent = 'Enregistrer';
         }
     });
+
     // Ferme la fenêtre de l’objectif lorsque aucun enregistrement n’est en cours.
-    ecouter(fermerObjectif, 'click', () => { if (!enregistrementEnCours) modal.close(); });
+    ecouter(fermerObjectif, 'click', () => {
+        if (!enregistrementEnCours) {
+            modal.close();
+        }
+    });
+
     // Empêche la touche Échap de fermer l’objectif pendant son enregistrement.
-    ecouter(modal, 'cancel', event => { if (enregistrementEnCours) event.preventDefault(); });
+    ecouter(modal, 'cancel', (event) => {
+        if (enregistrementEnCours) {
+            event.preventDefault();
+        }
+    });
+
     // Annule le chargement en cours et remet la fenêtre de l’objectif dans son état initial.
     const nettoyer = () => {
         controleur?.abort();
@@ -202,8 +265,11 @@ initialiserPage((ecouter) => {
         enregistrerObjectif.textContent = 'Enregistrer';
         formulaireObjectif.hidden = true;
         affichageObjectif.hidden = false;
-        if (modal.open) modal.close();
+        if (modal.open) {
+            modal.close();
+        }
     };
+
     // Annule les chargements et remet la fenêtre à zéro avant la mise en cache ou le remplacement de la page.
     ecouter(document, 'turbo:before-cache', nettoyer);
     ecouter(document, 'turbo:before-render', nettoyer);

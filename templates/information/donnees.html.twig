@@ -1,0 +1,35 @@
+{% extends 'information/base.html.twig' %}
+
+{% block information_titre %}Données personnelles{% endblock %}
+
+{% block information_contenu %}
+    <h2>Responsable et contact</h2>
+    <p>Manon FAYOLLE est votre interlocutrice pour les données traitées dans le cadre d’Incipit, projet réalisé pour son examen de fin d’études. Vous pouvez écrire à <a href="mailto:incipitbibliothequevirtuelle@gmail.com">incipitbibliothequevirtuelle@gmail.com</a>.</p>
+
+    <h2>Données et utilisations</h2>
+    <ul>
+        <li>Les comptes autorisés utilisent une adresse e-mail, un mot de passe enregistré sous forme de hash et des informations de rôle pour sécuriser l’espace de gestion.</li>
+        <li>Les contacts de prêt peuvent comporter un nom, un prénom, une adresse e-mail, un téléphone et un commentaire afin de suivre les prêts et les retours.</li>
+        <li>Le journal d’activité conserve des événements de gestion afin de suivre les opérations sur la bibliothèque.</li>
+        <li>Si vous envoyez un e-mail, votre adresse et le contenu de votre message servent à traiter votre demande.</li>
+    </ul>
+    <p>Les informations publiques sont celles sélectionnées pour la présentation de la bibliothèque. Les données des contacts de prêt n’ont pas vocation à être publiées.</p>
+
+    <h2>Fondements des traitements</h2>
+    <p>La gestion de la bibliothèque, la sécurité des accès et le suivi des prêts répondent à un intérêt légitime, sous réserve du respect des droits des personnes. Les e-mails sont utilisés pour répondre aux demandes reçues. La qualification définitive de chaque traitement doit être validée avant publication de cette page.</p>
+
+    <h2>Durées proposées</h2>
+    <ul>
+        <li>E-mails de contact : 12 mois après le dernier échange.</li>
+        <li>Coordonnées des contacts de prêt : jusqu’à 12 mois après le dernier prêt soldé, sous réserve d’un besoin de conservation justifié pour un litige en cours.</li>
+        <li>Journal d’activité : 6 mois.</li>
+    </ul>
+    <p>Les comptes restent nécessaires tant que leur accès est autorisé. La durée des sauvegardes et journaux techniques, ainsi que les procédures de suppression ou d’anonymisation, doivent encore être précisées. La validité d’un lien de réinitialisation de mot de passe est de 15 minutes ; cette validité ne constitue pas une garantie de suppression immédiate des données associées.</p>
+
+    <h2>Destinataires et prestataires</h2>
+    <p>Les personnes autorisées à administrer Incipit peuvent accéder aux données nécessaires à leurs fonctions. Le site est hébergé par alwaysdata et les e-mails de contact sont reçus sur Gmail. Le journal d’activité utilise MongoDB ; les conditions d’hébergement de ce service, les éventuels transferts hors de l’Espace économique européen et les garanties applicables restent à confirmer avant publication.</p>
+
+    <h2>Cookies et services externes</h2>
+    <p>L’application utilise des mécanismes de session et de protection des formulaires. Les traceurs strictement nécessaires à l’authentification et à la sécurité ne requièrent pas de consentement préalable. Aucun outil publicitaire ou de mesure d’audience n’a été identifié dans le code examiné.</p>
+    <p>Les polices sont actuellement chargées depuis Google Fonts. Certaines couvertures peuvent être chargées depuis des sites tiers. Ces connexions peuvent transmettre des informations techniques, dont l’adresse IP, aux fournisseurs concernés.</p>
+{% endblock %}

@@ -4,7 +4,6 @@
 
 {% block body %}
 <div class="espace-layout">
-    {# Réutilise la navigation commune avec l’onglet Wishlist actif. #}
     {% include 'components/_sidebar.html.twig' %}
 
     <main id="page-wishlist" class="espace-contenu bibliotheque wishlist">
@@ -35,7 +34,10 @@
         </div>
 
         {# Réutilise les quatre menus et les boutons de la bibliothèque. #}
-        {% include 'components/_filtres_livres.html.twig' with {genres: genres, prefixe: 'wishlist-'} only %}
+        {% include 'components/_filtres_livres.html.twig' with {
+            genres: genres,
+            prefixe: 'wishlist-'
+        } only %}
 
         {# Le JavaScript actualise le compteur et affiche les erreurs des actions sans quitter la page. #}
         <p id="wishlist-compteur" aria-live="polite">{{ souhaits|length }} livre(s) dans ma wishlist</p>
@@ -98,6 +100,7 @@
                         </button>
                     </div>
                 </article>
+
                 {# Associe à chaque carte sa fiche et ses actions, accessibles au clic et au clavier. #}
                 {% include 'wishlist/_fiche.html.twig' with {souhait: souhait, livre: livre, auteurs: auteurs} only %}
             {% endfor %}

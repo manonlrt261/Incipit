@@ -140,6 +140,7 @@
    ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 1250PX)
    ======================================= */
 @media (max-width: 1250px) {
+    /* Livres souhaités et actions de la wishlist */
     .wishlist-grille {
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
@@ -149,6 +150,7 @@
    ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 1050PX)
    ======================================= */
 @media (max-width: 1050px) {
+    /* Livres souhaités et actions de la wishlist */
     .wishlist-grille {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -158,6 +160,7 @@
    ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 650PX)
    ======================================= */
 @media (max-width: 650px) {
+    /* Livres souhaités et actions de la wishlist */
     .wishlist-grille {
         grid-template-columns: minmax(0, 1fr);
     }

@@ -1,0 +1,17 @@
+{% extends 'information/base.html.twig' %}
+
+{% block information_titre %}Aide et contact{% endblock %}
+
+{% block information_contenu %}
+    <p>Vous avez une question sur Incipit, une difficulté de navigation ou un problème à signaler ? Vous pouvez contacter Manon FAYOLLE par e-mail.</p>
+    <a class="information-contact" href="mailto:incipitbibliothequevirtuelle@gmail.com">incipitbibliothequevirtuelle@gmail.com</a>
+
+    <h2>Signaler un problème</h2>
+    <p>Précisez la page concernée, les étapes suivies et le message affiché. Ne transmettez jamais votre mot de passe ou un lien de réinitialisation.</p>
+
+    <h2>À propos du projet</h2>
+    <p>Incipit est un site de bibliothèque virtuelle réalisé par Manon FAYOLLE dans le cadre de son examen de fin d’études. Il permet de présenter un univers littéraire et de gérer une bibliothèque depuis un espace réservé.</p>
+
+    <h2>Vos données personnelles</h2>
+    <p>Cette même adresse permet d’adresser une demande concernant vos données. Consultez la page <a href="{{ path('app_donnees_personnelles') }}">Données personnelles</a> pour en savoir plus.</p>
+{% endblock %}

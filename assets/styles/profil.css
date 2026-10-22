@@ -266,6 +266,7 @@
    ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 650PX)
    ======================================= */
 @media (max-width: 650px) {
+    /* Compte et réglages de confidentialité */
     .profil-carte {
         padding: 20px;
     }

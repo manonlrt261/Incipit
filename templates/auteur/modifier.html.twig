@@ -1,26 +1,42 @@
 {% extends 'base.html.twig' %}
+
 {% block title %}Modifier l’auteur | Incipit{% endblock %}
+
 {% block body %}
 <div class="espace-layout">
     {% include 'components/_sidebar.html.twig' %}
+
     <main class="espace-contenu bibliotheque page-auteurs">
         <header class="bibliotheque-header">
             <a class="auteurs-retour" href="{{ path('app_auteur_fiche', {id: auteur.id}) }}">← Fiche de l’auteur</a>
             <img src="{{ asset('images/incipit.png') }}" alt="Incipit" class="bibliotheque-logo">
         </header>
-        <div class="bibliotheque-introduction"><div><h1 class="titre-page">Modifier l’auteur</h1><p class="sous-titre-page">Mettez à jour son prénom et son nom.</p></div></div>
+
+        <div class="bibliotheque-introduction">
+            <div>
+                <h1 class="titre-page">Modifier l’auteur</h1>
+                <p class="sous-titre-page">Mettez à jour son prénom et son nom.</p>
+            </div>
+        </div>
+
         {# Renomme la fiche sans recréer l’auteur ni perdre ses livres associés. #}
         <form class="auteur-formulaire" action="{{ path('app_auteur_modifier', {id: auteur.id}) }}" method="post" data-turbo="false">
             <input type="hidden" name="_token" value="{{ csrf_token('modifier_auteur_' ~ auteur.id) }}">
             <label for="auteur-prenom">Prénom</label>
             <input id="auteur-prenom" name="prenom" value="{{ auteur.prenom }}" maxlength="255" autocomplete="off">
+
             <label for="auteur-nom">Nom</label>
             <input id="auteur-nom" name="nom" value="{{ auteur.nom }}" maxlength="255" required autocomplete="off">
+
             {# Affiche le refus du serveur en conservant les prénom et nom saisis. #}
             {% if erreur %}
                 <p role="alert">{{ erreur }}</p>
             {% endif %}
-            <div class="auteur-formulaire-actions"><a href="{{ path('app_auteur_fiche', {id: auteur.id}) }}">Annuler</a><button type="submit">Enregistrer</button></div>
+
+            <div class="auteur-formulaire-actions">
+                <a href="{{ path('app_auteur_fiche', {id: auteur.id}) }}">Annuler</a>
+                <button type="submit">Enregistrer</button>
+            </div>
         </form>
     </main>
 </div>

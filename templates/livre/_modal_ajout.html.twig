@@ -1,4 +1,4 @@
-{# Initialise le mode une seule fois pour les pages qui ne passent pas ce paramètre. #}
+{# Utilise le mode bibliothèque lorsque la page ne précise pas de mode wishlist. #}
 {% set wishlist_mode = wishlist_mode|default(false) %}
 
 {# Fenêtre commune pour ajouter un livre possédé, ajouter un souhait ou modifier un livre. #}
@@ -25,16 +25,13 @@
         method="post"
         enctype="multipart/form-data"
     >
-
         {# Le JavaScript renseigne cet identifiant pour passer de l’ajout à la modification. #}
         <input type="hidden" id="modal-livre-id" name="livreId" value="">
-
         <input
             type="hidden"
             name="_token"
             value="{{ csrf_token('ajouter_livre') }}"
         >
-
         <section class="modal-section">
             <h3>
                 <img src="{{ asset('images/rechercher.png') }}" alt="">
@@ -69,7 +66,6 @@
                 <div id="modal-lecteur-isbn-photo" hidden></div>
 
                 <div id="modal-zone-scanner" hidden>
-
                     <p id="modal-instructions-scanner">
                         Autorise la caméra, puis place le code-barres devant elle.
                     </p>
@@ -87,7 +83,6 @@
                     <input id="modal-zoom-isbn" type="range" aria-label="Zoom du scanner" hidden>
                     <div id="modal-lecteur-isbn"></div>
                     <div id="modal-lecteur-isbn-hd" hidden></div>
-
                 </div>
 
                 <p id="modal-message-isbn" role="status" aria-live="polite"></p>
@@ -133,7 +128,6 @@
                         accept="image/jpeg,image/png,image/webp"
                         hidden
                     >
-
                     {# Propose aussi la prise de photo native sur les appareils compatibles. #}
                     <input
                         type="file"
@@ -142,7 +136,6 @@
                         capture="environment"
                         hidden
                     >
-
                     {# Zone vidéo activée par JavaScript pendant la prise de photo de la couverture. #}
                     <div id="modal-camera-zone" class="modal-camera-zone" hidden>
                         <video id="modal-camera-video" autoplay playsinline muted></video>
@@ -166,7 +159,6 @@
                         id="modal-image-couverture"
                         name="imageCouverture"
                     >
-
                     {# Affiche les résultats de recherche de couvertures et permet d’en sélectionner une. #}
                     <div id="modal-recherche-couverture-zone" class="modal-recherche-couverture-zone" hidden>
                         <label for="modal-recherche-couverture-input">
@@ -180,7 +172,6 @@
                                 id="modal-recherche-couverture-input"
                                 placeholder="Titre du livre ou auteur..."
                             >
-
                             <button type="button" id="modal-lancer-recherche-couverture" class="bouton-rechercher">
                                 Rechercher
                             </button>
@@ -194,7 +185,6 @@
                             Fermer la recherche
                         </button>
                     </div>
-
                 </div>
 
                 <div class="modal-champs-livre">
@@ -233,7 +223,11 @@
                             </div>
                         </div>
                         {# Suggestions partagées par les champs d’auteur, y compris ceux ajoutés dynamiquement. #}
-                        <div id="modal-suggestions-auteurs" class="modal-suggestions-auteurs" role="listbox" aria-label="Auteurs enregistrés" hidden></div>
+                        <div
+                            id="modal-suggestions-auteurs"
+                            class="modal-suggestions-auteurs"
+                            role="listbox"
+                            aria-label="Auteurs enregistrés" hidden></div>
                         <button type="button" id="modal-ajouter-auteur">
                             + Ajouter un auteur
                         </button>
@@ -243,8 +237,21 @@
                         {# Les suggestions sont limitées aux sagas des auteurs saisis dans ce formulaire. #}
                         <div class="modal-champ modal-saga-zone">
                             <label for="modal-saga">Saga</label>
-                            <input type="text" id="modal-saga" name="saga" maxlength="255" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="modal-suggestions-sagas" aria-expanded="false">
-                            <div id="modal-suggestions-sagas" class="modal-suggestions-auteurs" role="listbox" aria-label="Sagas des auteurs saisis" hidden></div>
+                            <input
+                                type="text"
+                                id="modal-saga"
+                                name="saga"
+                                maxlength="255"
+                                autocomplete="off"
+                                role="combobox"
+                                aria-autocomplete="list"
+                                aria-controls="modal-suggestions-sagas"
+                                aria-expanded="false">
+                            <div
+                                id="modal-suggestions-sagas"
+                                class="modal-suggestions-auteurs"
+                                role="listbox"
+                                aria-label="Sagas des auteurs saisis" hidden></div>
                         </div>
                         <div class="modal-champ">
                             <label for="modal-tome">Tome</label>
@@ -363,68 +370,68 @@
 
         {# La wishlist propose la visibilité publique ; les livres possédés proposent plutôt un statut de lecture et une note. #}
         {% if wishlist_mode %}
-        {# Conserve le prix et le lien avec le souhait, sans créer de livre possédé. #}
-        <section class="modal-section">
-            <h3>Informations d’achat</h3>
-            <div class="modal-deux-colonnes">
-                <div class="modal-champ">
-                    <label for="modal-prix-estime">Prix en euros (facultatif)</label>
-                    <input type="number" id="modal-prix-estime" name="prixEstime" min="0" max="99999999.99" step="0.01" inputmode="decimal">
+            {# Conserve le prix et le lien avec le souhait, sans créer de livre possédé. #}
+            <section class="modal-section">
+                <h3>Informations d’achat</h3>
+                <div class="modal-deux-colonnes">
+                    <div class="modal-champ">
+                        <label for="modal-prix-estime">Prix en euros (facultatif)</label>
+                        <input type="number" id="modal-prix-estime" name="prixEstime" min="0" max="99999999.99" step="0.01" inputmode="decimal">
+                    </div>
+                    <div class="modal-champ">
+                        <label for="modal-lien-achat">Lien (facultatif)</label>
+                        <input type="url" id="modal-lien-achat" name="lienAchat" maxlength="2048" placeholder="https://…">
+                    </div>
                 </div>
-                <div class="modal-champ">
-                    <label for="modal-lien-achat">Lien (facultatif)</label>
-                    <input type="url" id="modal-lien-achat" name="lienAchat" maxlength="2048" placeholder="https://…">
-                </div>
-            </div>
-        </section>
-        <section class="modal-section">
-            <label class="wishlist-visibilite"><input type="checkbox" id="modal-publique" name="publique" value="1">Rendre publique</label>
-            <p>Ce livre apparaîtra dans la wishlist de l’accueil public si cette case est cochée.</p>
-        </section>
+            </section>
+
+            <section class="modal-section">
+                <label class="wishlist-visibilite"><input type="checkbox" id="modal-publique" name="publique" value="1">Rendre publique</label>
+                <p>Ce livre apparaîtra dans la wishlist de l’accueil public si cette case est cochée.</p>
+            </section>
         {% else %}
-        <section class="modal-section">
-            <h3>Statut de lecture et note</h3>
+            <section class="modal-section">
+                <h3>Statut de lecture et note</h3>
 
-            <div class="modal-deux-colonnes">
-                <div class="modal-champ">
-                    <label for="modal-statut">Statut de lecture</label>
-                    <select id="modal-statut" name="statut">
-                        <option value="Pas commencé">Pas commencé</option>
-                        <option value="En cours">En cours</option>
-                        <option value="En pause">En pause</option>
-                        <option value="Abandonné">Abandonné</option>
-                        <option value="Terminé">Terminé</option>
-                        <option value="À lire">À lire</option>
-                    </select>
+                <div class="modal-deux-colonnes">
+                    <div class="modal-champ">
+                        <label for="modal-statut">Statut de lecture</label>
+                        <select id="modal-statut" name="statut">
+                            <option value="Pas commencé">Pas commencé</option>
+                            <option value="En cours">En cours</option>
+                            <option value="En pause">En pause</option>
+                            <option value="Abandonné">Abandonné</option>
+                            <option value="Terminé">Terminé</option>
+                            <option value="À lire">À lire</option>
+                        </select>
+                    </div>
+
+                    <div class="modal-champ">
+                        <label for="modal-note">Note sur 5 (facultative)</label>
+                        <input
+                            type="number"
+                            id="modal-note"
+                            name="note"
+                            min="0"
+                            max="5"
+                            step="0.5"
+                            placeholder="Ex. : 4,5"
+                        >
+                    </div>
                 </div>
 
-                <div class="modal-champ">
-                    <label for="modal-note">Note sur 5 (facultative)</label>
-                    <input
-                        type="number"
-                        id="modal-note"
-                        name="note"
-                        min="0"
-                        max="5"
-                        step="0.5"
-                        placeholder="Ex. : 4,5"
-                    >
+                {# Les dates facultatives sont proposées selon le statut et enregistrées dans la session de lecture. #}
+                <div class="modal-deux-colonnes">
+                    <div class="modal-champ" id="modal-date-debut-zone" hidden>
+                        <label for="modal-date-debut">Date de début de lecture (facultative)</label>
+                        <input type="date" id="modal-date-debut" name="dateDebut" disabled>
+                    </div>
+                    <div class="modal-champ" id="modal-date-fin-zone" hidden>
+                        <label for="modal-date-fin">Date de fin de lecture (facultative)</label>
+                        <input type="date" id="modal-date-fin" name="dateFin" disabled>
+                    </div>
                 </div>
-            </div>
-
-            {# Les dates facultatives sont proposées selon le statut et enregistrées dans la session de lecture. #}
-            <div class="modal-deux-colonnes">
-                <div class="modal-champ" id="modal-date-debut-zone" hidden>
-                    <label for="modal-date-debut">Date de début de lecture (facultative)</label>
-                    <input type="date" id="modal-date-debut" name="dateDebut" disabled>
-                </div>
-                <div class="modal-champ" id="modal-date-fin-zone" hidden>
-                    <label for="modal-date-fin">Date de fin de lecture (facultative)</label>
-                    <input type="date" id="modal-date-fin" name="dateFin" disabled>
-                </div>
-            </div>
-        </section>
-
+            </section>
         {% endif %}
 
         {% if not wishlist_mode %}

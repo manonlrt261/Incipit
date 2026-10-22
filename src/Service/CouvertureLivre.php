@@ -23,22 +23,26 @@ final class CouvertureLivre
     // Enregistre sous un nom aléatoire pour ne jamais écraser une couverture existante.
     public function enregistrer(UploadedFile $fichier): string
     {
-        $dossier = $this->projet.'/public/uploads/couvertures';
+        $dossier = $this->projet . '/public/uploads/couvertures';
+
         if (!is_dir($dossier) && !mkdir($dossier, 0775, true) && !is_dir($dossier)) {
             throw new \RuntimeException('Le dossier des couvertures ne peut pas être créé.');
         }
-        $nom = bin2hex(random_bytes(16)).'.'.$fichier->guessExtension();
+        $nom = bin2hex(random_bytes(16)) . '.' . $fichier->guessExtension();
         $fichier->move($dossier, $nom);
 
-        return 'uploads/couvertures/'.$nom;
+        return 'uploads/couvertures/' . $nom;
     }
 
     // Retire uniquement le nouveau fichier si l’enregistrement en base échoue.
     public function annuler(?string $chemin): void
     {
         if ($chemin && str_starts_with($chemin, 'uploads/couvertures/') && !str_contains($chemin, '..')) {
-            $fichier = $this->projet.'/public/'.$chemin;
-            if (is_file($fichier)) unlink($fichier);
+            $fichier = $this->projet . '/public/' . $chemin;
+
+            if (is_file($fichier)) {
+                unlink($fichier);
+            }
         }
     }
 }

@@ -4,14 +4,19 @@
 
 {% block body %}
 {# Les attributs d’édition permettent au script de sauvegarder les choix avant de revenir au profil. #}
-<div class="accueil accueil-public" {% if edition|default(false) %}id="edition-accueil" data-url="{{ path('app_accueil_ordre') }}" data-token="{{ csrf_token('ordre_accueil') }}" data-retour="{{ path('app_espace_profil') }}#visibilite"{% endif %}>
+<div class="accueil accueil-public"
+    {% if edition|default(false) %}
+        id="edition-accueil"
+        data-url="{{ path('app_accueil_ordre') }}"
+        data-token="{{ csrf_token('ordre_accueil') }}"
+        data-retour="{{ path('app_espace_profil') }}#visibilite"
+    {% endif %}
+>
     {% include 'accueil/_edition_commandes.html.twig' %}
 
-    {# Réutilise l’en-tête public et son lien de connexion. #}
     {% include 'accueil/_entete.html.twig' only %}
 
     <main class="accueil-main">
-
         {# Présente le message de bienvenue et le parchemin entre la bannière et les sections publiques. #}
         <div class="accueil-introduction">
             <div class="accueil-livre-rond">
@@ -55,8 +60,8 @@
                     </div>
                 {% endif %}
             </section>
-
         {% endif %}
+
         {# Affiche le classement annuel des auteurs si sa visibilité publique est activée. #}
         {% if visibilite.auteurs %}
             <section class="accueil-section">
@@ -69,7 +74,13 @@
                         <h2>Mes 5 auteurs les plus lus de l’année</h2>
                         <p>Les auteurs que j’ai le plus lus cette année.</p>
                     </div>
-                    <a class="accueil-lien" {% if edition %}data-edition-navigation{% endif %} href="{{ path('app_accueil_auteurs_lectures', edition ? {edition: 1} : {}) }}">Voir les auteurs</a>
+                    <a
+                        class="accueil-lien"
+                        {% if edition %}data-edition-navigation{% endif %}
+                        href="{{ path('app_accueil_auteurs_lectures', edition ? {edition: 1} : {}) }}"
+                    >
+                        Voir les auteurs
+                    </a>
                 </div>
 
                 {# Prévoit un message lorsqu’aucune lecture terminée ne permet de classer les auteurs. #}
@@ -78,7 +89,10 @@
                         Aucune lecture terminée cette année.
                     </p>
                 {% else %}
-                    {% if edition %}<p class="accueil-auteurs-explication">En cas d’égalité, choisissez les auteurs à afficher. Les changements seront enregistrés en quittant le mode édition.</p>{% endif %}
+                    {% if edition %}
+                        <p class="accueil-auteurs-explication">En cas d’égalité, choisissez les auteurs à afficher. Les changements seront enregistrés en quittant le mode édition.</p>
+                    {% endif %}
+
                     <div class="accueil-grille-auteurs">
                         {% for auteur in auteurs %}
                             <div class="accueil-auteur">
@@ -88,11 +102,17 @@
                                 </div>
                                 {% if edition %}
                                     {# Propose uniquement les auteurs ayant le même nombre de lectures à cette place. #}
-                                    <label class="accueil-choix-auteur">Auteur à la position {{ loop.index }}
+                                    <label class="accueil-choix-auteur">
+                                        Auteur à la position {{ loop.index }}
                                         <select data-choix-auteur>
                                             {% for candidat in auteursAnnuels %}
                                                 {% if candidat.nombre_lectures == auteur.nombre_lectures %}
-                                                    <option value="{{ candidat.id }}" {{ candidat.id == auteur.id ? 'selected' : '' }}>{{ candidat.nom_affichage }}</option>
+                                                    <option
+                                                        value="{{ candidat.id }}"
+                                                        {{ candidat.id == auteur.id ? 'selected' : '' }}
+                                                    >
+                                                        {{ candidat.nom_affichage }}
+                                                    </option>
                                                 {% endif %}
                                             {% endfor %}
                                         </select>
@@ -103,8 +123,8 @@
                     </div>
                 {% endif %}
             </section>
-
         {% endif %}
+
         {# Affiche les souhaits publics si la section wishlist est visible sur l’accueil. #}
         {% if visibilite.wishlist %}
             <section class="accueil-section">
@@ -141,5 +161,10 @@
 
         {% endif %}
     </main>
+
+    {# Réserve le pied de page à la consultation publique de l’accueil. #}
+    {% if not edition|default(false) %}
+        {% include 'accueil/_footer.html.twig' only %}
+    {% endif %}
 </div>
 {% endblock %}

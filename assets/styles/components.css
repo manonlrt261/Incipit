@@ -268,11 +268,16 @@
 @media (max-width: 700px) {
     /* Empêche le zoom automatique de Safari à la saisie, y compris dans les recherches des fenêtres modales.
        La priorité protège cette taille des règles propres à chaque page ; le zoom manuel reste disponible. */
-    :root input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='hidden']):not([type='file']):not([type='submit']):not([type='button']),
+    :root
+        input:not([type='checkbox']):not([type='radio']):not([type='range']):not(
+            [type='hidden']
+        ):not([type='file']):not([type='submit']):not([type='button']),
     :root textarea,
     :root select {
         font-size: 16px !important;
     }
+
+    /* Recherche de livres dans le tableau de bord */
 
     :is(.espace-contenu, #modal-ajout-livre, #modal-details-livre, #modal-selection-pile)
         .bibliotheque-recherche,
@@ -316,6 +321,7 @@
    ======================================= */
 
 @media (max-width: 800px) {
+    /* Sections et livres du tableau de bord */
     .espace-contenu.bibliotheque,
     .espace-contenu.page-lectures,
     .espace-contenu.dashboard {
@@ -325,7 +331,12 @@
 }
 
 /* La recherche occupe la première ligne sur téléphone, avant le logo. */
+
+/* =======================================
+   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 700PX)
+   ======================================= */
 @media (max-width: 700px) {
+    /* Répartition de la navigation et du contenu */
     .espace-contenu .bibliotheque-header {
         flex-wrap: wrap;
     }
@@ -446,4 +457,34 @@
 :root .carte-focus-souris:focus,
 :root .wishlist-carte.carte-focus-souris:focus {
     outline: none;
+}
+
+/* Place le logo sous la recherche à droite, comme sur Mes prêts, sur téléphone. */
+
+/* =======================================
+   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 700PX)
+   ======================================= */
+@media (max-width: 700px) {
+    /* Répartition de la navigation et du contenu */
+    .espace-contenu .bibliotheque-header > .bibliotheque-logo {
+        margin-left: auto;
+    }
+    /* En-tête du tableau de bord */
+    .espace-contenu.dashboard .dashboard-header {
+        flex-wrap: wrap;
+    }
+    /* Recherche de livres dans le tableau de bord */
+    .espace-contenu.dashboard .dashboard-recherche {
+        flex: 0 1 100%;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    /* Logo et actions du compte dans l’en-tête */
+    .espace-contenu.dashboard .dashboard-header-actions {
+        display: flex;
+        margin-left: auto;
+    }
+    .espace-contenu.dashboard .dashboard-header-actions > form {
+        display: none;
+    }
 }

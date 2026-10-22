@@ -1,9 +1,13 @@
 {% extends 'base.html.twig' %}
+
 {% block title %}Mes auteurs | Incipit{% endblock %}
+
 {% block body %}
 <div class="espace-layout">
     {% include 'components/_sidebar.html.twig' %}
+
     <main class="espace-contenu bibliotheque page-auteurs" id="page-auteurs">
+
         {# Réutilise le format de recherche des autres pages de la bibliothèque. #}
         <header class="bibliotheque-header">
             <form id="auteurs-recherche-form" class="bibliotheque-recherche" role="search">
@@ -13,20 +17,47 @@
             </form>
             <img src="{{ asset('images/incipit.png') }}" alt="Incipit" class="bibliotheque-logo">
         </header>
+
         <div class="bibliotheque-introduction">
-            <div><h1 class="titre-page">Mes auteurs</h1><p class="sous-titre-page">Retrouvez les auteurs de vos livres.</p></div>
+            <div>
+                <h1 class="titre-page">Mes auteurs</h1>
+                <p class="sous-titre-page">Retrouvez les auteurs de vos livres.</p>
+            </div>
         </div>
+
         {# Chaque menu trie les fiches selon le prénom ou le nom, sans rechargement. #}
         <div class="auteurs-tris">
-            <label><span class="sr-only">Prénom</span><select id="auteurs-tri-prenom"><option value="">Prénom</option><option value="asc">Prénom : A à Z</option><option value="desc">Prénom : Z à A</option></select></label>
-            <label><span class="sr-only">Nom</span><select id="auteurs-tri-nom"><option value="">Nom</option><option value="asc">Nom : A à Z</option><option value="desc">Nom : Z à A</option></select></label>
+            <label>
+                <span class="sr-only">Prénom</span>
+                <select id="auteurs-tri-prenom">
+                    <option value="">Prénom</option>
+                    <option value="asc">Prénom : A à Z</option>
+                    <option value="desc">Prénom : Z à A</option>
+                </select>
+            </label>
+            <label>
+                <span class="sr-only">Nom</span>
+                <select id="auteurs-tri-nom">
+                    <option value="">Nom</option>
+                    <option value="asc">Nom : A à Z</option>
+                    <option value="desc">Nom : Z à A</option>
+                </select>
+            </label>
             <button type="button" id="auteurs-reinitialiser" class="bibliotheque-reinitialiser">↻ Réinitialiser les filtres</button>
         </div>
         <p id="auteurs-compteur" class="auteurs-compteur" aria-live="polite">{{ auteurs|length }} auteur{{ auteurs|length > 1 ? 's' : '' }}</p>
+
         {# Chaque carte ouvre la fiche persistante déjà liée aux livres et aux suggestions de saisie. #}
         <div class="auteurs-grille">
             {% for auteur in auteurs %}
-                <a class="auteurs-carte" href="{{ path('app_auteur_fiche', {id: auteur.id}) }}" data-auteur-nom="{{ auteur.affichage|e('html_attr') }}" data-sagas="{{ auteur.sagas|default('')|e('html_attr') }}" data-prenom="{{ auteur.prenom|e('html_attr') }}" data-nom="{{ auteur.nom|e('html_attr') }}">
+                <a
+                    class="auteurs-carte"
+                    href="{{ path('app_auteur_fiche', {id: auteur.id}) }}"
+                    data-auteur-nom="{{ auteur.affichage|e('html_attr') }}"
+                    data-sagas="{{ auteur.sagas|default('')|e('html_attr') }}"
+                    data-prenom="{{ auteur.prenom|e('html_attr') }}"
+                    data-nom="{{ auteur.nom|e('html_attr') }}">
+
                     {# Les initiales sont décoratives : le nom complet reste le libellé accessible de la carte. #}
                     <span class="auteurs-initiales" aria-hidden="true">{% if auteur.prenom %}<span class="auteur-initiale-prenom">{{ auteur.prenom|slice(0, 1)|upper }}</span>{% endif %}<span class="auteur-initiale-nom">{{ auteur.nom|slice(0, 1)|upper }}</span></span>
                     <h2>{{ auteur.affichage }}</h2>
