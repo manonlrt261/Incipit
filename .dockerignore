@@ -1,0 +1,23 @@
+.git
+.env
+.env.*
+!.env.example
+vendor
+node_modules
+var
+public/assets
+public/uploads
+assets/vendor
+config/secrets
+.codex
+.agents
+.DS_Store
+*.tar.gz
+*.sql.gz
+
+# Exports et clés ne sont pas nécessaires à l’image locale.
+*.pem
+*.key
+*.p12
+*.sql
+!docs/base-de-donnees/scripts-sql/*.sql
