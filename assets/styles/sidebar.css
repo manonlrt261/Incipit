@@ -1,21 +1,26 @@
-/* =======================================
-   NAVIGATION COMMUNE
-   ======================================= */
+/* Navigation Mobile First : barre inférieure par défaut. */
 
-/* Dimensions, fond et couleurs de la navigation */
 .sidebar {
-    width: 256px;
-    min-width: 256px;
-    min-height: 100vh;
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
     box-sizing: border-box;
-    padding: 35px 12px;
-    background: linear-gradient(160deg, #593721 0%, #342820 100%);
-    color: var(--color-white);
+    padding: 6px 8px;
+    background: var(--color-fond);
+    color: var(--color-secondary);
+    z-index: 100;
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid var(--color-encadre);
+    border-bottom: 0;
 }
 
-/* Logo et nom de la bibliothèque */
 .sidebar-logo {
-    display: flex;
+    display: none;
     align-items: center;
     gap: 14px;
     padding: 0 28px;
@@ -38,27 +43,37 @@
     font-weight: 600;
 }
 
-/* Organisation des liens de navigation */
 .sidebar-navigation {
-    display: flex;
+    display: grid;
     flex-direction: column;
-    gap: 8px;
+    gap: 4px;
+    grid-auto-flow: column;
+    grid-auto-columns: calc((100% - 20px) / 6);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
 }
 
-/* Liens, icônes et onglet actif */
 .sidebar-lien {
     display: flex;
     align-items: center;
-    gap: 20px;
-    min-height: 48px;
+    gap: 6px;
+    min-height: 76px;
     box-sizing: border-box;
-    padding: 10px 22px;
-    border-radius: 9px;
-    color: var(--color-white);
+    padding: 8px 1px;
+    border-radius: 10px;
+    color: var(--color-secondary);
     text-decoration: none;
-    font-family: 'Inter', sans-serif;
-    font-size: 14px;
+    font-family: Arial, sans-serif;
+    font-size: clamp(9px, 2.55vw, 11px);
     transition: background-color 0.2s ease;
+    flex-direction: column;
+    justify-content: flex-start;
+    min-width: 0;
+    letter-spacing: -0.1px;
+    line-height: 1.2;
+    text-align: center;
+    white-space: normal;
 }
 
 .sidebar-lien img {
@@ -77,10 +92,12 @@
     font-weight: 500;
 }
 
-/* Disposition de la navigation et du contenu */
 .espace-layout {
     display: flex;
     min-height: 100vh;
+    flex-direction: column;
+    box-sizing: border-box;
+    padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px));
 }
 
 .espace-contenu {
@@ -88,136 +105,156 @@
     min-width: 0;
 }
 
-/* =======================================
-   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 900PX)
-   ======================================= */
-
-@media (max-width: 900px) {
-    /* Navigation et onglet actif de la bibliothèque */
-    .sidebar {
-        width: 220px;
-        min-width: 220px;
-    }
-
-    .sidebar-lien {
-        gap: 12px;
-        padding: 10px 14px;
-        font-size: 13px;
-    }
-}
-
-/* Alignement des variantes d’icônes et repère au clavier */
 .sidebar-lien picture {
     display: flex;
     align-items: center;
     flex-shrink: 0;
 }
+
 .sidebar-lien:focus-visible {
     outline: 2px solid currentColor;
     outline-offset: -3px;
 }
 
-/* =======================================
-   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 700PX)
-   ======================================= */
-
-@media (max-width: 700px) {
-    /* Répartition de la navigation et du contenu */
-    .espace-layout {
-        flex-direction: column;
-    }
-    /* Navigation et onglet actif de la bibliothèque */
-    .sidebar {
-        z-index: 100;
-        width: 100%;
-        min-width: 0;
-        min-height: 0;
-        padding: 6px 8px;
-        background: var(--color-fond);
-        color: var(--color-secondary);
-    }
-    .sidebar-logo {
-        display: none;
-    }
-    .sidebar-navigation {
-        display: grid;
-        grid-auto-flow: column;
-        grid-auto-columns: calc((100% - 20px) / 6);
-        gap: 4px;
-        overflow-x: auto;
-        overscroll-behavior-x: contain;
-        scrollbar-width: none;
-    }
-    .sidebar-navigation::-webkit-scrollbar {
-        display: none;
-    }
-    .sidebar-lien {
-        flex-direction: column;
-        justify-content: flex-start;
-        align-items: center;
-        gap: 6px;
-        min-width: 0;
-        min-height: 76px;
-        padding: 8px 1px;
-        border-radius: 10px;
-        color: var(--color-secondary);
-        font-family: Arial, sans-serif;
-        font-size: clamp(9px, 2.55vw, 11px);
-        letter-spacing: -0.1px;
-        line-height: 1.2;
-        text-align: center;
-        white-space: normal;
-    }
-    .sidebar-lien picture,
-    .sidebar-lien img {
-        width: 36px;
-        height: 36px;
-    }
-    .sidebar-lien > span {
-        display: grid;
-        place-items: center;
-        min-height: 24px;
-        max-width: 100%;
-        overflow-wrap: anywhere;
-    }
-    .sidebar-lien:hover,
-    .sidebar-lien-actif {
-        background-color: var(--color-encadre);
-    }
-    .sidebar {
-        position: fixed;
-        top: auto;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
-        border-top: 1px solid var(--color-encadre);
-        border-bottom: 0;
-    }
-    /* Répartition de la navigation et du contenu */
-    .espace-layout {
-        box-sizing: border-box;
-        padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px));
-    }
-    html {
-        scroll-padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px));
-    }
-}
-
-/* Les noms courts sont réservés à la navigation du téléphone. */
-.sidebar-lien > .sidebar-libelle-mobile {
+.sidebar-navigation::-webkit-scrollbar {
     display: none;
 }
 
-/* =======================================
-   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 700PX)
-   ======================================= */
-@media (max-width: 700px) {
-    /* Libellés de navigation adaptés au téléphone */
-    .sidebar-lien > .sidebar-libelle-desktop {
+.sidebar-lien picture,
+.sidebar-lien img {
+    width: 36px;
+    height: 36px;
+}
+
+.sidebar-lien > span {
+    display: grid;
+    place-items: center;
+    min-height: 24px;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+}
+
+.sidebar-lien:hover,
+.sidebar-lien-actif {
+    background-color: var(--color-encadre);
+}
+
+html {
+    scroll-padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px));
+}
+
+.sidebar-lien > .sidebar-libelle-mobile {
+    display: grid;
+}
+
+.sidebar-lien > .sidebar-libelle-desktop {
+    display: none;
+}
+
+/* Navigation latérale à partir de 701 px. */
+@media (min-width: 701px) {
+    .sidebar {
+        width: 220px;
+        min-width: 220px;
+        min-height: 100vh;
+        padding: 35px 12px;
+        background: linear-gradient(160deg, #593721 0%, #342820 100%);
+        color: var(--color-white);
+        z-index: auto;
+        position: static;
+        top: auto;
+        bottom: auto;
+        left: auto;
+        right: auto;
+        padding-bottom: 35px;
+        border-top: 0;
+        border-bottom: 0;
+    }
+
+    .sidebar-logo {
+        display: flex;
+    }
+
+    .sidebar-navigation {
+        display: flex;
+        gap: 8px;
+        grid-auto-flow: row;
+        grid-auto-columns: auto;
+        overflow-x: visible;
+        overscroll-behavior-x: auto;
+        scrollbar-width: auto;
+    }
+
+    .sidebar-lien {
+        gap: 12px;
+        min-height: 48px;
+        padding: 10px 14px;
+        border-radius: 9px;
+        color: var(--color-white);
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        flex-direction: row;
+        justify-content: normal;
+        min-width: auto;
+        letter-spacing: normal;
+        line-height: normal;
+        text-align: start;
+        white-space: normal;
+    }
+
+    .espace-layout {
+        flex-direction: row;
+        box-sizing: content-box;
+        padding-bottom: 0;
+    }
+
+    .sidebar-navigation::-webkit-scrollbar {
+        display: inline;
+    }
+
+    .sidebar-lien picture,
+    .sidebar-lien img {
+        width: 27px;
+        height: 27px;
+    }
+
+    .sidebar-lien > span {
+        display: inline;
+        place-items: normal;
+        min-height: auto;
+        max-width: none;
+        overflow-wrap: normal;
+    }
+
+    .sidebar-lien:hover,
+    .sidebar-lien-actif {
+        background-color: rgba(185, 122, 83, 0.48);
+    }
+
+    html {
+        scroll-padding-bottom: 0;
+    }
+
+    .sidebar-lien > .sidebar-libelle-mobile {
         display: none;
     }
-    .sidebar-lien > .sidebar-libelle-mobile {
-        display: grid;
+
+    .sidebar-lien > .sidebar-libelle-desktop {
+        display: inline;
     }
+
+}
+
+@media (min-width: 901px) {
+    .sidebar {
+        width: 256px;
+        min-width: 256px;
+    }
+
+    .sidebar-lien {
+        gap: 20px;
+        padding: 10px 22px;
+        font-size: 14px;
+    }
+
 }

@@ -1,10 +1,11 @@
+/* Mobile First : styles mobiles par défaut, adaptations avec min-width. */
 /* =======================================
    LECTURES
    ======================================= */
 
 /* Mise en page des lectures */
 .page-lectures {
-    padding: 0 36px 50px;
+    padding: 0 16px 30px;
     background: var(--color-fond);
     min-height: 100vh;
     box-sizing: border-box;
@@ -22,7 +23,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    width: min(570px, 70%);
+    width: 100%;
     padding: 12px 15px;
     border: 1px solid var(--color-encadre);
     border-radius: 8px;
@@ -48,8 +49,9 @@
 /* Présentation de la page */
 .lectures-introduction {
     display: flex;
+    flex-direction: column;
     justify-content: space-between;
-    align-items: flex-end;
+    align-items: flex-start;
     gap: 20px;
     margin: 30px 0;
 }
@@ -86,17 +88,17 @@
 /* Compteurs et filtres par statut */
 .lectures-statistiques {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 14px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
     margin-bottom: 28px;
 }
 
 .lectures-statistique {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 8px;
     min-width: 0;
-    padding: 19px 15px;
+    padding: 12px;
     border: 1px solid var(--color-encadre);
     border-radius: 12px;
     background: var(--color-white);
@@ -121,16 +123,16 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 50px;
-    height: 50px;
+    width: 38px;
+    height: 38px;
     flex-shrink: 0;
     border-radius: 50%;
     background: var(--color-fond);
 }
 
 .lectures-statistique-icone img {
-    width: 28px;
-    height: 28px;
+    width: 23px;
+    height: 23px;
     object-fit: contain;
 }
 
@@ -150,7 +152,8 @@
 
 .lectures-statistique-informations > span {
     font-family: 'Inter', sans-serif;
-    font-size: 13px;
+    font-size: 11px;
+    line-height: 1.3;
     font-weight: 400;
     color: #87776c;
 }
@@ -165,7 +168,7 @@
 /* Liste des livres et sessions de lecture */
 .lectures-livres {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
     gap: 18px;
 }
 
@@ -257,97 +260,6 @@
 }
 
 /* =======================================
-   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 1250PX)
-   ======================================= */
-@media (max-width: 1250px) {
-    /* Suivi des lectures et commandes d’affichage */
-    .lectures-livres {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-}
-
-/* =======================================
-   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 950PX)
-   ======================================= */
-@media (max-width: 950px) {
-    /* Suivi des lectures et commandes d’affichage */
-    .lectures-statistiques {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .lectures-livres {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-}
-
-/* =======================================
-   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 650PX)
-   ======================================= */
-@media (max-width: 650px) {
-    /* Suivi des lectures et commandes d’affichage */
-    .page-lectures {
-        padding: 0 16px 30px;
-    }
-
-    .lectures-introduction {
-        align-items: flex-start;
-        flex-direction: column;
-    }
-
-    .lectures-statistiques {
-        grid-template-columns: 1fr 1fr;
-        gap: 9px;
-    }
-
-    .lectures-statistique {
-        padding: 12px;
-        gap: 8px;
-    }
-
-    .lectures-statistique-icone {
-        width: 38px;
-        height: 38px;
-    }
-
-    .lectures-statistique-icone img {
-        width: 23px;
-        height: 23px;
-    }
-
-    .lectures-livres {
-        grid-template-columns: 1fr;
-    }
-
-    .lectures-recherche {
-        width: 100%;
-    }
-}
-
-/* Conserve la taille des libellés du tableau de bord sur téléphone. */
-
-/* =======================================
-   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 700PX)
-   ======================================= */
-@media (max-width: 700px) {
-    /* Suivi des lectures et commandes d’affichage */
-    .lectures-statistique-informations > span {
-        font-size: 12px;
-        line-height: 1.3;
-    }
-}
-
-/* =======================================
-   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 350PX)
-   ======================================= */
-
-@media (max-width: 350px) {
-    /* Suivi des lectures et commandes d’affichage */
-    .lectures-statistique-informations > span {
-        font-size: 11px;
-    }
-}
-
-/* =======================================
    COMMANDES D’AFFICHAGE ET MODE LISTE
    ======================================= */
 
@@ -364,6 +276,7 @@
 .lectures-livres.vue-liste .lectures-carte {
     flex-direction: row;
     align-items: center;
+    padding: 14px;
 }
 
 .lectures-livres.vue-liste .lectures-couverture {
@@ -375,30 +288,6 @@
 .lectures-livres.vue-liste .lectures-carte-informations {
     min-width: 0;
     overflow-wrap: anywhere;
-}
-
-/* =======================================
-   COMMANDES SUR TÉLÉPHONE
-   ======================================= */
-@media (max-width: 700px) {
-    /* Garde le compteur et la flèche ensemble, puis les choix d’affichage sur la ligne suivante. */
-    .lectures-outils {
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-
-    /* Présentation et commandes de la bibliothèque */
-
-    .lectures-outils .bibliotheque-vues {
-        width: 100%;
-        justify-content: flex-end;
-    }
-
-    /* Cartes des livres et sessions de lecture */
-
-    .lectures-livres.vue-liste .lectures-carte {
-        padding: 14px;
-    }
 }
 
 /* Statut et sélection de pile à lire, avec la même hauteur compacte. */
@@ -426,7 +315,7 @@
    FILTRES DES LECTURES ET NOTES
    ======================================= */
 
-/* Réunit les cinq critères sur une ligne et les actions en dessous, alignées à gauche. */
+/* Deux colonnes sur mobile ; cinq critères par ligne à partir de 701 px. */
 #lectures-filtres {
     display: flex;
     flex-direction: column;
@@ -437,7 +326,7 @@
     flex: none;
     width: 100%;
     max-width: 100%;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .lectures-filtres-actions {
@@ -448,17 +337,6 @@
     gap: 12px;
 }
 
-/* =======================================
-   ADAPTATION AUX ÉCRANS : (MAX-WIDTH: 700PX)
-   ======================================= */
-
-@media (max-width: 700px) {
-    /* Critères et réinitialisation des filtres */
-    #lectures-filtres .bibliotheque-selects {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-}
-
 /* Consultation des fiches retirées au clic et au clavier. */
 .bibliotheque-livre-retire[data-retire-details-url] {
     cursor: pointer;
@@ -467,4 +345,91 @@
 .bibliotheque-livre-retire[data-retire-details-url]:focus-visible {
     outline: 2px solid var(--color-terra);
     outline-offset: 3px;
+}
+
+/* Mobile First : commandes adaptées aux petites largeurs. */
+.lectures-outils {
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.lectures-outils .bibliotheque-vues {
+    width: 100%;
+    justify-content: flex-end;
+}
+
+@media (min-width: 351px) {
+    .lectures-statistique-informations > span {
+        font-size: 12px;
+    }
+}
+
+/* À partir de 651 px : présentation plus espacée et grille de deux livres. */
+@media (min-width: 651px) {
+    .page-lectures {
+        padding: 0 36px 50px;
+    }
+    .lectures-recherche {
+        width: min(570px, 70%);
+    }
+    .lectures-introduction {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-end;
+    }
+    .lectures-statistiques {
+        gap: 14px;
+    }
+    .lectures-statistique {
+        padding: 19px 15px;
+        gap: 14px;
+    }
+    .lectures-statistique-icone {
+        width: 50px;
+        height: 50px;
+    }
+    .lectures-statistique-icone img {
+        width: 28px;
+        height: 28px;
+    }
+    .lectures-livres {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* Même seuil que la navigation et les commandes partagées. */
+@media (min-width: 701px) {
+    .lectures-statistique-informations > span {
+        font-size: 13px;
+        line-height: normal;
+    }
+    .lectures-outils {
+        flex-wrap: nowrap;
+        gap: 20px;
+    }
+    .lectures-outils .bibliotheque-vues {
+        width: auto;
+        justify-content: normal;
+    }
+    .lectures-livres.vue-liste .lectures-carte {
+        padding: 20px;
+    }
+    #lectures-filtres .bibliotheque-selects {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 951px) {
+    .lectures-statistiques {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .lectures-livres {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1251px) {
+    .lectures-livres {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
 }
